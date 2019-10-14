@@ -1,5 +1,5 @@
-#ifndef _SCANNER_H
-#define _SCANNER_H
+#ifndef _ENUMS_H
+#define _ENUMS_H
 
 typedef enum {
 	KEYWORD_DEF,
@@ -22,7 +22,6 @@ typedef enum {
 
 	TOKEN_EOL,		// end of line
 	TOKEN_EOF,		// end of file
-
 	TOKEN_ASSIGN,		// =
 	TOKEN_GREATER_THAN,	// >
 	TOKEN_LESSER_THAN,	// <
@@ -40,7 +39,8 @@ typedef enum {
 	TOKEN_DEDENT,
 	TOKEN_HASH,					// #
 	TOKEN_PERCENT,				// %
-
-};
+	TOKEN_COLON,				// :
+	TOKEN_COMMA,				// ,
+} Token_type;
 
 #endif
