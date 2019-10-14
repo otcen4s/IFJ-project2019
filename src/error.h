@@ -3,6 +3,7 @@
 
 //macro aliases for error codes 
 
+#define NO_ERROR 0
 #define LEXICAL_ERROR 1
 #define SYNTAX_ERROR 2
 #define UNDEFINE_REDEFINE_ERROR 3
