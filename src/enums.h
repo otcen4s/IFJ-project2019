@@ -15,11 +15,17 @@ typedef enum {
 	KEYWORD_NOT,
 	KEYWORD_TRUE,
 	KEYWORD_FALSE,
-	KEYWORD_INTEGER,
-	KEYWORD_DOUBLE,
-	KEYWORD_STRING,
-	KEYWORD_CHAR,
+	KEYWORD_PRINT,
+	KEYWORD_INPUTS, // string
+	KEYWORD_INPUTI, // int
+	KEYWORD_INPUTF, // float
+	KEYWORD_LEN,
+	KEYWORD_SUBSTR,
+	KEYWORD_ORD, // return ordinal value 
+	KEYWORD_CHR, // return one char string
 
+
+	TOKEN_IDENTIFIER, 
 	TOKEN_EOL,		// end of line
 	TOKEN_EOF,		// end of file
 	TOKEN_ASSIGN,		// =

@@ -1,7 +1,7 @@
 #ifndef _SCANNER_H
 #define _SCANNER_H
 
-#include enums.h
+#include "enums.h"
 
 typedef union {
 	char *string;

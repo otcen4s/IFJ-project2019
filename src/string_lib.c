@@ -32,5 +32,5 @@ str_destroy(tString *s){
 
 str_cmp_keyword(tString *s, const char* keyword){
     int value = strcmp(s->str, keyword);
-    return value;
+    return !value;
 }
