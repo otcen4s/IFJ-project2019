@@ -47,6 +47,9 @@ typedef enum {
 	TOKEN_PERCENT,				// %
 	TOKEN_COLON,				// :
 	TOKEN_COMMA,				// ,
+	TOKEN_INTEGER,
+	TOKEN_DECIMAL,
+	TOKEN_STRING,
 } Token_type;
 
 typedef enum {

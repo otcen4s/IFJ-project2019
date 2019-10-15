@@ -12,8 +12,15 @@ typedef struct{
 
 
 int str_init(tString *s);
-int str_realloc(tString *s);
+
+int str_realloc(tString *s, unsigned new_arr_size);
+
 int str_destroy(tString *s);
+
 int str_cmp_keyword(tString *s, const char* keyword);
+
+int str_insert_char(tString *s, const char new_char);
+
+int str_copy(tString *s, const char* new_string);
 
 #endif

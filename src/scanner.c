@@ -80,13 +80,13 @@ Token create_decimal_token(tString string, int *error) {
     return token;
 }
 
-Token create_string_token(tString string, int *error) {
+Token create_string_token(char *string, int *error) {
     *error = NO_ERROR;
     
     Token token;
 
     token.type = TOKEN_STRING;
-    // strcpy(token.attribute.string, string.str); TODO
+    *error = str_copy(&token.attribute.string, string);
     
     return token;
 }
