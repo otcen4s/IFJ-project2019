@@ -21,6 +21,6 @@ int str_cmp_keyword(tString *s, const char* keyword);
 
 int insert_char(tString *s, const char new_char);
 
-int copy_string(tString *s, const char* new_string);
+int str_copy(tString *s, const char* new_string);
 
 #endif
