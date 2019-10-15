@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 typedef union {
-	char *string;
+	tString string;
 	int integer;
 	double decimal;
 } Token_attribute;

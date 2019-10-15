@@ -37,7 +37,7 @@ str_cmp_keyword(tString *s, const char* keyword){
     return !value;
 }
 
-copy_string(tString *s, const char* new_string){
+str_copy(tString *s, const char* new_string){
     unsigned new_str_len = strlen(new_string); // getting new size for reallocation, strlen() returns length of string without '/0' char counted
 
     if(str_realloc(s, new_str_len) == INTERNAL_ERROR){
