@@ -56,7 +56,7 @@ str_insert_char(tString *s, const char new_char){
     }
     s->str[s->len] = new_char;
     s->str[s->len + 1] = '\0';
-    s->len += 1;
+    s->len++;
 
     return NO_ERROR;
 }
