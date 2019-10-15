@@ -16,10 +16,12 @@ str_init(tString *s){
     return NO_ERROR;
 }
 
-str_realloc(tString *s){
-    s->str = realloc(s->str, REALLOC_CONST + s->arr_size);
+str_realloc(tString *s, unsigned new_arr_size){
+    s->str = realloc(s->str, REALLOC_CONST + new_arr_size);
+
     if(s->str == NULL) return INTERNAL_ERROR;
-    s->arr_size += REALLOC_CONST;
+    
+    s->arr_size = new_arr_size + REALLOC_CONST;
 
     return NO_ERROR;
 }
@@ -34,3 +36,17 @@ str_cmp_keyword(tString *s, const char* keyword){
     int value = strcmp(s->str, keyword);
     return !value;
 }
+
+copy_string(tString *s, const char* new_string){
+    unsigned new_str_len = strlen(new_string); // getting new size for reallocation, strlen() returns length of string without '/0' char counted
+
+    if(str_realloc(s, new_str_len) == INTERNAL_ERROR){
+        return INTERNAL_ERROR;
+    }
+    
+    strcpy(s->str, new_string);
+    s->len = new_str_len;
+
+    return NO_ERROR;
+}
+
