@@ -41,6 +41,55 @@ static int chceck_keyword(tString* string, Token* token){
     else token->type = TOKEN_IDENTIFIER;
 }
 
+Token create_integer_token(tString string, int *error) {
+    *error = NO_ERROR;
+    
+    Token token;
+    char *endptr = 0;
+
+    int value = strtol(string.str, endptr, 10);
+
+    if (*endptr) {
+        *error = INTERNAL_ERROR;
+        return;
+    }
+
+    token.type = TOKEN_INTEGER;
+    token.attribute.integer = value;
+    
+    return token;
+}
+
+Token create_decimal_token(tString string, int *error) {
+    *error = NO_ERROR;
+    
+    Token token;
+    char *endptr = 0;
+
+    double value = strtod(string.str, endptr);
+
+    if (*endptr) {
+        *error = INTERNAL_ERROR;
+        return;
+    }
+
+    token.type = TOKEN_DECIMAL;
+    token.attribute.decimal = value;
+    
+    return token;
+}
+
+Token create_string_token(tString string, int *error) {
+    *error = NO_ERROR;
+    
+    Token token;
+
+    token.type = TOKEN_STRING;
+    // strcpy(token.attribute.string, string.str); TODO
+    
+    return token;
+}
+
 Token read_token()
 {
     while(true)
