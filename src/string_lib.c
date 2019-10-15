@@ -43,9 +43,20 @@ copy_string(tString *s, const char* new_string){
     if(str_realloc(s, new_str_len) == INTERNAL_ERROR){
         return INTERNAL_ERROR;
     }
-    
+
     strcpy(s->str, new_string);
     s->len = new_str_len;
+
+    return NO_ERROR;
+}
+
+str_insert_char(tString *s, const char new_char){
+    if(str_realloc(s, 1) == INTERNAL_ERROR){
+        return INTERNAL_ERROR;
+    }
+    s->str[s->len] = new_char;
+    s->str[s->len + 1] = '\0';
+    s->len += 1;
 
     return NO_ERROR;
 }
