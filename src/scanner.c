@@ -3,10 +3,11 @@
 #include "error.h"
 #include  "string_lib.h"
 #include <stdbool.h>
+#include <string.h>
+#include <ctype.h> 
 
 // create and init scanner
 Scanner *scanner;
-init_scanner(scanner);
 
 int init_scanner(Scanner *s, const char* file_name)
 { 
@@ -14,7 +15,7 @@ int init_scanner(Scanner *s, const char* file_name)
     s->is_line_start= 1;
     s->state= STATE_START;
     s->curr_char=0; 
-    str_init(s->atr_string);    
+    s->atr_string= NULL; 
 }
 
 static int chceck_keyword(tString* string, Token* token){
@@ -90,8 +91,12 @@ Token create_string_token(tString string, int *error) {
     return token;
 }
 
-Token read_token()
+Token read_token(int *err)
 {
+    //init atribute string
+    if(str_init(scanner->atr_string)) return INTERNAL_ERROR;
+
+
     while(true)
     {
        //read character form file
@@ -100,11 +105,25 @@ Token read_token()
 
         switch (scanner->state)
         {
-        case STATE_START:            
-            if(scanner->curr_char == '+') scanner->state = STATE_PLUS; // + 
-            else if (scanner->curr_char == '-') scanner->state = STATE_MINUS; // -
-            else if (scanner->curr_char == '(')
-
+        case STATE_START: 
+            if (scanner->is_line_start) scanner->state = STATE_INDENTATION_CHECK;   // indentation check
+            else if((scanner->curr_char == ' ') && (!scanner->is_line_start)) scanner->state = STATE_START; //ignore space if its not indent    
+            else if(scanner->curr_char == '+') scanner->state = STATE_PLUS;
+            else if (scanner->curr_char == '*') scanner->state = STATE_MULTIPLICATION;
+            else if (scanner->curr_char == '-') scanner->state = STATE_MINUS;  
+            else if (scanner->curr_char == '/') scanner->state = STATE_DIVISON;    
+            else if (scanner->curr_char == '>') scanner->state = STATE_GREATER_THAN;
+            else if (scanner->curr_char == '<') scanner->state = STATE_RIGHT_BRACKET;
+            else if (scanner->curr_char == '(') scanner->state = STATE_LEFT_BRACKET;            
+            else if (scanner->curr_char == ')') scanner->state = STATE_RIGHT_BRACKET;
+            else if (scanner->curr_char == '=') scanner->state = STATE_ASSIGN;
+            else if (scanner->curr_char == EOF) scanner->state = STATE_EOF;
+            else if (scanner->curr_char == '\n' ) scanner->state = STATE_EOL;
+            else if (scanner->curr_char == ',') scanner->state = STATE_COMMA;
+            else if (scanner->curr_char == '#') scanner->state = STATE_HASH;
+            else if (isalpha(scanner->curr_char) || scanner->curr_char == '_' ) scanner->state = STATE_ID;
+            else if (scanner->curr_char == '#') scanner->state = STATE_HASH;
+            
 
             break;
         

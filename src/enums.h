@@ -74,6 +74,7 @@ typedef enum {
 	STATE_ASSIGN,
 	STATE_EOL,
 	STATE_EOF,
+    STATE_HASH,
 } Scanner_state;
 
 #endif

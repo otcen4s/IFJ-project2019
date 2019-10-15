@@ -27,7 +27,7 @@ typedef struct {
 } Scanner;
 
 // functions declaration 
-Token read_token();
+Token read_token(int *err);
 int init_scanner(Scanner *s, const char* file_name);
 static int chceck_keyword(tString* string, Token* token);
 
