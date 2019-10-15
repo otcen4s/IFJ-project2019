@@ -1,5 +1,21 @@
 #include "string_lib.h"
 #include "scanner.h"
+#include "error.h"
+#include  "string_lib.h"
+#include <stdbool.h>
+
+// create and init scanner
+Scanner *scanner;
+init_scanner(scanner);
+
+int init_scanner(Scanner *s, const char* file_name)
+{ 
+    if (s->src_file=fopen(file_name, "r")) return INTERNAL_ERROR;
+    s->is_line_start= 1;
+    s->state= STATE_START;
+    s->curr_char=0; 
+    str_init(s->atr_string);    
+}
 
 static int chceck_keyword(tString* string, Token* token){
     if(str_cmp_keyword(string, "def")) token->type = KEYWORD_DEF;
@@ -23,4 +39,29 @@ static int chceck_keyword(tString* string, Token* token){
     else if(str_cmp_keyword(string, "ord")) token->type = KEYWORD_ORD;   
     else if(str_cmp_keyword(string, "chr")) token->type = KEYWORD_CHR; 
     else token->type = TOKEN_IDENTIFIER;
+}
+
+Token read_token()
+{
+    while(true)
+    {
+       //read character form file
+       scanner->curr_char=getc(scanner->src_file);
+
+
+        switch (scanner->state)
+        {
+        case STATE_START:            
+            if(scanner->curr_char == '+') scanner->state = STATE_PLUS; // + 
+            else if (scanner->curr_char == '-') scanner->state = STATE_MINUS; // -
+            else if (scanner->curr_char == '(')
+
+
+            break;
+        
+
+        }
+    }
+
+
 }
