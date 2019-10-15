@@ -101,6 +101,8 @@ Token read_token(int *err)
     {
        //read character form file
        scanner->curr_char=getc(scanner->src_file);
+       Token  token;
+  
 
 
         switch (scanner->state)
@@ -118,11 +120,23 @@ Token read_token(int *err)
             else if (scanner->curr_char == ')') scanner->state = STATE_RIGHT_BRACKET;
             else if (scanner->curr_char == '=') scanner->state = STATE_ASSIGN;
             else if (scanner->curr_char == EOF) scanner->state = STATE_EOF;
-            else if (scanner->curr_char == '\n' ) scanner->state = STATE_EOL;
+            else if (scanner->curr_char == '\n-' ) scanner->state = STATE_EOL;
             else if (scanner->curr_char == ',') scanner->state = STATE_COMMA;
             else if (scanner->curr_char == '#') scanner->state = STATE_HASH;
             else if (isalpha(scanner->curr_char) || scanner->curr_char == '_' ) scanner->state = STATE_ID;
             else if (scanner->curr_char == '#') scanner->state = STATE_HASH;
+            else if (scanner->curr_char == '"') scanner->state = STATE_STRING_START;
+            else scanner->state = STATE_ERROR; //
+            
+
+            break;
+        
+        case STATE_PLUS:
+            token.type=TOKEN_PLUS;
+        
+        
+
+        
             
 
             break;
