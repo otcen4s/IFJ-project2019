@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/matej/Documents/Druhy_rocnik/zimny_semester/IFJ/IFJ-PROJEKT/IFJ-project2019/src/error.h
+
+/home/matej/Documents/Druhy_rocnik/zimny_semester/IFJ/IFJ-PROJEKT/IFJ-project2019/src/string_lib.c
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+string_lib.h
+/home/matej/Documents/Druhy_rocnik/zimny_semester/IFJ/IFJ-PROJEKT/IFJ-project2019/src/string_lib.h
+error.h
+/home/matej/Documents/Druhy_rocnik/zimny_semester/IFJ/IFJ-PROJEKT/IFJ-project2019/src/error.h
+
+/home/matej/Documents/Druhy_rocnik/zimny_semester/IFJ/IFJ-PROJEKT/IFJ-project2019/src/string_lib.h
+
+/home/matej/Documents/Druhy_rocnik/zimny_semester/IFJ/IFJ-PROJEKT/IFJ-project2019/src/tests/tests.cpp
+gtest/gtest.h
+/home/matej/Documents/Druhy_rocnik/zimny_semester/IFJ/IFJ-PROJEKT/IFJ-project2019/src/tests/gtest/gtest.h
+../string_lib.c
+/home/matej/Documents/Druhy_rocnik/zimny_semester/IFJ/IFJ-PROJEKT/IFJ-project2019/src/string_lib.c
+

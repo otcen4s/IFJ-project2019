@@ -4,7 +4,7 @@
 #include "string_lib.h"
 #include "error.h"
 
-str_init(tString *s){
+int str_init(tString *s){
     s->str = (char*) malloc(ALLOC_SIZE * sizeof(char));
     if(s->str == NULL){
         return INTERNAL_ERROR; //99
@@ -13,11 +13,11 @@ str_init(tString *s){
     s->arr_size = ALLOC_SIZE;
     s->str[s->len] = '\0';
 
-    return NO_ERROR;
+    return NO_ERROR; //0
 }
 
-str_realloc(tString *s, unsigned new_arr_size){
-    s->str = realloc(s->str, REALLOC_CONST + new_arr_size);
+int str_realloc(tString *s, unsigned new_arr_size){
+    s->str = (char*)realloc(s->str, REALLOC_CONST + new_arr_size); //fix
 
     if(s->str == NULL) return INTERNAL_ERROR;
     
@@ -26,18 +26,18 @@ str_realloc(tString *s, unsigned new_arr_size){
     return NO_ERROR;
 }
 
-str_destroy(tString *s){
+int str_destroy(tString *s){
     s->len = 0;
     s->arr_size = 0;
     free(s->str);
 }
 
-str_cmp_keyword(tString *s, const char* keyword){
+int str_cmp_keyword(tString *s, const char* keyword){
     int value = strcmp(s->str, keyword);
     return !value;
 }
 
-str_copy(tString *s, const char* new_string){
+int str_copy(tString *s, const char* new_string){
     unsigned new_str_len = strlen(new_string); // getting new size for reallocation, strlen() returns length of string without '/0' char counted
 
     if(str_realloc(s, new_str_len) == INTERNAL_ERROR){
@@ -45,12 +45,12 @@ str_copy(tString *s, const char* new_string){
     }
 
     strcpy(s->str, new_string);
-    s->len = new_str_len;
+    s->len = new_str_len + 1; //modified
 
     return NO_ERROR;
 }
 
-str_insert_char(tString *s, const char new_char){
+int str_insert_char(tString *s, const char new_char){
     if(str_realloc(s, 1) == INTERNAL_ERROR){
         return INTERNAL_ERROR;
     }
