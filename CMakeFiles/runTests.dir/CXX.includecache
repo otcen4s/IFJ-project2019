@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/samuel/Desktop/vut/ifj/IFJ-project2019/src/error.h
+
+/home/samuel/Desktop/vut/ifj/IFJ-project2019/src/string_lib.c
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+string_lib.h
+/home/samuel/Desktop/vut/ifj/IFJ-project2019/src/string_lib.h
+error.h
+/home/samuel/Desktop/vut/ifj/IFJ-project2019/src/error.h
+
+/home/samuel/Desktop/vut/ifj/IFJ-project2019/src/string_lib.h
+
+/home/samuel/Desktop/vut/ifj/IFJ-project2019/src/tests/tests.cpp
+gtest/gtest.h
+/home/samuel/Desktop/vut/ifj/IFJ-project2019/src/tests/gtest/gtest.h
+../string_lib.c
+/home/samuel/Desktop/vut/ifj/IFJ-project2019/src/string_lib.c
+

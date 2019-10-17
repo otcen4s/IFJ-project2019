@@ -1,3 +1,0 @@
-/home/matej/Documents/Druhy_rocnik/zimny_semester/IFJ/IFJ-PROJEKT/IFJ-project2019/src/tests/CMakeFiles/rebuild_cache.dir
-/home/matej/Documents/Druhy_rocnik/zimny_semester/IFJ/IFJ-PROJEKT/IFJ-project2019/src/tests/CMakeFiles/runTests.dir
-/home/matej/Documents/Druhy_rocnik/zimny_semester/IFJ/IFJ-PROJEKT/IFJ-project2019/src/tests/CMakeFiles/edit_cache.dir
