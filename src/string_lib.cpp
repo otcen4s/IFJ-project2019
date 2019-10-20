@@ -26,7 +26,7 @@ int str_realloc(tString *s, unsigned new_arr_size){
     return NO_ERROR;
 }
 
-int str_destroy(tString *s){
+void str_destroy(tString *s){
     s->len = 0;
     s->arr_size = 0;
     free(s->str);

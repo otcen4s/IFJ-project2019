@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "../string_lib.c"
+#include "../string_lib.cpp"
 
 tString string;
 

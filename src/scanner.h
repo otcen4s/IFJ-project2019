@@ -2,7 +2,11 @@
 #define _SCANNER_H
 
 #include "enums.h"
-#include "string_lib.h"
+#include "error.h"
+#include  "string_lib.h"
+#include <stdbool.h>
+#include <string.h>
+#include <ctype.h> 
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -26,9 +30,12 @@ typedef struct {
 
 } Scanner;
 
-// functions declaration 
+// functions forward declarations
+Token create_string_token(tString string, int *error);
+Token create_decimal_token(tString string, int *error);
+Token create_integer_token(tString string, int *error);
+void check_keyword(tString* string, Token* token);
 Token read_token(int *err);
 int init_scanner(Scanner *s, const char* file_name);
-static int chceck_keyword(tString* string, Token* token);
 
 #endif

@@ -1,13 +1,8 @@
-#include "string_lib.h"
 #include "scanner.h"
-#include "error.h"
-#include  "string_lib.h"
-#include <stdbool.h>
-#include <string.h>
-#include <ctype.h> 
 
-// create and init scanner
-Scanner *scanner;
+// declare global scanner
+Scanner scan;
+Scanner *scanner = &scan;
 
 int init_scanner(Scanner *s, const char* file_name)
 { 
@@ -15,10 +10,11 @@ int init_scanner(Scanner *s, const char* file_name)
     s->is_line_start= 1;
     s->state= STATE_START;
     s->curr_char=0; 
-    s->atr_string= NULL; 
+    s->atr_string= NULL;
+    return NO_ERROR;
 }
 
-static int chceck_keyword(tString* string, Token* token){
+void check_keyword(tString* string, Token* token){
     if(str_cmp_keyword(string, "def")) token->type = KEYWORD_DEF;
     else if(str_cmp_keyword(string, "else")) token->type = KEYWORD_ELSE;
     else if(str_cmp_keyword(string, "if")) token->type = KEYWORD_IF;
@@ -46,13 +42,12 @@ Token create_integer_token(tString string, int *error) {
     *error = NO_ERROR;
     
     Token token;
-    char *endptr = 0;
+    char *endptr;
+    long  value = strtol(string.str, &endptr, 10);
 
-    int value = strtol(string.str, endptr, 10);
-
-    if (*endptr) {
+    if (*endptr != '\0') {
         *error = INTERNAL_ERROR;
-        return;
+        return token;
     }
 
     token.type = TOKEN_INTEGER;
@@ -65,13 +60,13 @@ Token create_decimal_token(tString string, int *error) {
     *error = NO_ERROR;
     
     Token token;
-    char *endptr = 0;
+    char *endptr;
 
-    double value = strtod(string.str, endptr);
+    double value = strtod(string.str, &endptr);
 
-    if (*endptr) {
+    if (*endptr != '\0') {
         *error = INTERNAL_ERROR;
-        return;
+        return token;
     }
 
     token.type = TOKEN_DECIMAL;
@@ -80,21 +75,27 @@ Token create_decimal_token(tString string, int *error) {
     return token;
 }
 
-Token create_string_token(char *string, int *error) {
+Token create_string_token(tString string, int *error) {
     *error = NO_ERROR;
     
     Token token;
 
     token.type = TOKEN_STRING;
-    *error = str_copy(&token.attribute.string, string);
+    token.attribute.string=string;
     
     return token;
 }
 
 Token read_token(int *err)
 {
+    Token  token;
     //init atribute string
-    if(str_init(scanner->atr_string)) return INTERNAL_ERROR;
+    if(str_init(scanner->atr_string))
+    {
+        return token;
+        *err = INTERNAL_ERROR;
+
+    } 
 
 
     while(true)
@@ -120,7 +121,7 @@ Token read_token(int *err)
             else if (scanner->curr_char == ')') scanner->state = STATE_RIGHT_BRACKET;
             else if (scanner->curr_char == '=') scanner->state = STATE_ASSIGN;
             else if (scanner->curr_char == EOF) scanner->state = STATE_EOF;
-            else if (scanner->curr_char == '\n-' ) scanner->state = STATE_EOL;
+            else if (scanner->curr_char == '\n' ) scanner->state = STATE_EOL;
             else if (scanner->curr_char == ',') scanner->state = STATE_COMMA;
             else if (scanner->curr_char == '#') scanner->state = STATE_HASH;
             else if (isalpha(scanner->curr_char) || scanner->curr_char == '_' ) scanner->state = STATE_ID;
@@ -129,7 +130,7 @@ Token read_token(int *err)
             else scanner->state = STATE_ERROR; //
             
 
-            break;
+        break;
         
         case STATE_PLUS:
             token.type=TOKEN_PLUS;
@@ -139,7 +140,7 @@ Token read_token(int *err)
         
             
 
-            break;
+        break;
         
 
         }
