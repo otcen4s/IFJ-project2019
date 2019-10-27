@@ -1,4 +1,4 @@
-#include  "../src/string_lib.h"
+#include  "../src/scanner.h"
 #include "unity.h"
 
 
@@ -10,40 +10,84 @@ void tearDown(void)
 {
 }
 
-void test_str_cpy(void)
+void test1_read_token(void)
 {
-    tString string;
-    str_init(&string);
-    str_copy(&string, "ahoj");
-    TEST_ASSERT_EQUAL_STRING("ahoj",string.str);
-    TEST_ASSERT_EQUAL_INT32(string.len, 5);
+    /* test file looks like this
+       + *
+    */ 
+    int err = 0; 
+    Token token; 
+    Scanner s; 
+    Scanner *scanner = &s; 
+    int init_err = init_scanner(scanner, "../test/test_data/scanner_test_1.txt");
+    TEST_ASSERT_NOT_NULL(scanner->src_file);
+    TEST_ASSERT_NOT_NULL(scanner->atr_string); 
+    TEST_ASSERT_EQUAL_INT32(init_err, NO_ERROR);
+    TEST_ASSERT_TRUE(scanner->is_line_start == 1);
+    TEST_ASSERT_EQUAL_INT32(scanner->state, 300);
+
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(err, NO_ERROR);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_PLUS);
+
+     token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(err, NO_ERROR);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_MULTIPLICATION);
+    
 }
 
-void test_str_copy_arr_size(void)
+void test2_token_after_line_commentary(void)
 {
-   tString string;
-   str_init(&string);
-   str_realloc(&string, 10);
-   TEST_ASSERT_EQUAL_INT32(string.arr_size,128+10);
-}
+    /*test  file looks like this
+        # this is line commentary
+        =
+    */ 
+    int err = 0; 
+    Token token; 
+    Scanner s; 
+    Scanner *scanner = &s; 
+    int init_err = init_scanner(scanner, "../test/test_data/scanner_test_2.txt");
 
 
-void test_str_cmp_keyword(void)
-{
-    tString string;
-    str_init(&string);
-    str_copy(&string, "for");
-    TEST_ASSERT_TRUE(str_cmp_keyword(&string, "for"));
-    str_copy(&string, "rof");
-    TEST_ASSERT_FALSE(str_cmp_keyword(&string, "for"));
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_EOL); //commentary should be ignored but EOL shoul be preserved
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_ASSIGN); //next token is =
+    
 }
+
+void test3_lesser_eqal_eol_eof(void)
+{
+    /* test file
+        <=
+    */
+
+    
+    int err = 0; 
+    Token token; 
+    Scanner s; 
+    Scanner *scanner = &s; 
+    int init_err = init_scanner(scanner, "../test/test_data/scanner_test_3.txt");
+
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_LESSER_EQUAL);
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_EOL);
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_EOF);
+    
+}
+
 
 int main(void) 
 {
     UNITY_BEGIN();
-    RUN_TEST(test_str_cpy);
-    RUN_TEST(test_str_copy_arr_size);
-    RUN_TEST(test_str_cmp_keyword);
+    RUN_TEST(test1_read_token);
+    RUN_TEST(test2_token_after_line_commentary);
+    RUN_TEST(test2_token_after_line_commentary);
 
     return UNITY_END();
 }

@@ -1,18 +1,19 @@
 #include "scanner.h"
 
-// declare global scanner
-Scanner scan;
-Scanner *scanner = &scan;
-
-
 int init_scanner(Scanner *s, const char* file_name)
 { 
-    if (s->src_file=fopen(file_name, "r")) return INTERNAL_ERROR;
+    s->src_file=fopen(file_name, "r");
+    s->atr_string= (tString*) malloc(sizeof(tString));
+    if (s->src_file == NULL || s->atr_string == NULL) return INTERNAL_ERROR;
     s->is_line_start= 1;
     s->state= STATE_START;
     s->curr_char=0; 
-    s->atr_string= NULL;
     return NO_ERROR;
+}
+
+void destroy_scanner (Scanner *s)
+{ 
+    free(s->atr_string);
 }
 
 void check_keyword(tString* string, Token* token){
@@ -87,8 +88,10 @@ Token create_string_token(tString string, int *error) {
     return token;
 }
 
-Token read_token(int *err)
+Token read_token(Scanner *scanner, int *err)
 {
+    scanner->state = STATE_START;
+    
     Token  empty_token;
     *err = NO_ERROR;
     
@@ -108,11 +111,16 @@ Token read_token(int *err)
        //read character form file
        scanner->curr_char=getc(scanner->src_file);
        Token token;
-
         switch (scanner->state)
         {
-            case STATE_START: 
-                if (scanner->is_line_start) scanner->state = STATE_INDENTATION_CHECK;   // indentation check
+        
+            case STATE_START:
+                if (scanner->is_line_start) 
+                {
+                    scanner->state = STATE_INDENTATION_CHECK;   // indentation check
+                    ungetc(scanner->curr_char, scanner->src_file); //nothing should be readed here
+                    break; 
+                }
                 else if((scanner->curr_char == ' ') && (!scanner->is_line_start)) scanner->state = STATE_START; //ignore space if its not indent    
                 else if(scanner->curr_char == '+') scanner->state = STATE_PLUS;
                 else if (scanner->curr_char == '*') scanner->state = STATE_MULTIPLICATION;
@@ -129,15 +137,27 @@ Token read_token(int *err)
                 else if (scanner->curr_char == '#') scanner->state = STATE_COMMENT_SINGLE_LINE;
                 else if (isalpha(scanner->curr_char) || scanner->curr_char == '_' ) scanner->state = STATE_ID;
                 else if (scanner->curr_char == '\'') scanner->state = STATE_STRING_START;
-                else scanner->state = STATE_ERROR;      
+                else scanner->state = STATE_ERROR;
                 break;
-            
+
+               
+
+                
+
+            case STATE_INDENTATION_CHECK:                
+                //TODO implement indent checking here
+                ungetc(scanner->curr_char, scanner->src_file); //temporary 
+                scanner->state = STATE_START;
+                scanner->is_line_start=0; 
+                break; 
+
             case STATE_ERROR:
                 *err = LEXICAL_ERROR;
                 return token; 
                 break;
             
             case STATE_PLUS:
+
                 token.type=TOKEN_PLUS;
                 ungetc(scanner->curr_char, scanner->src_file);
                 return token;
@@ -201,8 +221,8 @@ Token read_token(int *err)
 
             case STATE_EOL:
                 token.type= TOKEN_EOL;
-                ungetc(scanner->curr_char, scanner->src_file);
-                return token; 
+                ungetc(scanner->curr_char, scanner->src_file);                
+                return token;
                 break;
 
             case STATE_EOF:
@@ -330,12 +350,10 @@ Token read_token(int *err)
             break;
             
             //case STATE_STRING_END:
-        }       
+            
+        }     
             
     
-        
-
-            
     }
 
 

@@ -56,7 +56,7 @@ typedef enum {
 } Token_type;
 
 typedef enum {
-	STATE_START,
+	STATE_START =300,
 	STATE_ERROR,
 	STATE_COMMENT_SINGLE_LINE,
 	STATE_INDENTATION_CHECK,
