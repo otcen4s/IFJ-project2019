@@ -73,6 +73,7 @@ void test3_lesser_eqal_eol_eof(void)
 
 
     token = read_token(scanner, &err);
+    printf("token type %d \n", token.type );
     TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_LESSER_EQUAL);
     token = read_token(scanner, &err);
     TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_EOL);
@@ -81,13 +82,57 @@ void test3_lesser_eqal_eol_eof(void)
     
 }
 
+void test4_doscstring(void)
+{
+    /* test file
+
+       """" this is some 
+    docstring  """
+
+    +
+
+    */
+    
+    int err = 0; 
+    Token token; 
+    Scanner s; 
+    Scanner *scanner = &s; 
+    int init_err = init_scanner(scanner, "../test/test_data/scanner_test_4.txt");
+
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_EOL);
+    TEST_ASSERT_EQUAL_INT32(err, NO_ERROR);    
+}
+
+void test5_string(void)
+{
+    /* test file:
+      'stringliteral'
+    */
+    
+    int err = 0; 
+    Token token; 
+    Scanner s; 
+    Scanner *scanner = &s; 
+    int init_err = init_scanner(scanner, "../test/test_data/scanner_test_5.txt");
+
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(err, NO_ERROR);
+    TEST_ASSERT_EQUAL_STRING(scanner->atr_string->str, "stringliteral");    
+    TEST_ASSERT_EQUAL_INT32(token.type , TOKEN_STRING);
+}
+
 
 int main(void) 
 {
     UNITY_BEGIN();
     RUN_TEST(test1_read_token);
     RUN_TEST(test2_token_after_line_commentary);
-    RUN_TEST(test2_token_after_line_commentary);
+    RUN_TEST(test3_lesser_eqal_eol_eof);
+    RUN_TEST(test4_doscstring);
+    RUN_TEST(test5_string);
 
     return UNITY_END();
 }

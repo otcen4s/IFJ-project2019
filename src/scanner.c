@@ -77,11 +77,8 @@ Token create_decimal_token(tString string, int *error) {
     return token;
 }
 
-Token create_string_token(tString string, int *error) {
-    *error = NO_ERROR;
-    
+Token create_string_token(tString string) {    
     Token token;
-
     token.type = TOKEN_STRING;
     token.attribute.string=string;
     
@@ -121,13 +118,14 @@ Token read_token(Scanner *scanner, int *err)
                     ungetc(scanner->curr_char, scanner->src_file); //nothing should be readed here
                     break; 
                 }
-                else if((scanner->curr_char == ' ') && (!scanner->is_line_start)) scanner->state = STATE_START; //ignore space if its not indent    
+                else if((scanner->curr_char == '\n') && (scanner->is_line_start)) scanner->state = STATE_START; //ignore empty lines   
+                else if((scanner->curr_char == ' ') && (!scanner->is_line_start)) scanner->state = STATE_START; //ignore space if its not indent
                 else if(scanner->curr_char == '+') scanner->state = STATE_PLUS;
                 else if (scanner->curr_char == '*') scanner->state = STATE_MULTIPLICATION;
                 else if (scanner->curr_char == '-') scanner->state = STATE_MINUS;  
                 else if (scanner->curr_char == '/') scanner->state = STATE_DIVISON;    
                 else if (scanner->curr_char == '>') scanner->state = STATE_GREATER_THAN;
-                else if (scanner->curr_char == '<') scanner->state = STATE_RIGHT_BRACKET;
+                else if (scanner->curr_char == '<') scanner->state = STATE_LESSER_THAN;
                 else if (scanner->curr_char == '(') scanner->state = STATE_LEFT_BRACKET;            
                 else if (scanner->curr_char == ')') scanner->state = STATE_RIGHT_BRACKET;
                 else if (scanner->curr_char == '=') scanner->state = STATE_ASSIGN;
@@ -230,7 +228,8 @@ Token read_token(Scanner *scanner, int *err)
 
             case STATE_EOL:
                 token.type= TOKEN_EOL;
-                ungetc(scanner->curr_char, scanner->src_file);                
+                ungetc(scanner->curr_char, scanner->src_file);
+                scanner->is_line_start = 1;                
                 return token;
                 break;
 
@@ -295,15 +294,13 @@ Token read_token(Scanner *scanner, int *err)
                 }
                 else if (scanner->curr_char < 32) //invalid character
                 {
+                    printf("string wrong char\n");
                     scanner->state = STATE_ERROR;
                     *err = INTERNAL_ERROR;
                 }
-                else if (scanner->curr_char = '\'')
-                {
-                    scanner->state = STATE_STRING_END; //end of string 
-                }
+         
                 else
-                {
+                {                    
                     str_insert_char(scanner->atr_string,scanner->curr_char); //TODO fail check
                 }
                 break;
@@ -396,14 +393,8 @@ Token read_token(Scanner *scanner, int *err)
             
             
             case STATE_STRING_END:
-                token = create_string_token(*(scanner->atr_string),err);
-
-                //check if token was sucessfuly created
-                if(&err)
-                {
-                    return empty_token; //error code alredy set 
-                }                
-                return token;  
+                token = create_string_token(*(scanner->atr_string));
+                return token;
             break;
 
             
