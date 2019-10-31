@@ -135,8 +135,17 @@ Token read_token(Scanner *scanner, int *err)
                 else if (scanner->curr_char == '\n' ) scanner->state = STATE_EOL;
                 else if (scanner->curr_char == ',') scanner->state = STATE_COMMA;
                 else if (scanner->curr_char == '#') scanner->state = STATE_COMMENT_SINGLE_LINE;
-                else if (isalpha(scanner->curr_char) || scanner->curr_char == '_' ) scanner->state = STATE_ID;
                 else if (scanner->curr_char == '\'') scanner->state = STATE_STRING_START;
+                else if  (scanner->curr_char == '"') scanner->state = STATE_DOCSTRING_ENTER_1;
+                else if (isalpha(scanner->curr_char || scanner->curr_char == '_'))
+                {
+                    scanner->state = STATE_ID; //id or keyword, will be checked later
+                    if(str_insert_char(scanner->atr_string, scanner->curr_char))
+                    {
+                        *err = INTERNAL_ERROR;
+                        return empty_token;
+                    }
+                }
                 else scanner->state = STATE_ERROR;
                 break;
 
@@ -289,28 +298,49 @@ Token read_token(Scanner *scanner, int *err)
                     scanner->state = STATE_ERROR;
                     *err = INTERNAL_ERROR;
                 }
+                else if (scanner->curr_char = '\'')
+                {
+                    scanner->state = STATE_STRING_END; //end of string 
+                }
                 else
                 {
                     str_insert_char(scanner->atr_string,scanner->curr_char); //TODO fail check
                 }
                 break;
 
+
             case STATE_STRING_ESCAPE_SEQ:
                 if(scanner->curr_char == 'n')
                 {
-                    str_insert_char(scanner->atr_string,'\n'); //TODO fail check
+                    if(str_insert_char(scanner->atr_string,'\n'))
+                    {
+                        *err= INTERNAL_ERROR;
+                        return empty_token;
+                    } 
                 }
                 else if (scanner->curr_char == 't')
                 {
-                    str_insert_char(scanner->atr_string,'\t'); //TODO fail check
+                    if(str_insert_char(scanner->atr_string,'\t'))
+                    {
+                        *err= INTERNAL_ERROR;
+                        return empty_token;
+                    }
                 }
                 else if (scanner->curr_char == '\\')
                 {
-                    str_insert_char(scanner->atr_string,'\\'); //TODO fail check
+                    if(str_insert_char(scanner->atr_string,'\\'))
+                    {
+                        *err= INTERNAL_ERROR;
+                        return empty_token;
+                    }
                 }
                 else if (scanner->curr_char == '\'')
                 {
-                    str_insert_char(scanner->atr_string,'\''); //TODO fail check
+                    if(str_insert_char(scanner->atr_string,'\''))
+                    {
+                        *err= INTERNAL_ERROR;
+                        return empty_token;
+                    }
                 }
                 // check for hexa decimal escape sequence
                 else if (
@@ -326,6 +356,7 @@ Token read_token(Scanner *scanner, int *err)
                 {
                     str_insert_char(scanner->atr_string,'\\'); //TODO fail check
                     str_insert_char(scanner->atr_string,scanner->curr_char);
+                    scanner->state = STATE_STRING_START; //continue reading the rest of the string
                 }  
                 break;
 
@@ -337,22 +368,98 @@ Token read_token(Scanner *scanner, int *err)
                 {
                     hexa_number_str[1]=scanner->curr_char; 
                     char* endptr;
-                    char result= (char) strtol(hexa_number_str, NULL, 16);  //TODO fail check
-                    str_insert_char(scanner->atr_string,result);
+                    char result= (char) strtol(hexa_number_str, NULL, 16);  
+                    
+                    if(str_insert_char(scanner->atr_string,result)||
+                       *endptr != '\0')                  
+                    { 
+                        *err= INTERNAL_ERROR;
+                        return empty_token;
+                    };
                 }
                 else
                 // not valid hexa decimal number, will be writen into resulting string as if there was no escape sequence i.e. one by one
                 { 
-                    str_insert_char(scanner->atr_string,'\\');
-                    str_insert_char(scanner->atr_string,hexa_number_str[0]); //TODO fail check
-                    str_insert_char(scanner->atr_string,scanner->curr_char);
-                }          
+                   if(
+                    str_insert_char(scanner->atr_string,'\\') || 
+                    str_insert_char(scanner->atr_string,hexa_number_str[0]) ||
+                    str_insert_char(scanner->atr_string,scanner->curr_char)
+                    )
+                    {
+                        *err= INTERNAL_ERROR;
+                        return empty_token;
+                    }
+                }
+                
+                scanner->state = STATE_STRING_START; //continue reading the rest of the string          
             break;
             
-            //case STATE_STRING_END:
             
-        }     
+            case STATE_STRING_END:
+                token = create_string_token(*(scanner->atr_string),err);
+
+                //check if token was sucessfuly created
+                if(&err)
+                {
+                    return empty_token; //error code alredy set 
+                }                
+                return token;  
+            break;
+
             
+            case STATE_DOCSTRING_ENTER_1:
+                if(scanner->curr_char == '"') scanner->state = STATE_DOCSTRING_ENTER_2; // so far "" was readed
+                else
+                 {
+                     *err= LEXICAL_ERROR;
+                     return empty_token; 
+                 }
+            break; 
+
+            case STATE_DOCSTRING_ENTER_2:
+                if(scanner->curr_char == '"') scanner->state = STATE_DOCSTRING_VALID; // docstring was correctly entered
+                else
+                 {
+                     *err= LEXICAL_ERROR;
+                     return empty_token; 
+                 }
+            break; 
+
+
+            case STATE_DOCSTRING_VALID:
+                if(scanner->curr_char == '"') scanner->state = STATE_DOCSTRING_EXIT_1;
+            break;
+
+
+            case STATE_DOCSTRING_EXIT_1:
+                if(scanner->curr_char == '"') scanner->state = STATE_DOCSTRING_EXIT_2; // "" readed
+                else scanner->state = STATE_DOCSTRING_VALID; //docstring wasnt exited yet
+            break;
+            
+
+            case STATE_DOCSTRING_EXIT_2:
+                if(scanner->curr_char == '"') scanner->state = STATE_START; //docstring was propperly exited
+                else scanner->state = STATE_DOCSTRING_VALID; //docstring wasnt exited yet
+            break;
+    
+            case STATE_ID:
+                if(isalnum(scanner->curr_char) || scanner->curr_char == '_')
+                {               
+                    if(str_insert_char(scanner->atr_string, scanner->curr_char))
+                    {
+                        *err = INTERNAL_ERROR;
+                        return empty_token;
+                    }
+                }
+                else //end of identifier 
+                { 
+                    token.type = TOKEN_IDENTIFIER;
+                    token.attribute.string = *(scanner->atr_string);
+                    return token; 
+                }
+            break;
+            
+        }
     
     }
 
