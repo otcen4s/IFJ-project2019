@@ -19,7 +19,7 @@ void test1_read_token(void)
     Token token; 
     Scanner s; 
     Scanner *scanner = &s; 
-    int init_err = init_scanner(scanner, "../test/test_data/scanner_test_1.txt");
+    int init_err = init_scanner(scanner, "test/test_data/scanner_test_1.txt");
     TEST_ASSERT_NOT_NULL(scanner->src_file);
     TEST_ASSERT_NOT_NULL(scanner->atr_string); 
     TEST_ASSERT_EQUAL_INT32(init_err, NO_ERROR);
@@ -47,7 +47,7 @@ void test2_token_after_line_commentary(void)
     Token token; 
     Scanner s; 
     Scanner *scanner = &s; 
-    int init_err = init_scanner(scanner, "../test/test_data/scanner_test_2.txt");
+    int init_err = init_scanner(scanner, "test/test_data/scanner_test_2.txt");
 
 
     token = read_token(scanner, &err);
@@ -69,7 +69,7 @@ void test3_lesser_eqal_eol_eof(void)
     Token token; 
     Scanner s; 
     Scanner *scanner = &s; 
-    int init_err = init_scanner(scanner, "../test/test_data/scanner_test_3.txt");
+    int init_err = init_scanner(scanner, "test/test_data/scanner_test_3.txt");
 
 
     token = read_token(scanner, &err);
@@ -96,7 +96,7 @@ void test4_doscstring(void)
     Token token; 
     Scanner s; 
     Scanner *scanner = &s; 
-    int init_err = init_scanner(scanner, "../test/test_data/scanner_test_4.txt");
+    int init_err = init_scanner(scanner, "test/test_data/scanner_test_4.txt");
 
 
     token = read_token(scanner, &err);
@@ -114,7 +114,7 @@ void test5_string(void)
     Token token; 
     Scanner s; 
     Scanner *scanner = &s; 
-    int init_err = init_scanner(scanner, "../test/test_data/scanner_test_5.txt");
+    int init_err = init_scanner(scanner, "test/test_data/scanner_test_5.txt");
 
 
     token = read_token(scanner, &err);
