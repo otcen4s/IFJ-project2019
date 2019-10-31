@@ -37,7 +37,11 @@ void check_keyword(tString* string, Token* token){
     else if(str_cmp_keyword(string, "substr")) token->type = KEYWORD_SUBSTR;
     else if(str_cmp_keyword(string, "ord")) token->type = KEYWORD_ORD;   
     else if(str_cmp_keyword(string, "chr")) token->type = KEYWORD_CHR; 
-    else token->type = TOKEN_IDENTIFIER;
+    else
+    {
+        token->type = TOKEN_IDENTIFIER;
+        token->attribute.string = *string; //save identifier name as a token atribute 
+    } 
 }
 
 Token create_integer_token(tString string, int *error) {
@@ -58,19 +62,11 @@ Token create_integer_token(tString string, int *error) {
     return token;
 }
 
-Token create_decimal_token(tString string, int *error) {
-    *error = NO_ERROR;
+Token create_decimal_token(tString string) 
+{
     
     Token token;
-    char *endptr;
-
-    double value = strtod(string.str, &endptr);
-
-    if (*endptr != '\0') {
-        *error = INTERNAL_ERROR;
-        return token;
-    }
-
+    double value = atof(string.str);
     token.type = TOKEN_DECIMAL;
     token.attribute.decimal = value;
     
@@ -135,7 +131,7 @@ Token read_token(Scanner *scanner, int *err)
                 else if (scanner->curr_char == '#') scanner->state = STATE_COMMENT_SINGLE_LINE;
                 else if (scanner->curr_char == '\'') scanner->state = STATE_STRING_START;
                 else if  (scanner->curr_char == '"') scanner->state = STATE_DOCSTRING_ENTER_1;
-                else if (isalpha(scanner->curr_char || scanner->curr_char == '_'))
+                else if ((isalpha(scanner->curr_char))  || (scanner->curr_char == '_'))
                 {
                     scanner->state = STATE_ID; //id or keyword, will be checked later
                     if(str_insert_char(scanner->atr_string, scanner->curr_char))
@@ -144,6 +140,16 @@ Token read_token(Scanner *scanner, int *err)
                         return empty_token;
                     }
                 }
+                else if ((isdigit(scanner->curr_char)))
+                {
+                    scanner->state = STATE_NUMBER;
+                    if(str_insert_char(scanner->atr_string, scanner->curr_char))
+                    {
+                        *err = INTERNAL_ERROR;
+                        return empty_token;
+                    }
+                }
+               
                 else scanner->state = STATE_ERROR;
                 break;
 
@@ -447,26 +453,157 @@ Token read_token(Scanner *scanner, int *err)
                 else scanner->state = STATE_DOCSTRING_VALID; //docstring wasnt exited yet
             break;
     
-            case STATE_ID:
+            case STATE_ID:   
                 if(isalnum(scanner->curr_char) || scanner->curr_char == '_')
-                {               
+                {          
                     if(str_insert_char(scanner->atr_string, scanner->curr_char))
                     {
                         *err = INTERNAL_ERROR;
                         return empty_token;
                     }
                 }
-                else //end of identifier 
+                else //end of identifier or keyword
                 { 
-                    token.type = TOKEN_IDENTIFIER;
-                    token.attribute.string = *(scanner->atr_string);
+                    //set token type to identifier or keyword and set appropriate token argument 
+                    check_keyword(scanner->atr_string, &token);
+                    ungetc(scanner->curr_char, scanner->src_file);
                     return token; 
                 }
             break;
+
+            case STATE_NUMBER:
+                if(isdigit(scanner->curr_char))
+                {
+                    if(str_insert_char(scanner->atr_string, scanner->curr_char))
+                    {
+                        *err = INTERNAL_ERROR;
+                        return empty_token;
+                    }
+                }
+
+                else if(scanner->curr_char == '.')
+                {
+                    scanner->state = STATE_NUMBER_DECIMAL;
+                    if(str_insert_char(scanner->atr_string, scanner->curr_char))
+                    {
+                        *err = INTERNAL_ERROR;
+                        return empty_token;
+                    }
+                }
+                else if (tolower(scanner->curr_char) == 'e')
+                { 
+                    scanner->state = STATE_NUMBER_EXPONENT;
+                    if(str_insert_char(scanner->atr_string, scanner->curr_char))
+                    {
+                        *err = INTERNAL_ERROR;
+                        return empty_token;
+                    }
+                }
+                else
+                {
+                    ungetc(scanner->curr_char, scanner->src_file);
+
+                    //what we have readed so far is a correct int number
+                    token = create_integer_token(*scanner->atr_string, err);
+                    if(*err)
+                    { 
+                        return empty_token; //error code is allredy set
+                    }
+                    else return token;
+                }
+                break;
             
-        }
-    
+            case STATE_NUMBER_DECIMAL:
+                if(isdigit(scanner->curr_char))
+                {
+                    if(str_insert_char(scanner->atr_string, scanner->curr_char))
+                    {
+                        *err = INTERNAL_ERROR;
+                        return empty_token;
+                    }
+                }
+                else if (tolower(scanner->curr_char) == 'e')
+                { 
+                    scanner->state = STATE_NUMBER_EXPONENT;
+                    if(str_insert_char(scanner->atr_string, scanner->curr_char))
+                    {
+                        *err = INTERNAL_ERROR;
+                        return empty_token;
+                    }
+                }
+                else
+                {
+                    ungetc(scanner->curr_char, scanner->src_file);
+
+                    //what we have readed so far is a correct int number
+                    token = create_decimal_token(*scanner->atr_string);
+                    return token; 
+                }
+                break;
+
+            case STATE_NUMBER_EXPONENT:
+                if((scanner->curr_char == '+') || (scanner->curr_char == '-'))
+                {
+                    scanner->state = STATE_EXPONENT_SIGN;
+                    
+                    if(str_insert_char(scanner->atr_string, scanner->curr_char))
+                    { 
+                        *err= INTERNAL_ERROR;
+                        return empty_token;
+                    }
+
+                }
+                else if(isdigit(scanner->curr_char))
+                {
+                    scanner->state = STATE_NUMBER_EXPONENT_VALID;
+                    if(str_insert_char(scanner->atr_string, scanner->curr_char))
+                    { 
+                        *err= INTERNAL_ERROR;
+                        return empty_token;
+                    }
+                }
+                else scanner->state = STATE_ERROR;
+                break; 
+            
+            case STATE_EXPONENT_SIGN:
+                if(isdigit(scanner->curr_char))
+                {
+                    scanner->state = STATE_NUMBER_EXPONENT_VALID;
+                    if(str_insert_char(scanner->atr_string, scanner->curr_char))
+                    { 
+                        *err= INTERNAL_ERROR;
+                        return empty_token;
+                    }
+                }
+                else scanner->state = STATE_ERROR; 
+                break; 
+
+            
+            case STATE_NUMBER_EXPONENT_VALID:
+                if(isdigit(scanner->curr_char))
+                {
+                    scanner->state = STATE_NUMBER_EXPONENT_VALID;
+                    if(str_insert_char(scanner->atr_string, scanner->curr_char))
+                    { 
+                        *err= INTERNAL_ERROR;
+                        return empty_token;
+                    }
+                }
+                else
+                {
+                    ungetc(scanner->curr_char, scanner->src_file);  //TODO NEEDS A FIX
+                    //what we have readed so far is a correct int number
+                    printf("string value is %s", scanner->atr_string->str);
+                    token = create_decimal_token(*scanner->atr_string);
+                    if(*err)
+                    { 
+                        return empty_token; //error code is allredy set
+                    }
+                    else return token;
+                }
+                break;       
+     
+     
+        }    
     }
-
-
 }
