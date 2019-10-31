@@ -88,7 +88,7 @@ unsigned symtab_hash_function(const char *str);
 
 tSymbol_item *symtab_lookup(tSymbol *t, const char *key);
 
-int symtab_add(tSymbol *t, const char* key);
+int symtab_add(tSymbol *t, const char* key, Symbol_type symbol_type, Data_type data_type, Symbol_value symbol_value, Symbol_state symbol_state);
 
 
 #endif
