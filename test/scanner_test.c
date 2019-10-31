@@ -73,7 +73,6 @@ void test3_lesser_eqal_eol_eof(void)
 
 
     token = read_token(scanner, &err);
-    printf("token type %d \n", token.type );
     TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_LESSER_EQUAL);
     token = read_token(scanner, &err);
     TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_EOL);
@@ -122,7 +121,27 @@ void test5_string(void)
     TEST_ASSERT_EQUAL_INT32(err, NO_ERROR);
     TEST_ASSERT_EQUAL_STRING(scanner->atr_string->str, "stringliteral");    
     TEST_ASSERT_EQUAL_INT32(token.type , TOKEN_STRING);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(err, NO_ERROR);
+    TEST_ASSERT_EQUAL_INT32(token.type , TOKEN_STRING);
+    TEST_ASSERT_EQUAL_STRING(scanner->atr_string->str, "Ahoj\n\"Sve\'te \\\x27"); //example from assignment
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(err, NO_ERROR);
+    TEST_ASSERT_EQUAL_INT32(token.type , TOKEN_EOL);
+        
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(err, NO_ERROR);
+    TEST_ASSERT_EQUAL_INT32(token.type , TOKEN_STRING);
+    TEST_ASSERT_EQUAL_STRING(scanner->atr_string->str, "\\y"); //not valid escape sequence shoul be reded as 2 characters
+
+    //invalid hexa decimal escape sequence should cause an error
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(err, LEXICAL_ERROR);
+    TEST_ASSERT_EQUAL_INT32(token.type , TOKEN_STRING);
 }
+
 
 
 int main(void) 

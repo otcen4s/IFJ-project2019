@@ -1,1 +1,2 @@
-'stringliteral'
+'stringliteral' 'Ahoj\n"Sve\'te \\\x27'
+'\y' '\xyz' 

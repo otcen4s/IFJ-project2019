@@ -294,7 +294,6 @@ Token read_token(Scanner *scanner, int *err)
                 }
                 else if (scanner->curr_char < 32) //invalid character
                 {
-                    printf("string wrong char\n");
                     scanner->state = STATE_ERROR;
                     *err = INTERNAL_ERROR;
                 }
@@ -313,7 +312,8 @@ Token read_token(Scanner *scanner, int *err)
                     {
                         *err= INTERNAL_ERROR;
                         return empty_token;
-                    } 
+                    }
+                    scanner->state= STATE_STRING_START;
                 }
                 else if (scanner->curr_char == 't')
                 {
@@ -322,6 +322,7 @@ Token read_token(Scanner *scanner, int *err)
                         *err= INTERNAL_ERROR;
                         return empty_token;
                     }
+                    scanner->state= STATE_STRING_START;
                 }
                 else if (scanner->curr_char == '\\')
                 {
@@ -330,6 +331,7 @@ Token read_token(Scanner *scanner, int *err)
                         *err= INTERNAL_ERROR;
                         return empty_token;
                     }
+                    scanner->state= STATE_STRING_START;
                 }
                 else if (scanner->curr_char == '\'')
                 {
@@ -338,17 +340,10 @@ Token read_token(Scanner *scanner, int *err)
                         *err= INTERNAL_ERROR;
                         return empty_token;
                     }
+                    scanner->state= STATE_STRING_START;
                 }
                 // check for hexa decimal escape sequence
-                else if (
-                        (tolower(scanner->curr_char) >= 'a' && tolower(scanner->curr_char) <= 'f') ||
-                        (scanner->curr_char >= '0' && scanner->curr_char <= '9')
-                        )
-                {
-                    scanner->state = STATE_STR_ESCAPE_HEXA;
-                    hexa_number_str[0] = scanner->curr_char;
-                }
-                //invalid escape sequence will be inserted as 2 separate chars
+                else if (scanner->curr_char == 'x') scanner->state = STATE_STR_ESCAPE_HEXA_1;    
                 else 
                 {
                     str_insert_char(scanner->atr_string,'\\'); //TODO fail check
@@ -356,8 +351,25 @@ Token read_token(Scanner *scanner, int *err)
                     scanner->state = STATE_STRING_START; //continue reading the rest of the string
                 }  
                 break;
+            
+            case STATE_STR_ESCAPE_HEXA_1:
+                if (
+                  (tolower(scanner->curr_char) >= 'a' && tolower(scanner->curr_char) <= 'f') ||
+                  (scanner->curr_char >= '0' && scanner->curr_char <= '9')
+                   )
+                {
+                    hexa_number_str[0] = scanner->curr_char;
+                    scanner->state = STATE_STR_ESCAPE_HEXA_2;
+                }
+                else
+                { 
+                    scanner->state= STATE_ERROR;
+                }
+                break; 
 
-            case STATE_STR_ESCAPE_HEXA:
+            
+
+            case STATE_STR_ESCAPE_HEXA_2:
                 if (
                         (tolower(scanner->curr_char) >= 'a' && tolower(scanner->curr_char) <= 'f') ||
                         (scanner->curr_char >= '0' && scanner->curr_char <= '9')
@@ -365,7 +377,7 @@ Token read_token(Scanner *scanner, int *err)
                 {
                     hexa_number_str[1]=scanner->curr_char; 
                     char* endptr;
-                    char result= (char) strtol(hexa_number_str, NULL, 16);  
+                    char result= (char) strtol(hexa_number_str, &endptr, 16);
                     
                     if(str_insert_char(scanner->atr_string,result)||
                        *endptr != '\0')                  
@@ -373,6 +385,7 @@ Token read_token(Scanner *scanner, int *err)
                         *err= INTERNAL_ERROR;
                         return empty_token;
                     };
+                    scanner->state= STATE_STRING_START;
                 }
                 else
                 // not valid hexa decimal number, will be writen into resulting string as if there was no escape sequence i.e. one by one
@@ -393,6 +406,7 @@ Token read_token(Scanner *scanner, int *err)
             
             
             case STATE_STRING_END:
+                ungetc(scanner->curr_char, scanner->src_file);
                 token = create_string_token(*(scanner->atr_string));
                 return token;
             break;
