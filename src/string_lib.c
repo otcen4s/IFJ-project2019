@@ -45,7 +45,7 @@ int str_copy(tString *s, const char* new_string){
     }
 
     strcpy(s->str, new_string);
-    s->len = new_str_len + 1; //modified
+    s->len = new_str_len; //modified
 
     return NO_ERROR;
 }

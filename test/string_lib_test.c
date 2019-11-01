@@ -16,7 +16,7 @@ void test_str_cpy(void)
     str_init(&string);
     str_copy(&string, "ahoj");
     TEST_ASSERT_EQUAL_STRING("ahoj",string.str);
-    TEST_ASSERT_EQUAL_INT32(string.len, 5);
+    TEST_ASSERT_EQUAL_INT32(string.len, 4);
 }
 
 void test_str_copy_arr_size(void)
@@ -38,12 +38,21 @@ void test_str_cmp_keyword(void)
     TEST_ASSERT_FALSE(str_cmp_keyword(&string, "for"));
 }
 
+void test_str_insert_char(void) {
+    tString string;
+    str_init(&string);
+    str_copy(&string, "test");
+    str_insert_char(&string, 'a');
+    TEST_ASSERT_EQUAL_STRING("testa", string.str);
+}
+
 int main(void) 
 {
     UNITY_BEGIN();
     RUN_TEST(test_str_cpy);
     RUN_TEST(test_str_copy_arr_size);
     RUN_TEST(test_str_cmp_keyword);
+    RUN_TEST(test_str_insert_char);
 
     return UNITY_END();
 }
