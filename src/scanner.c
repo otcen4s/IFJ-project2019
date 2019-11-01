@@ -48,6 +48,7 @@ Token create_integer_token(tString string, int *error) {
     *error = NO_ERROR;
     
     Token token;
+    token.type = 0; 
     char *endptr;
     long  value = strtol(string.str, &endptr, 10);
 
@@ -86,6 +87,7 @@ Token read_token(Scanner *scanner, int *err)
     scanner->state = STATE_START;
     
     Token  empty_token;
+    empty_token.type=0;
     *err = NO_ERROR;
     
     //used to store hexadecimal sequence for conversion
@@ -104,6 +106,8 @@ Token read_token(Scanner *scanner, int *err)
        //read character form file
        scanner->curr_char=getc(scanner->src_file);
        Token token;
+       token.type=0; //initialisation
+
         switch (scanner->state)
         {
         
@@ -306,7 +310,11 @@ Token read_token(Scanner *scanner, int *err)
          
                 else
                 {                    
-                    str_insert_char(scanner->atr_string,scanner->curr_char); //TODO fail check
+                    if(str_insert_char(scanner->atr_string,scanner->curr_char))
+                    {
+                        *err= INTERNAL_ERROR;
+                        return empty_token;
+                    }
                 }
                 break;
 

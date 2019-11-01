@@ -17,7 +17,7 @@ int str_init(tString *s){
 }
 
 int str_realloc(tString *s, unsigned new_arr_size){
-    s->str = (char*)realloc(s->str, REALLOC_CONST + new_arr_size); //fix
+    s->str = (char*)realloc(s->str, REALLOC_CONST + new_arr_size);
 
     if(s->str == NULL) return INTERNAL_ERROR;
     

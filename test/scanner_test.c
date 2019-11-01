@@ -19,7 +19,7 @@ void test1_read_token(void)
     Token token; 
     Scanner s; 
     Scanner *scanner = &s; 
-    int init_err = init_scanner(scanner, "../test/test_data/scanner_test_1.txt");
+    int init_err = init_scanner(scanner, "test/test_data/scanner_test_1.txt");
     TEST_ASSERT_NOT_NULL(scanner->src_file);
     TEST_ASSERT_NOT_NULL(scanner->atr_string); 
     TEST_ASSERT_EQUAL_INT32(init_err, NO_ERROR);
@@ -47,7 +47,7 @@ void test2_token_after_line_commentary(void)
     Token token; 
     Scanner s; 
     Scanner *scanner = &s; 
-    int init_err = init_scanner(scanner, "../test/test_data/scanner_test_2.txt");
+    init_scanner(scanner, "test/test_data/scanner_test_2.txt");
 
 
     token = read_token(scanner, &err);
@@ -69,7 +69,7 @@ void test3_lesser_eqal_eol_eof(void)
     Token token; 
     Scanner s; 
     Scanner *scanner = &s; 
-    int init_err = init_scanner(scanner, "../test/test_data/scanner_test_3.txt");
+    init_scanner(scanner, "test/test_data/scanner_test_3.txt");
 
 
     token = read_token(scanner, &err);
@@ -96,7 +96,7 @@ void test4_doscstring(void)
     Token token; 
     Scanner s; 
     Scanner *scanner = &s; 
-    int init_err = init_scanner(scanner, "../test/test_data/scanner_test_4.txt");
+    init_scanner(scanner, "test/test_data/scanner_test_4.txt");
 
 
     token = read_token(scanner, &err);
@@ -114,7 +114,7 @@ void test5_string(void)
     Token token; 
     Scanner s; 
     Scanner *scanner = &s; 
-    int init_err = init_scanner(scanner, "../test/test_data/scanner_test_5.txt");
+    init_scanner(scanner, "test/test_data/scanner_test_5.txt");
 
 
     token = read_token(scanner, &err);
@@ -139,7 +139,6 @@ void test5_string(void)
     //invalid hexa decimal escape sequence should cause an error
     token = read_token(scanner, &err);
     TEST_ASSERT_EQUAL_INT32(err, LEXICAL_ERROR);
-    TEST_ASSERT_EQUAL_INT32(token.type , TOKEN_STRING);
 }
 
 void test6_id_or_keyword(void)
@@ -156,7 +155,7 @@ void test6_id_or_keyword(void)
     Token token; 
     Scanner s; 
     Scanner *scanner = &s; 
-    int init_err = init_scanner(scanner, "../test/test_data/scanner_test_6.txt");
+    init_scanner(scanner, "test/test_data/scanner_test_6.txt");
 
 
     token = read_token(scanner, &err);
@@ -173,7 +172,8 @@ void test7_numbers(void)
 {
     /* test file
 
-       923
+       923 92.51
+       10e5 2E-12 2eh
 
     */
     
@@ -181,7 +181,8 @@ void test7_numbers(void)
     Token token; 
     Scanner s; 
     Scanner *scanner = &s; 
-    int init_err = init_scanner(scanner, "../test/test_data/scanner_test_7.txt");
+    err= init_scanner(scanner, "test/test_data/scanner_test_7.txt");
+    TEST_ASSERT_EQUAL_INT32(err, NO_ERROR);
 
 
     token = read_token(scanner, &err);
@@ -203,7 +204,7 @@ void test7_numbers(void)
     token = read_token(scanner, &err);
     TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_DECIMAL);
     TEST_ASSERT_EQUAL_INT32(err, NO_ERROR);
-    TEST_ASSERT_EQUAL_FLOAT(token.attribute.decimal, 2e-12); //NEED TO BE FIXED 
+    TEST_ASSERT_EQUAL_FLOAT(token.attribute.decimal, 2e-12); 
 
     token = read_token(scanner, &err); // invalid exponent
     TEST_ASSERT_EQUAL_INT32(err, LEXICAL_ERROR);   
