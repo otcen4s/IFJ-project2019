@@ -47,7 +47,7 @@ void test2_token_after_line_commentary(void)
     Token token; 
     Scanner s; 
     Scanner *scanner = &s; 
-    int init_err = init_scanner(scanner, "test/test_data/scanner_test_2.txt");
+    init_scanner(scanner, "test/test_data/scanner_test_2.txt");
 
 
     token = read_token(scanner, &err);
@@ -69,7 +69,7 @@ void test3_lesser_eqal_eol_eof(void)
     Token token; 
     Scanner s; 
     Scanner *scanner = &s; 
-    int init_err = init_scanner(scanner, "test/test_data/scanner_test_3.txt");
+    init_scanner(scanner, "test/test_data/scanner_test_3.txt");
 
 
     token = read_token(scanner, &err);
@@ -96,7 +96,7 @@ void test4_doscstring(void)
     Token token; 
     Scanner s; 
     Scanner *scanner = &s; 
-    int init_err = init_scanner(scanner, "test/test_data/scanner_test_4.txt");
+    init_scanner(scanner, "test/test_data/scanner_test_4.txt");
 
 
     token = read_token(scanner, &err);
@@ -114,7 +114,7 @@ void test5_string(void)
     Token token; 
     Scanner s; 
     Scanner *scanner = &s; 
-    int init_err = init_scanner(scanner, "test/test_data/scanner_test_5.txt");
+    init_scanner(scanner, "test/test_data/scanner_test_5.txt");
 
 
     token = read_token(scanner, &err);
@@ -139,7 +139,75 @@ void test5_string(void)
     //invalid hexa decimal escape sequence should cause an error
     token = read_token(scanner, &err);
     TEST_ASSERT_EQUAL_INT32(err, LEXICAL_ERROR);
-    TEST_ASSERT_EQUAL_INT32(token.type , TOKEN_STRING);
+}
+
+void test6_id_or_keyword(void)
+{
+    /* test file
+
+        if hfd_dssd 
+
+    +
+
+    */
+    
+    int err = 0; 
+    Token token; 
+    Scanner s; 
+    Scanner *scanner = &s; 
+    init_scanner(scanner, "test/test_data/scanner_test_6.txt");
+
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, KEYWORD_IF);
+    TEST_ASSERT_EQUAL_INT32(err, NO_ERROR);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_IDENTIFIER);
+    TEST_ASSERT_EQUAL_STRING(token.attribute.string.str, "hkdfg");
+    TEST_ASSERT_EQUAL_INT32(err, NO_ERROR);        
+}
+
+void test7_numbers(void)
+{
+    /* test file
+
+       923 92.51
+       10e5 2E-12 2eh
+
+    */
+    
+    int err = 0; 
+    Token token; 
+    Scanner s; 
+    Scanner *scanner = &s; 
+    err= init_scanner(scanner, "test/test_data/scanner_test_7.txt");
+    TEST_ASSERT_EQUAL_INT32(err, NO_ERROR);
+
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_INTEGER);
+    TEST_ASSERT_EQUAL_INT32(token.attribute.integer, 923);
+    TEST_ASSERT_EQUAL_INT32(err, NO_ERROR);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_DECIMAL);
+    TEST_ASSERT_EQUAL_FLOAT(token.attribute.decimal, 92.51);
+    TEST_ASSERT_EQUAL_INT32(err, NO_ERROR);
+
+    read_token(scanner, &err); // just to get rid of EOL
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_DECIMAL);
+    TEST_ASSERT_EQUAL_FLOAT(token.attribute.decimal, 10e5);
+    TEST_ASSERT_EQUAL_INT32(err, NO_ERROR);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_DECIMAL);
+    TEST_ASSERT_EQUAL_INT32(err, NO_ERROR);
+    TEST_ASSERT_EQUAL_FLOAT(token.attribute.decimal, 2e-12); 
+
+    token = read_token(scanner, &err); // invalid exponent
+    TEST_ASSERT_EQUAL_INT32(err, LEXICAL_ERROR);   
 }
 
 
@@ -152,6 +220,8 @@ int main(void)
     RUN_TEST(test3_lesser_eqal_eol_eof);
     RUN_TEST(test4_doscstring);
     RUN_TEST(test5_string);
+    RUN_TEST(test6_id_or_keyword);
+    RUN_TEST(test7_numbers);
 
     return UNITY_END();
 }
