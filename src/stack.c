@@ -1,13 +1,19 @@
-
-
 #include "stack.h"
 
-int stack_init  (t_stack* s ) 
+t_stack* stack_create  (const unsigned cap, const enum stack_type type) 
 {
+    t_stack* stack; 
+       
+    if((stack = malloc(sizeof(t_stack))) == NULL) return NULL; 
+ 
+    stack->cap = cap;
+    stack->top = -1;
+    stack->type = type;
 
-if(!s) return STACK_ERROR;
+   if((stack->items = malloc(sizeof(t_stack_item)*cap)) == NULL) return NULL; 
 
-s->top = -1;
+
+    return stack;
 }
 
 int stack_empty ( const t_stack* s ) 
@@ -20,32 +26,63 @@ int stack_full ( const t_stack* s )
 	return s->top == s->cap-1;
 }
 
-t_stack_item* stack_top ( const t_stack* s) 
+
+t_stack_item stack_top ( const t_stack* s, int *err) 
 {
-	if(stack_empty(s)) return NULL;
+	if(stack_empty(s)) 
+    {
+        *err= STACK_ERROR;
+        t_stack_item  empty;
+        return empty;
+    }
 
-    return &(s->items[s->top]);
+    return (s->items[s->top]);
 }
 
 
-t_stack_item* stack_pop ( t_stack* s ) {
 
-	return  &(s->items[s->top]);
+t_stack_item stack_pop ( t_stack* s, int *err) {
+    if(stack_empty(s)) 
+    {
+        *err= STACK_ERROR;
+        t_stack_item  empty;
+        return empty; 
+    }
+    return s->items[s->top--];
 }
 
 
-int stack_push ( t_stack* s, int item_symbol, int item_type) {
+int stack_push (int* err, t_stack* s, ...) 
+{
+    //params list
+    va_list ap;
+    va_start(ap, s);
 
     if (stack_full(s))
     {
-    //ak nieje dostatocna kapacita musime ju rozsirit
+
+    //if cappacity is too small we need to resize it
     s->cap += ALLOC_CHUNK;
-    if(!(s->items = realloc(s->cap*sizeof(t_stack_item)))) return STACK_ERROR;
+   if((s->items = realloc(s->items, s->cap*sizeof(t_stack_item))) == NULL)
+   {
+       return STACK_ERROR;
+   }
     }
 
-    //samotne vlozenie prvku na zasobnik
-    s->items[++s->top].item_type =item_type;
-    s->items[s->top].item_symbol =item_symbol;
-    return 0; 
+    //take value from argument based on type of stack
+    switch ( s->type ) {
+        case INTEGER_TYPE:
+            s->items[++s->top].integer = (int) va_arg(ap,int);
+            break;
+
+        case TOKEN_TYPE:
+            s->items[++s->top].token = (Token) va_arg(ap,Token);
+            break;
+        default:
+            break;
+    }
+    
+    return 0;
 }
+    
 
