@@ -601,7 +601,6 @@ Token read_token(Scanner *scanner, int *err)
                 {
                     ungetc(scanner->curr_char, scanner->src_file);  //TODO NEEDS A FIX
                     //what we have readed so far is a correct int number
-                    printf("string value is %s", scanner->atr_string->str);
                     token = create_decimal_token(*scanner->atr_string);
                     if(*err)
                     { 
