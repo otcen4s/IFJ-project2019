@@ -210,6 +210,88 @@ void test7_numbers(void)
     TEST_ASSERT_EQUAL_INT32(err, LEXICAL_ERROR);   
 }
 
+void test8_indent(void)
+{
+/* test file
+    +
+-
+    +
+        +
+-
+    +
+  -
+*/
+
+    
+    int err = 0; 
+    Token token; 
+    Scanner s; 
+    Scanner *scanner = &s; 
+    init_scanner(scanner, "test/test_data/scanner_test_8.txt");
+
+    //single indent and dedent
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_INDENT);
+    
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_PLUS); 
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_EOL); 
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_DEDENT);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_MINUS); 
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_EOL);
+
+    // 2 indent levels and dedent back to 0 - generating 2 dedents one after another
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_INDENT);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_PLUS);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_EOL);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_INDENT);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_PLUS);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_EOL);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_DEDENT);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_DEDENT);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_MINUS);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_EOL);
+
+    //incorrect indent level
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_INDENT);
+    
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_PLUS);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_EOL);
+
+    token = read_token(scanner, &err); //here is the incorect indent level
+    TEST_ASSERT_EQUAL_INT(err, LEXICAL_ERROR);
+}
 
 
 int main(void) 
@@ -222,6 +304,7 @@ int main(void)
     RUN_TEST(test5_string);
     RUN_TEST(test6_id_or_keyword);
     RUN_TEST(test7_numbers);
+    RUN_TEST(test8_indent);
 
     return UNITY_END();
 }

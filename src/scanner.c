@@ -193,6 +193,7 @@ Token read_token(Scanner *scanner, int *err)
                 {
                     token.type = TOKEN_INDENT;
                     scanner->is_line_start  = 0;
+                    stack_push(scanner->stack, scanner->indent_cnt);
                     return token; 
                 }
                 //indentation decreased, generate dedent 
