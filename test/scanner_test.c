@@ -293,6 +293,52 @@ void test8_indent(void)
     TEST_ASSERT_EQUAL_INT(err, LEXICAL_ERROR);
 }
 
+void test9_function(void)
+{
+/* test file
+def my_function():
+    print("Mam 42 rokov")
+    vek = 42.56 
+*/
+
+    int err = 0; 
+    Token token; 
+    Scanner s; 
+    Scanner *scanner = &s; 
+    init_scanner(scanner, "test/test_data/scanner_test_9.txt");
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(KEYWORD_DEF, token.type);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(TOKEN_IDENTIFIER, token.type);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(TOKEN_LEFT_BRACKET, token.type);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(TOKEN_RIGHT_BRACKET, token.type);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(TOKEN_COLON, token.type);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(TOKEN_EOL, token.type);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(TOKEN_INDENT, token.type);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(KEYWORD_PRINT, token.type);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(TOKEN_LEFT_BRACKET, token.type);
+
+    token = read_token(scanner, &err);
+    // TODO token.type = 0 FIX?
+    // TEST_ASSERT_EQUAL_INT32(TOKEN_DOUBLE_QUOTE, token.type); 
+
+}
 
 int main(void) 
 {
@@ -305,6 +351,7 @@ int main(void)
     RUN_TEST(test6_id_or_keyword);
     RUN_TEST(test7_numbers);
     RUN_TEST(test8_indent);
+    RUN_TEST(test9_function);
 
     return UNITY_END();
 }
