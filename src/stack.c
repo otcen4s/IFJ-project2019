@@ -84,5 +84,9 @@ int stack_push (int* err, t_stack* s, ...)
     
     return 0;
 }
-    
 
+void stack_free(t_stack* s)
+{
+    free(s->items);
+    free(s);
+}

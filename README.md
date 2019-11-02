@@ -2,10 +2,10 @@
 This is a third semester project to subject called Formal Languages and Compilers (IFJ) at VUT FIT Brno
 
 ## Building project
-This is the case for root dir
-
+### Tests
+You have to be in the root directory
 ```
-mkdir build && cd build && cmake ../
+make
 ```
 
 ## Testing framework
