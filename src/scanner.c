@@ -180,14 +180,52 @@ Token read_token(Scanner *scanner, int *err)
                 break;
             
             case STATE_INDENT_ENDED:
-
-                //indentation matches previous
-            
-                //if (stack_top(scanner->stack, err).integer == scanner->indent_cnt)
-               
-                scanner->state= STATE_START;
                 ungetc(scanner->curr_char, scanner->src_file);
-                scanner->is_line_start  =0;
+
+                //indentation matches previous            
+                if(stack_top(scanner->stack, err).integer == scanner->indent_cnt)
+                {
+                    scanner->state= STATE_START;
+                    scanner->is_line_start  =0;
+                }
+                //indentation increased, generate INDENT token
+                else if(stack_top(scanner->stack, err).integer < scanner->indent_cnt)
+                {
+                    token.type = TOKEN_INDENT;
+                    scanner->is_line_start  = 0;
+                    return token; 
+                }
+                //indentation decreased, generate dedent 
+                else if(stack_top(scanner->stack, err).integer > scanner->indent_cnt)
+                {
+                    token.type = TOKEN_DEDENT;
+                    stack_pop(scanner->stack, err);
+                    
+                    //if is equal after pop generate dedent and set line start to 0 because indentation checking is done
+                    if(stack_top(scanner->stack, err).integer == scanner->indent_cnt)
+                    {
+                        scanner->is_line_start  = 0;
+                        return token; 
+                    }
+                    //more than one dedent will be generated
+                    else if (stack_top(scanner->stack, err).integer > scanner->indent_cnt)
+                    { 
+                        //return readed spaces to the file to check other indents generation
+                        while(scanner->indent_cnt)
+                        { 
+                            scanner->indent_cnt--; 
+                            ungetc(' ', scanner->src_file);
+                        }
+                        return token;                       
+                    }
+                     //indentation does not match any on the stack
+                    else
+                    {
+                        *err = LEXICAL_ERROR;
+                        return empty_token;
+                    }
+                    
+                }
                 break; 
 
 
