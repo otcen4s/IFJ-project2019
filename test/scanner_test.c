@@ -312,6 +312,8 @@ def my_function():
 
     token = read_token(scanner, &err);
     TEST_ASSERT_EQUAL_INT32(TOKEN_IDENTIFIER, token.type);
+    TEST_ASSERT_EQUAL_STRING("my_function", token.attribute.string.str);
+    TEST_ASSERT_EQUAL_INT32(11, token.attribute.string.len);
 
     token = read_token(scanner, &err);
     TEST_ASSERT_EQUAL_INT32(TOKEN_LEFT_BRACKET, token.type);
@@ -335,8 +337,30 @@ def my_function():
     TEST_ASSERT_EQUAL_INT32(TOKEN_LEFT_BRACKET, token.type);
 
     token = read_token(scanner, &err);
-    // TODO token.type = 0 FIX?
-    // TEST_ASSERT_EQUAL_INT32(TOKEN_DOUBLE_QUOTE, token.type); 
+    TEST_ASSERT_EQUAL_INT32(TOKEN_STRING, token.type);
+    TEST_ASSERT_EQUAL_STRING("Mam 42 rokov", token.attribute.string.str);
+    TEST_ASSERT_EQUAL_INT32(12, token.attribute.string.len);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(TOKEN_RIGHT_BRACKET, token.type);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(TOKEN_EOL, token.type);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(TOKEN_IDENTIFIER, token.type);
+    TEST_ASSERT_EQUAL_STRING("vek", token.attribute.string.str);
+    TEST_ASSERT_EQUAL_INT32(3, token.attribute.string.len);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(TOKEN_ASSIGN, token.type);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(TOKEN_DECIMAL, token.type);
+    TEST_ASSERT_EQUAL_FLOAT(42.56, token.attribute.decimal);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(TOKEN_EOF, token.type);
 
 }
 

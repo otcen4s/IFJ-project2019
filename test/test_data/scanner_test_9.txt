@@ -1,3 +1,3 @@
 def my_function():
-    print("Mam 42 rokov")
+    print('Mam 42 rokov')
     vek = 42.56
