@@ -33,6 +33,7 @@ t_stack_item stack_top ( const t_stack* s, int *err)
     {
         *err= STACK_ERROR;
         t_stack_item  empty;
+        empty.integer = STACK_ERROR;
         return empty;
     }
 
@@ -46,13 +47,14 @@ t_stack_item stack_pop ( t_stack* s, int *err) {
     {
         *err= STACK_ERROR;
         t_stack_item  empty;
+        empty.integer = STACK_ERROR;
         return empty; 
     }
     return s->items[s->top--];
 }
 
 
-int stack_push (int* err, t_stack* s, ...) 
+int stack_push ( t_stack* s, ...) 
 {
     //params list
     va_list ap;
@@ -75,9 +77,7 @@ int stack_push (int* err, t_stack* s, ...)
             s->items[++s->top].integer = (int) va_arg(ap,int);
             break;
 
-        case TOKEN_TYPE:
-            s->items[++s->top].token = (Token) va_arg(ap,Token);
-            break;
+        // add other types here
         default:
             break;
     }

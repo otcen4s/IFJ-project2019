@@ -9,6 +9,7 @@
 #include <ctype.h> 
 #include <stdlib.h>
 #include <stdio.h>
+#include "stack.h"
 
 typedef union {
 	tString string;
@@ -24,9 +25,11 @@ typedef struct {
 typedef struct {
     FILE *src_file;
     int state;
+    struct stack_struct *stack;
     tString *atr_string;    
     int is_line_start;
     char curr_char;
+    int indent_cnt;
 
 } Scanner;
 

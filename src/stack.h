@@ -11,16 +11,16 @@
 enum stack_type
 {
     INTEGER_TYPE,
-    TOKEN_TYPE,
+    // add other types here 
 } stack_data_type;
 
 
 typedef union {
         int integer;
-        Token token; 
+        //add other types here;
 } t_stack_item;
 
-typedef struct
+typedef struct stack_struct
 {
     long  top;
     long cap;
@@ -32,7 +32,7 @@ typedef struct
 int stack_empty ( const t_stack* s );
 int stack_full ( const t_stack* s );
 t_stack_item stack_top ( const t_stack* s, int*err);
-int stack_push ( int *err, t_stack* s, ...);
+int stack_push ( t_stack* s, ...);
 t_stack_item stack_pop ( t_stack* s, int *err);
 t_stack * stack_create(const unsigned cap, const enum stack_type type);
 void stack_free(t_stack* s);

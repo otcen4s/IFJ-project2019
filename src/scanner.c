@@ -1,9 +1,11 @@
+#include "stack.h"
 #include "scanner.h"
 
 int init_scanner(Scanner *s, const char* file_name)
 { 
     s->src_file=fopen(file_name, "r");
     s->atr_string= (tString*) malloc(sizeof(tString));
+    s->stack = (t_stack*) malloc(sizeof(t_stack));
     if (s->src_file == NULL || s->atr_string == NULL) return INTERNAL_ERROR;
     s->is_line_start= 1;
     s->state= STATE_START;
@@ -115,14 +117,20 @@ Token read_token(Scanner *scanner, int *err)
                 if (scanner->is_line_start) 
                 {
                     scanner->state = STATE_INDENTATION_CHECK;   // indentation check
+                    scanner->indent_cnt = 0; //init indent counter to zero
                     ungetc(scanner->curr_char, scanner->src_file); //nothing should be readed here
-                    break; 
                 }
-                else if((scanner->curr_char == '\n') && (scanner->is_line_start)) scanner->state = STATE_START; //ignore empty lines   
-                else if((scanner->curr_char == ' ') && (!scanner->is_line_start)) scanner->state = STATE_START; //ignore space if its not indent
+                else if((scanner->curr_char == '\n') && 
+                       (scanner->is_line_start)) scanner->state = STATE_START; //ignore empty lines   
+                else if((scanner->curr_char == ' ') && 
+                        (!scanner->is_line_start)) scanner->state = STATE_START; //ignore space if its not indent
                 else if(scanner->curr_char == '+') scanner->state = STATE_PLUS;
                 else if (scanner->curr_char == '*') scanner->state = STATE_MULTIPLICATION;
-                else if (scanner->curr_char == '-') scanner->state = STATE_MINUS;  
+                else if (scanner->curr_char == '-') scanner->state = STATE_MINUS;
+                else if (scanner->curr_char == ':') scanner->state = STATE_COLON;
+                else if (scanner->curr_char == '[') scanner->state = STATE_LEFT_SQUARE_BRACKET;
+                else if (scanner->curr_char == ']') scanner->state = STATE_RIGHT_SQUARE_BRACKET;
+                else if (scanner->curr_char == '%') scanner->state = STATE_PERCENT;
                 else if (scanner->curr_char == '/') scanner->state = STATE_DIVISON;    
                 else if (scanner->curr_char == '>') scanner->state = STATE_GREATER_THAN;
                 else if (scanner->curr_char == '<') scanner->state = STATE_LESSER_THAN;
@@ -152,21 +160,27 @@ Token read_token(Scanner *scanner, int *err)
                         *err = INTERNAL_ERROR;
                         return empty_token;
                     }
-                }
-               
+                }               
                 else scanner->state = STATE_ERROR;
-                break;
-
-               
-
                 
+                break;           
 
             case STATE_INDENTATION_CHECK:                
-                //TODO implement indent checking here
-                ungetc(scanner->curr_char, scanner->src_file); //temporary 
+                if (scanner->curr_char == ' ') scanner->indent_cnt++; //count number of spaces
+                else
+                {
+                    scanner->state = STATE_INDENT_ENDED;
+                    ungetc(scanner->curr_char, scanner->src_file);
+                }                
+                //ungetc(scanner->curr_char, scanner->src_file); //temporary 
                 scanner->state = STATE_START;
                 scanner->is_line_start=0; 
+                break;
+            
+            case STATE_INDENT_ENDED:
+
                 break; 
+
 
             case STATE_ERROR:
                 *err = LEXICAL_ERROR;
@@ -235,6 +249,18 @@ Token read_token(Scanner *scanner, int *err)
                 ungetc(scanner->curr_char, scanner->src_file);
                 return token; 
                 break;
+            
+            case STATE_COLON:
+                token.type=TOKEN_COLON;
+                ungetc(scanner->curr_char, scanner->src_file);
+                return token;
+                break;
+            
+            case STATE_PERCENT:
+                token.type=TOKEN_PERCENT;
+                ungetc(scanner->curr_char, scanner->src_file);
+                return token;
+                break;
 
             case STATE_EOL:
                 token.type= TOKEN_EOL;
@@ -259,6 +285,18 @@ Token read_token(Scanner *scanner, int *err)
                 token.type= TOKEN_RIGHT_BRACKET;
                 ungetc(scanner->curr_char, scanner->src_file);
                 return token; 
+                break;
+            
+            case STATE_RIGHT_SQUARE_BRACKET:
+                token.type=TOKEN_RIGHT_SQUARE_BRACKET;
+                ungetc(scanner->curr_char, scanner->src_file);
+                return token;
+                break;
+            
+            case STATE_LEFT_SQUARE_BRACKET:
+                token.type=TOKEN_LEFT_SQUARE_BRACKET;
+                ungetc(scanner->curr_char, scanner->src_file);
+                return token;
                 break;
 
             case STATE_COMMA:
