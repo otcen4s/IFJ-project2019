@@ -5,17 +5,22 @@ int init_scanner(Scanner *s, const char* file_name)
 { 
     s->src_file=fopen(file_name, "r");
     s->atr_string= (tString*) malloc(sizeof(tString));
-    s->stack = (t_stack*) malloc(sizeof(t_stack));
     if (s->src_file == NULL || s->atr_string == NULL) return INTERNAL_ERROR;
     s->is_line_start= 1;
     s->state= STATE_START;
     s->curr_char=0; 
+    
+    //init stack for indent analysis
+     s->stack = stack_create(100, INTEGER_TYPE);
+     stack_push(s->stack, 0); 
     return NO_ERROR;
 }
 
 void destroy_scanner (Scanner *s)
 { 
+    str_destroy(s->atr_string); 
     free(s->atr_string);
+    stack_free(s->stack); 
 }
 
 void check_keyword(tString* string, Token* token){
@@ -172,13 +177,17 @@ Token read_token(Scanner *scanner, int *err)
                     scanner->state = STATE_INDENT_ENDED;
                     ungetc(scanner->curr_char, scanner->src_file);
                 }                
-                //ungetc(scanner->curr_char, scanner->src_file); //temporary 
-                scanner->state = STATE_START;
-                scanner->is_line_start=0; 
                 break;
             
             case STATE_INDENT_ENDED:
 
+                //indentation matches previous
+            
+                //if (stack_top(scanner->stack, err).integer == scanner->indent_cnt)
+               
+                scanner->state= STATE_START;
+                ungetc(scanner->curr_char, scanner->src_file);
+                scanner->is_line_start  =0;
                 break; 
 
 
