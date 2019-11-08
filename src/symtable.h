@@ -5,7 +5,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include <stdint.h>
+#include <stdint.h>/**
+ * This table is helpful to iterte through our hash table 
+ */
+typedef struct tSymbol_iterator 
+{
+    struct tSymbol_item *ptr;      
+    const tSymbol *table;            
+    int idx;                    
+}tSymbol_iterator; 
 
 #include "string_lib.h"
 #include "error.h"
@@ -65,16 +73,6 @@ typedef struct tSymbol
     size_t arr_size;
     tSymbol_item *item_array[]; // pointer to array of structures
 }tSymbol;
-
-/**
- * This table is helpful to iterte through our hash table 
- */
-typedef struct tSymbol_iterator 
-{
-    struct tSymbol_item *ptr;      
-    const tSymbol *table;            
-    int idx;                    
-}tSymbol_iterator; 
 
 
 int symtab_init(tSymbol *table);
