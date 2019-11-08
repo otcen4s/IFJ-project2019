@@ -25,7 +25,7 @@ typedef enum
     DATA_INT,
     DATA_DOUBLE,
     DATA_STRING,
-    DATA_BOOL
+    DATA_NONE
 } Data_type;
 
 typedef enum 
@@ -38,7 +38,6 @@ typedef union
 {
     int int_val;
     double double_val;
-    bool bool_val;
     tString string_val;
 } Symbol_value;
 
