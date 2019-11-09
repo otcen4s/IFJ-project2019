@@ -3,12 +3,25 @@
 
 int init_scanner(Scanner *s, const char* file_name)
 { 
-    s->src_file=fopen(file_name, "r");
+    if(strcmp(file_name, "stdin") == 0)
+    {
+        s->src_file=stdin; 
+    }
+    else 
+    {
+        if(!(s->src_file=fopen(file_name, "r")))
+        {
+            return INTERNAL_ERROR;
+        }
+    }
     s->atr_string= (tString*) malloc(sizeof(tString));
     if (s->src_file == NULL || s->atr_string == NULL) return INTERNAL_ERROR;
     s->is_line_start= 1;
     s->state= STATE_START;
     s->curr_char=0; 
+
+    //init string buffer
+    if(str_init(s->atr_string)) return INTERNAL_ERROR; 
     
     //init stack for indent analysis
      s->stack = stack_create(100, INTEGER_TYPE);
@@ -20,7 +33,7 @@ void destroy_scanner (Scanner *s)
 { 
     str_destroy(s->atr_string); 
     free(s->atr_string);
-    stack_free(s->stack); 
+    stack_free(s->stack);
 }
 
 void check_keyword(tString* string, Token* token){
@@ -100,13 +113,12 @@ Token read_token(Scanner *scanner, int *err)
     //used to store hexadecimal sequence for conversion
     char hexa_number_str[3] = {0};
 
-    //init atribute string
-    if(str_init(scanner->atr_string))
+    //clear atribute string
+    if(str_copy(scanner->atr_string, ""))
     {
-        return empty_token ; //returning empty token in case of error
-        *err = INTERNAL_ERROR;
-    } 
-
+        *err= INTERNAL_ERROR;
+        return empty_token;
+    }
 
     while(true)
     {
