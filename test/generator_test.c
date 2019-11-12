@@ -11,7 +11,7 @@ void tearDown(void)
 
 void test1(void)
 {
-    generator_begin();
+    TEST_ASSERT_EQUAL_INT32(NO_ERROR, generator_begin());
 }
 
 int main(void) 

@@ -26,7 +26,7 @@ $(PATHB)string_lib_test : $(PATHT)string_lib_test.c $(PATHS)string_lib.c
 $(PATHB)stack_test : $(PATHT)stack_test.c $(PATHS)stack.c
 	$(CC) $(CFLAGS) $^ -o $@
 
-$(PATHB)generator_test : $(PATHT)generator_test.c $(PATHS)generator.c
+$(PATHB)generator_test : $(PATHT)generator_test.c $(PATHS)generator.c $(PATHS)string_lib.c
 	$(CC) $(CFLAGS) $^ -o $@
 
 
