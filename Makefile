@@ -7,10 +7,11 @@ PATHB = bin/
 CC := gcc
 CFLAGS = -Wall -W -std=c99 -I unity/src unity/src/unity.c
 
-test : $(PATHB) $(PATHB)scanner_test $(PATHB)string_lib_test $(PATHB)stack_test
+test : $(PATHB) $(PATHB)scanner_test $(PATHB)string_lib_test $(PATHB)stack_test $(PATHB)generator_test
 	./$(PATHB)string_lib_test
 	./$(PATHB)scanner_test
 	./$(PATHB)stack_test
+	./$(PATHB)generator_test
 			
 
 $(PATHB) :
@@ -23,6 +24,9 @@ $(PATHB)string_lib_test : $(PATHT)string_lib_test.c $(PATHS)string_lib.c
 	$(CC) $(CFLAGS) $^ -o $@
 
 $(PATHB)stack_test : $(PATHT)stack_test.c $(PATHS)stack.c
+	$(CC) $(CFLAGS) $^ -o $@
+
+$(PATHB)generator_test : $(PATHT)generator_test.c $(PATHS)generator.c
 	$(CC) $(CFLAGS) $^ -o $@
 
 

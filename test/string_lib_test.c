@@ -93,6 +93,18 @@ void test_str_realloc(void) {
 
 }
 
+void test_str_append(void) {
+    tString string;
+    str_init(&string);
+
+    str_append(&string, "auto");
+    TEST_ASSERT_EQUAL_STRING("auto", string.str);
+
+    str_append(&string, "bus");
+    TEST_ASSERT_EQUAL_STRING("autobus", string.str);
+
+}
+
 int main(void) 
 {
     UNITY_BEGIN();
@@ -104,6 +116,7 @@ int main(void)
     RUN_TEST(test_str_realloc);
     RUN_TEST(test_str_destroy);
     RUN_TEST(test_str_init);
+    RUN_TEST(test_str_append);
 
     return UNITY_END();
 }
