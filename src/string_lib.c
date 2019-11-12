@@ -61,3 +61,17 @@ int str_insert_char(tString *s, const char new_char){
     return NO_ERROR;
 }
 
+int str_append(tString *s, const char *new_string) {
+    unsigned new_str_len = strlen(new_string);
+
+    unsigned new_len = s->len + new_str_len;
+
+    if (str_realloc(s, new_len) == INTERNAL_ERROR) {
+        return INTERNAL_ERROR;
+    }
+
+    strcat(s->str, new_string);
+    s->len = new_len;
+
+    return NO_ERROR;
+}
