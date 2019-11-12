@@ -1,0 +1,38 @@
+1. <statement> -> EOF
+2. <statement> -> EOL <statement>
+3. <statement> -> DEF ID ( <params> ): EOL INDENT <statement_inside> <end> EOL DEDENT <statement>
+4. <statement> -> IF <expression>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside>  EOL DEDENT <statement>
+5. <statement> -> WHILE <expression_start>: EOL INDENT <statement_inside> EOL DEDENT <statement>
+6. <statement> -> ID = <expression_start> EOL <statement>
+7. <statement> -> PASS EOL <statement>
+8. <statement> -> PRINT ( <arg> ) EOL <statement>
+9. <statement_inside> -> IF <expression>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> EOL DEDENT <statement>
+10. <statement_inside> -> WHILE <expression_start>: EOL INDENT <statement_inside> EOL DEDENT <statement>
+11. <statement_inside> -> ID = <expression_start> EOL <statement_inside>
+12. <statement_inside> -> RETURN <expression_start> EOL <statement_inside>
+13. <statement_inside> -> PASS EOL <statement_inside>
+14. <statement_inside> -> PRINT ( <arg> ) EOL
+15. <end> -> EOF
+16. <end> -> eps
+17. <params> -> ID <next_params>
+18. <params> -> eps
+19. <next_params> -> , ID <next_params>
+20. <next_params> -> eps
+21. <expression_start> -> <value> <expression_next>
+22. <expression_next> eps
+23. <expression_next> OPERATOR <expression_start>
+24. <value> ID
+25. <value> INT
+26. <value> DOUBLE
+27. <value> STRING
+28. <value> NONE
+29. <value> -> ID ( <arg> )
+30. <value> -> INPUTS()
+31. <value> -> INPTUF()
+32. <value> -> INPUTI()
+33. <value> -> LEN ( <value> )
+34. <value> -> SUBSTR ( <value>, <value>, <value> )
+35. <value> -> ORD ( <value>, <value> )
+36. <value> -> CHR ( <value> )
+37. <arg> -> eps
+38. <arg> -> <value> <arg>
