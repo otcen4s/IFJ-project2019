@@ -1,5 +1,33 @@
 #include "parser.h"
+
+/************** MACROS **********/
+#define GET_NEXT_TOKEN() \
+                        do{\
+                            parser->curr_token = read_token(parser->scanner, err); \
+                            if(err) return err; \
+                        }while(0)
+                        
+
+/********* PREDECLARATIONS ***********/
+int statement (Parser *parser);
+int statement_inside (Parser *parser);
+int end (Parser *parser);
+int params (Parser *parser);
+int next_params (Parser *parser);
+int expression_start (Parser *parser);
+int expression_next (Parser *parser);
+int value (Parser *parser);
+int arg (Parser *parser);
+
+/********* GLOBAL VARIABELS ***********/
 int counter_var = 1;
+bool is_if = false;
+bool is_while = false;
+bool is_def = false;
+
+
+
+/****************** FUNCTION DEFINITIONS ************************/
 
 int init_parser(Parser* parser)
 {
@@ -69,4 +97,24 @@ int start_compiler(char* src_file_name)
     return NO_ERROR;    
 }
 
+
+/************************************ RULES ***********************************************/
+
+int statement(Parser *parser)
+{
+    int *err;
+    GET_NEXT_TOKEN();
+
+    /* Rule 1. <statement> -> EOL */
+    if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
+    
+    /* Rule 2. <statement> -> EOF <statement>*/
+    if(parser->curr_token.type == TOKEN_EOL) statement(parser);
+
+    /* Rule 3. <statement> -> DEF ID ( <params> ): EOL INDENT <statement_inside> <end> EOL DEDENT <statement> */
+    if(parser->curr_token.type == KEYWORD_DEF)
+    {
+        
+    }
+}
 
