@@ -4,6 +4,7 @@
 #include "error.h"
 #include <string.h>
 #include "string_lib.h"
+#include <stdio.h>
 
 tString code;
 int error;

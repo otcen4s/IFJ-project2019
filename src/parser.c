@@ -33,16 +33,17 @@ int init_parser(Parser* parser)
 {
     parser->curr_token.type = -1;
 
-    if( !(parser->scanner == malloc(sizeof(Scanner))) ||
-        !(parser->global_table = malloc(sizeof(tSymbol))) ||
-        !(parser->local_table = malloc(sizeof(tSymbol)))
+    if( (parser->scanner = malloc(sizeof(Scanner))) == NULL ||
+        (parser->global_table = malloc(sizeof(tSymbol))) == NULL ||
+        (parser->local_table = malloc(sizeof(tSymbol))) == NULL
       )
     {
         return INTERNAL_ERROR;
     }
+    return NO_ERROR;
 }
 
-int dispose_parser(Parser* parser)
+void dispose_parser(Parser* parser)
 {
     free(parser->scanner);
     free(parser->global_table);
@@ -71,7 +72,7 @@ int start_compiler(char* src_file_name)
     //create and initialise parser data structure 
     Parser p;
     Parser *parser = &p; 
-    if(init_parser(parser)) return INTERNAL_ERROR;
+    if(init_parser(parser))  return INTERNAL_ERROR;
 
     //initialisation of scanner 
     if(init_scanner(parser->scanner, src_file_name)) return INTERNAL_ERROR;
@@ -88,9 +89,12 @@ int start_compiler(char* src_file_name)
     parser->curr_token = read_token(parser->scanner, &err);
     
     //in case there is lexical errror at the very beginning of the src file
-    if(err) return err; 
+    if(err) return err;
 
-    //start syntactic analysis here e.i. call function which implements <program> rule     
+    //start syntactic analysis here e.i. call function which implements <program> rule 
+
+    //temporary
+    return NO_ERROR;    
 }
 
 
