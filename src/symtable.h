@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include <stdint.h>/**
+#include <stdint.h>
+/**
  * This table is helpful to iterte through our hash table 
  */
 typedef struct tSymbol_iterator 
