@@ -14,7 +14,10 @@ test : $(PATHB) $(PATHB)scanner_test $(PATHB)string_lib_test $(PATHB)stack_test 
 	./$(PATHB)generator_test
 	./$(PATHB)parser_test
 	./$(PATHB)symtable_test
-			
+	### MEZIKOD ###
+	cat program.code
+	### OUTPUT ###
+	./ic19int program.code
 
 $(PATHB) :
 	mkdir $(PATHB)

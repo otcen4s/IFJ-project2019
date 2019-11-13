@@ -1,0 +1,9 @@
+.IFJcode19
+label $main
+createframe
+pushframe
+defvar gf@dlzka
+add gf@dlzka float@0x1.4634ab4d286f7p+3 float@0x1.2a854cdb7ae58p+1
+defvar GF@neviem
+move GF@neviem float@0x1.4634ab4d286f7p+3
+write gf@dlzka
