@@ -75,3 +75,21 @@ int str_append(tString *s, const char *new_string) {
 
     return NO_ERROR;
 }
+
+int str_concat(tString *s, ...) {
+    va_list ap;
+    char *temp;
+
+    str_copy(s, "");
+
+    va_start(ap, *s);
+
+    while ((temp = va_arg(ap, char*))) {
+        str_append(s, temp);
+    }
+
+    va_end(ap);
+
+    return NO_ERROR;
+
+}

@@ -105,6 +105,17 @@ void test_str_append(void) {
 
 }
 
+void test_str_concat(void) {
+    tString string;
+    str_init(&string);
+
+    str_concat(&string, "Volam ", "sa ", "auto", "bus", NULL);
+    TEST_ASSERT_EQUAL_STRING("Volam sa autobus", string.str);
+
+    str_concat(&string, "Ako ", "sa ", "mas?", NULL);
+    TEST_ASSERT_EQUAL_STRING("Ako sa mas?", string.str);
+}
+
 int main(void) 
 {
     UNITY_BEGIN();
@@ -117,6 +128,7 @@ int main(void)
     RUN_TEST(test_str_destroy);
     RUN_TEST(test_str_init);
     RUN_TEST(test_str_append);
+    RUN_TEST(test_str_concat);
 
     return UNITY_END();
 }
