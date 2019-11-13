@@ -11,8 +11,6 @@
 
 #define SYMTAB_SIZE 20047
 
-
-//TODO ADD MORE ENUMS
 typedef enum 
 {
     SYMBOL_VAR,
@@ -30,7 +28,7 @@ typedef enum
 
 typedef enum 
 {
-    SYMBOL_DECLARED,
+    SYMBOL_USED,
     SYMBOL_DEFINED
 } Symbol_state;
 
@@ -48,7 +46,7 @@ typedef union
 //TODO ADD MORE ITEMS
 typedef struct tSymbol_item
 {
-    char *key; //XXX not implemented correcly yet XXX
+    char *key;
     struct tSymbol_item *next_symbol; // pointer to next table in case of linked list 
     Symbol_type symbol_type;
     Data_type data_type;
@@ -76,7 +74,7 @@ unsigned symtab_hash_function(const char *str);
 
 tSymbol_item *symtab_lookup(tSymbol *t, const char *key);
 
-int symtab_add(tSymbol *t, const char* key, Symbol_type symbol_type, Data_type data_type, Symbol_value symbol_value, Symbol_state symbol_state);
+tSymbol_item* symtab_add(tSymbol *t, const char* key, int* err);
 
 
 #endif

@@ -14,6 +14,7 @@ typedef struct
     Token curr_token;
     tSymbol* global_table;
     tSymbol* local_table;
+    tSymbol_item* symbol_data;
 } Parser;
 
 int start_compiler(char* src_file_name);
