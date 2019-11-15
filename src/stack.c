@@ -77,7 +77,8 @@ int stack_push ( t_stack* s, ...)
             s->items[++s->top].integer = (int) va_arg(ap,int);
             break;
 
-        // add other types here
+        case SYMBOL_TYPE:
+            s->items[++s->top].symbol = (Symbol) va_arg(ap,Symbol);
         default:
             break;
     }

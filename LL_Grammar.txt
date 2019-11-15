@@ -28,7 +28,7 @@
 28. <value> NONE
 29. <value> -> ID ( <arg> )
 30. <value> -> INPUTS()
-31. <value> -> INPTUF()
+31. <value> -> INPUTF()
 32. <value> -> INPUTI()
 33. <value> -> LEN ( <value> )
 34. <value> -> SUBSTR ( <value>, <value>, <value> )

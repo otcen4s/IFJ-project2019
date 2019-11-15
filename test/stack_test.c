@@ -1,6 +1,5 @@
-#define _STACK_TYPE_INT
+
 #include  "../src/stack.h"
-#undef _STACK_TYPE_INT
 
 #include "unity.h"
 
@@ -13,6 +12,7 @@ void tearDown(void)
 {
 }
 
+// integer stack tests
 void test_stack_empty(void)
 {
     t_stack * stack = stack_create(0, INTEGER_TYPE);
@@ -44,7 +44,7 @@ void test_stack_full(void)
     stack_free(stack);
 }
 
-void test_int(void)
+void test_init(void)
 {
     int err= 0;
     t_stack * stack = stack_create(0, INTEGER_TYPE);
@@ -63,15 +63,94 @@ void test_int(void)
 }
 
 
-//add tests for other types here
+// symblol stack tests
+
+void test_symb_stack_empty(void)
+{
+    t_stack * stack = stack_create(0, SYMBOL_TYPE);
+    TEST_ASSERT_TRUE(stack_empty(stack));
+
+    Symbol s1;
+    s1.data_type= 1;
+    s1.symbol= 2; 
+
+    Symbol s2;
+    s2.data_type= 3;
+    s2.symbol= 1; 
+
+    stack_push(stack, s1);
+    TEST_ASSERT_FALSE(stack_empty(stack));
+
+    stack_push(stack, s2);
+    TEST_ASSERT_FALSE(stack_empty(stack));
+
+    stack_free(stack);
+    stack = stack_create(0, SYMBOL_TYPE);
+    TEST_ASSERT_TRUE(stack_empty(stack));
+    stack_free(stack);
+}
+
+void test_symb_stack_full(void)
+{
+    t_stack * stack = stack_create(0, SYMBOL_TYPE);
+
+    TEST_ASSERT_TRUE(stack_full(stack));
+
+    Symbol s1;
+    s1.data_type= 1;
+    s1.symbol= 2; 
+    stack_push(stack, s1);
+
+    TEST_ASSERT_FALSE(stack_full(stack));
+
+    stack_free(stack);
+    stack = stack_create(2, SYMBOL_TYPE);
+    TEST_ASSERT_FALSE(stack_full(stack));
+    stack_free(stack);
+}
+
+void test_symb_init(void)
+{
+    int err= 0;
+    t_stack * stack = stack_create(0, SYMBOL_TYPE);
+    TEST_ASSERT_NOT_NULL(stack);
+    
+    Symbol s1;
+    s1.data_type= 1;
+    s1.symbol= 2; 
+
+    stack_push(stack, s1);
+    Symbol top = stack_pop(stack, &err).symbol;
+    TEST_ASSERT_EQUAL_INT(top.data_type, 1);
+    TEST_ASSERT_EQUAL_INT(top.symbol, 2);
+
+    Symbol s2;
+    s2.data_type= 5;
+    s2.symbol= 1; 
+
+    stack_push(stack, s2);
+    top = stack_top(stack ,&err).symbol;
+    TEST_ASSERT_EQUAL_INT(top.symbol, 1);
+    TEST_ASSERT_EQUAL_INT(top.data_type, 5);
+
+    stack_free(stack);
+}
+
 
 int main(void) 
 {
     UNITY_BEGIN();
 
-    RUN_TEST( test_int);
+    //integer stack
+    RUN_TEST( test_init);
     RUN_TEST(test_stack_empty);
     RUN_TEST(test_stack_full);
+    
+    //symbol stack
+    RUN_TEST( test_symb_init);
+    RUN_TEST(test_symb_stack_empty);
+    RUN_TEST(test_symb_stack_full);
+
 
     return UNITY_END();
 }

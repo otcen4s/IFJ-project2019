@@ -11,12 +11,20 @@
 enum stack_type
 {
     INTEGER_TYPE,
-    // add other types here 
+    SYMBOL_TYPE,
 } stack_data_type;
+
+//struct for expression parsing 
+typedef struct Symbol
+{
+    unsigned data_type; //data type of 
+    unsigned symbol; //determinates what kind of symbol it is
+} Symbol;
 
 
 typedef union {
         int integer;
+        Symbol symbol; 
         //add other types here;
 } t_stack_item;
 
