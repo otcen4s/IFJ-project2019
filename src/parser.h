@@ -19,4 +19,7 @@ typedef struct
 
 int start_compiler(char* src_file_name);
 
+//predeclaratins, just for testing reasons
+int init_parser(Parser* parser);
+
 #endif

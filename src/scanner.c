@@ -1,4 +1,3 @@
-#include "stack.h"
 #include "scanner.h"
 
 int init_scanner(Scanner *s, const char* file_name)
@@ -18,7 +17,9 @@ int init_scanner(Scanner *s, const char* file_name)
     if (s->src_file == NULL || s->atr_string == NULL) return INTERNAL_ERROR;
     s->is_line_start= 1;
     s->state= STATE_START;
-    s->curr_char=0; 
+    s->curr_char=0;
+
+    //if(!(s->ungeted_stack = stack_create(TOKEN_TYPE)))
 
     //init string buffer
     if(str_init(s->atr_string)) return INTERNAL_ERROR; 
@@ -101,6 +102,13 @@ Token create_string_token(tString string) {
     
     return token;
 }
+/*
+int unget_token(Scanner *scanner, Token token)
+{
+    int idx = ++scanner->ungeted_count;
+    scanner->ungeted_tokens[idx] = token;
+}
+*/
 
 Token read_token(Scanner *scanner, int *err)
 {

@@ -73,7 +73,6 @@ typedef enum {
 	DECIMAL,
 	STRING,
 	DOLLAR,
-
 } Symbol_enum; 
 
 typedef enum {

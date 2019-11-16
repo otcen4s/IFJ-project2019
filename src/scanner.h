@@ -1,6 +1,7 @@
 #ifndef _SCANNER_H
 #define _SCANNER_H
 
+#include "stack.h"
 #include "enums.h"
 #include "error.h"
 #include  "string_lib.h"
@@ -9,7 +10,9 @@
 #include <ctype.h> 
 #include <stdlib.h>
 #include <stdio.h>
-#include "stack.h"
+#include <stdbool.h> 
+
+#define MAX_UNGETED_TOKENS 100
 
 typedef union {
 	tString string;
@@ -30,7 +33,6 @@ typedef struct {
     int is_line_start;
     char curr_char;
     int indent_cnt;
-
 } Scanner;
 
 // functions forward declarations

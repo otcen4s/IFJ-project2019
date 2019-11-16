@@ -38,6 +38,8 @@ bool is_def = false;
 
 int init_parser(Parser* parser)
 {
+    if (!parser) return INTERNAL_ERROR;
+    
     parser->curr_token.type = -1;
 
     if( (parser->scanner = malloc(sizeof(Scanner))) == NULL ||
