@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "string_lib.h"
+#include "function_str.h"
 #include "error.h"
 
 #define SYMTAB_SIZE 20047
@@ -52,6 +53,7 @@ typedef struct tSymbol_item
     Data_type data_type;
     Symbol_value symbol_value;
     Symbol_state symbol_state;
+    tFunc_params function_params;
 }tSymbol_item;
 
 /**

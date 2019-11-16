@@ -149,17 +149,46 @@ int statement(Parser *parser)
     }
 }
 
-/* Rule 17. <params> -> ID <next_params> */
+/** Rule 17. <params> -> ID <next_params> 
+ *  Rule 18. <params> -> eps
+*/
 int params(Parser *parser)
 {
     int err;
     GET_NEXT_TOKEN();
-    /* STATE: DEF ID ( ) */ 
-    if(parser->curr_token.type == TOKEN_RIGHT_BRACKET) return NO_ERROR;
+    
+    if(parser->curr_token.type == TOKEN_RIGHT_BRACKET) return NO_ERROR; /* STATE: DEF ID ( ) */ 
     
     CHECK_TOKEN(TOKEN_IDENTIFIER);
     CHECK_ERROR();
 
-    /* or we are in this STATE: DEF ID ( <params> */
+    /* STATE: DEF ID ( <params> */
+    // insert parameters here
+    err = next_params(parser); // next rule
+    CHECK_ERROR(); // always check the ret value
+}
+
+/** Rule 19. <next_params> -> , ID <next_params> 
+ *  Rule 20. <next_params> -> eps
+*/
+int next_params(Parser *parser)
+{
+    int err;
+    GET_NEXT_TOKEN();
     
+    if(parser->curr_token.type == TOKEN_RIGHT_BRACKET) return NO_ERROR; /* STATE: DEF ID ( <params> ) */
+
+    CHECK_TOKEN(TOKEN_COMMA); // expected ',' after parameter or syntax error
+    CHECK_ERROR();
+
+    /* STATE: DEF ID ( <params> , */
+    GET_NEXT_TOKEN();
+    CHECK_TOKEN(TOKEN_IDENTIFIER);
+    CHECK_ERROR();
+    
+    /* STATE: DEF ID (<params> , <params> ... */
+    // save identifier into buffer
+
+    err = next_params(parser); // recursively go to next rule
+    CHECK_ERROR(); // always check the return value
 }
