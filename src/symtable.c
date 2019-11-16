@@ -97,9 +97,15 @@ tSymbol_item *symtab_lookup(tSymbol *table, const char *key)
  * In this function we are trying to find the right spot for our new symbol in our symtable
  * If we are lucky we return 0 in other way anything else
 */
-int symtab_add(tSymbol *table, const char *key, Symbol_type symbol_type, Data_type data_type, Symbol_value symbol_value, Symbol_state symbol_state)
+tSymbol_item* symtab_add(tSymbol *table, const char *key, int* err)
 {
-    if(table == NULL) {return -1;}
+    *err = NO_ERROR;
+
+    if(table == NULL) 
+    {
+        *err = INTERNAL_ERROR;
+        return NULL;
+    }
 
     unsigned int index = (symtab_hash_function(key) % table->arr_size); 
     struct tSymbol_item *new_symbol = table->item_array[index];
@@ -109,20 +115,20 @@ int symtab_add(tSymbol *table, const char *key, Symbol_type symbol_type, Data_ty
         new_symbol = malloc(sizeof(tSymbol_item));
         new_symbol->key = malloc(sizeof(char) * (strlen(key) + 1));
 
-        if((new_symbol == NULL) || (new_symbol->key == NULL)) {return INTERNAL_ERROR;}
+        if((new_symbol == NULL) || (new_symbol->key == NULL)) 
+        {
+            *err = INTERNAL_ERROR;
+            return NULL;
+        }
 
         // bunch of assignes
         strcpy(new_symbol->key, key);
         new_symbol->next_symbol = NULL;
-        new_symbol->data_type = data_type;
-        new_symbol->symbol_state = symbol_state;
-        new_symbol->symbol_type = symbol_type;
-        new_symbol->symbol_value = symbol_value;
         
         table->size++;
         table->item_array[index] = new_symbol;
         
-        return 0; 
+        return new_symbol; 
     }
 
     /**
@@ -133,21 +139,26 @@ int symtab_add(tSymbol *table, const char *key, Symbol_type symbol_type, Data_ty
     {
         while(new_symbol != NULL) 
         {
-            if(strcmp(key, new_symbol->key) == 0) {return -2;} // same key identifier was used, return error
+            if(strcmp(key, new_symbol->key) == 0) // same key identifier was used, return error 
+            {
+                *err = INTERNAL_ERROR;
+                return NULL;
+            } 
             new_symbol = new_symbol->next_symbol; 
         }
         new_symbol = malloc(sizeof(tSymbol_item));
         new_symbol->key = malloc(sizeof(char) * (strlen(key) + 1));
 
-        if((new_symbol == NULL) || (new_symbol->key == NULL)) {return INTERNAL_ERROR;}
+        if((new_symbol == NULL) || (new_symbol->key == NULL)) 
+        {
+            *err = INTERNAL_ERROR;
+            return NULL;
+        }
 
         // bunch of assignes
         strcpy(new_symbol->key, key);
         new_symbol->next_symbol = NULL;
-        new_symbol->data_type = data_type;
-        new_symbol->symbol_state = symbol_state;
-        new_symbol->symbol_type = symbol_type;
-        new_symbol->symbol_value = symbol_value; 
+
 
         // now we iterate at the end of the linked list and "connect" pointers
         struct tSymbol_item *connect_list = table->item_array[index];
@@ -158,6 +169,6 @@ int symtab_add(tSymbol *table, const char *key, Symbol_type symbol_type, Data_ty
         connect_list->next_symbol = new_symbol;
         table->size++;
 
-        return 0;
+        return new_symbol;
     }
 }
