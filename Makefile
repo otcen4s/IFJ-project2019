@@ -7,7 +7,10 @@ PATHB = bin/
 CC := gcc
 CFLAGS = -Wall -W -std=c99 -I unity/src unity/src/unity.c
 
-test : $(PATHB) $(PATHB)scanner_test $(PATHB)string_lib_test $(PATHB)stack_test $(PATHB)generator_test $(PATHB)parser_test $(PATHB)symtable_test
+SRC = $(wildcard $(PATHT)*.c)
+BIN = $(addprefix $(PATHB), $(basename $(notdir $(SRC))))
+
+test : $(PATHB) $(BIN)
 	./$(PATHB)string_lib_test
 	./$(PATHB)scanner_test
 	./$(PATHB)stack_test
