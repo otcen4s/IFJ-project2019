@@ -33,6 +33,13 @@ typedef enum
     SYMBOL_DEFINED
 } Symbol_state;
 
+typedef enum
+{
+    SYMBOL_GLOBAL,
+    SYMBOL_LOCAL,
+    SYMBOL_BUILT_IN
+}Symbol_validity;
+
 typedef union 
 {
     int int_val;
@@ -53,7 +60,9 @@ typedef struct tSymbol_item
     Data_type data_type;
     Symbol_value symbol_value;
     Symbol_state symbol_state;
-    tFunc_params *function_params;
+    Symbol_validity symbol_validity;
+    //tFunc_params *function_params;
+    tString *params;
 }tSymbol_item;
 
 /**
@@ -74,7 +83,7 @@ void symtab_free(tSymbol *table);
 
 unsigned symtab_hash_function(const char *str);
 
-tSymbol_item *symtab_lookup(tSymbol *t, const char *key);
+tSymbol_item *symtab_lookup(tSymbol *t, const char *key, int* err);
 
 tSymbol_item* symtab_add(tSymbol *t, const char* key, int* err);
 
