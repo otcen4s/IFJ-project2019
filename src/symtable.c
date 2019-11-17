@@ -80,7 +80,7 @@ void symtab_free(tSymbol *table)
 */
 tSymbol_item *symtab_lookup(tSymbol *table, const char *key)
 {
-    if(table == NULL) {return NULL;}
+    if(table == NULL || key == NULL) {return NULL;}
 
     unsigned int index = (symtab_hash_function(key) % table->arr_size); // generate index to access the right tSymbol_item 
     struct tSymbol_item *new_symbol = table->item_array[index];
@@ -114,8 +114,9 @@ tSymbol_item* symtab_add(tSymbol *table, const char *key, int* err)
     {
         new_symbol = malloc(sizeof(tSymbol_item));
         new_symbol->key = malloc(sizeof(char) * (strlen(key) + 1));
-
-        if((new_symbol == NULL) || (new_symbol->key == NULL)) 
+        *err = func_str_init(new_symbol->function_params); // creating space for function parameters array
+        
+        if((new_symbol == NULL) || (new_symbol->key == NULL) || (*err)) 
         {
             *err = INTERNAL_ERROR;
             return NULL;
@@ -124,6 +125,7 @@ tSymbol_item* symtab_add(tSymbol *table, const char *key, int* err)
         // bunch of assignes
         strcpy(new_symbol->key, key);
         new_symbol->next_symbol = NULL;
+
         
         table->size++;
         table->item_array[index] = new_symbol;
@@ -148,8 +150,9 @@ tSymbol_item* symtab_add(tSymbol *table, const char *key, int* err)
         }
         new_symbol = malloc(sizeof(tSymbol_item));
         new_symbol->key = malloc(sizeof(char) * (strlen(key) + 1));
+        *err = func_str_init(new_symbol->function_params); // creating space for function parameters array
 
-        if((new_symbol == NULL) || (new_symbol->key == NULL)) 
+        if((new_symbol == NULL) || (new_symbol->key == NULL) || (*err)) 
         {
             *err = INTERNAL_ERROR;
             return NULL;

@@ -53,7 +53,7 @@ typedef struct tSymbol_item
     Data_type data_type;
     Symbol_value symbol_value;
     Symbol_state symbol_state;
-    tFunc_params function_params;
+    tFunc_params *function_params;
 }tSymbol_item;
 
 /**

@@ -3,17 +3,28 @@
 /************** MACROS **********/
 #define CHECK_ERROR() if(err) return err
 
-#define GET_NEXT_TOKEN() \
-                        do{\
+#define GET_NEXT_TOKEN()                                                            \
+                        do{                                                         \
                             parser->curr_token = read_token(parser->scanner, &err); \
-                            CHECK_ERROR(); \
+                            CHECK_ERROR();                                          \
                         }while(0)
 
-#define CHECK_TOKEN(token) \
-                         do{\
-                            if(parser->curr_token.type != token) err = SYNTAX_ERROR; \                 
-                            else err = NO_ERROR; \
-                         }while(0)
+#define CHECK_TOKEN(token)                                                              \
+                        do{                                                             \
+                            if(parser->curr_token.type != (token)) err = SYNTAX_ERROR;  \
+                            else err = NO_ERROR;                                        \
+                            }while(0)
+
+#define GET_KEY() tString key = parser->curr_token.attribute.string
+
+#define ADD_BUILT_IN_FUNC(id,type)                                                          \
+                                do{                                                         \
+                                    tmp = symtab_add(parser->global_table, (id), &err);     \
+                                    CHECK_ERROR();                                          \
+                                    tmp->data_type = (type);                                \
+                                    tmp->symbol_state = SYMBOL_DEFINED;                     \
+                                    tmp->symbol_type = SYMBOL_FUNC;                         \
+                                }while(0)
 
 /********* PREDECLARATIONS ***********/
 int statement (Parser *parser);
@@ -31,30 +42,37 @@ int counter_var = 1;
 bool is_if = false;
 bool is_while = false;
 bool is_def = false;
-
+size_t nested_cnt = 0;
 
 
 /****************** FUNCTION DEFINITIONS ************************/
 
 int init_parser(Parser* parser)
 {
-    parser->curr_token.type = -1;
+    if(((parser->scanner = malloc(sizeof(Scanner))) == NULL) || (symtab_init(parser->global_table)) || (symtab_init(parser->local_table))) return INTERNAL_ERROR;
 
-    if( (parser->scanner = malloc(sizeof(Scanner))) == NULL ||
-        (parser->global_table = malloc(sizeof(tSymbol))) == NULL ||
-        (parser->local_table = malloc(sizeof(tSymbol))) == NULL
-      )
-    {
-        return INTERNAL_ERROR;
-    }
+    int err;
+    parser->curr_token.type = -1;
+    parser->symbol_data = NULL;
+
+    /* Predefine built-in functions into global table*/
+    tSymbol_item* tmp;
+    ADD_BUILT_IN_FUNC("len",DATA_INT);
+    ADD_BUILT_IN_FUNC("substr",DATA_STRING);
+    ADD_BUILT_IN_FUNC("ord",DATA_INT);
+    ADD_BUILT_IN_FUNC("chr",DATA_STRING);
+    ADD_BUILT_IN_FUNC("inputs",DATA_STRING);
+    ADD_BUILT_IN_FUNC("inputf",DATA_DOUBLE);
+    ADD_BUILT_IN_FUNC("inputi",DATA_INT);
+    
     return NO_ERROR;
 }
 
 void dispose_parser(Parser* parser)
 {
     free(parser->scanner);
-    free(parser->global_table);
-    free(parser->local_table);
+    symtab_free(parser->global_table);
+    symtab_free(parser->local_table);
 }
 
 void generate_variable_key(tString* var)
@@ -107,6 +125,15 @@ int start_compiler(char* src_file_name)
 
 /************************************ RULES ***********************************************/
 
+/** Rule 1. <statement> -> EOF
+ *  Rule 2. <statement> -> EOL <statement>
+ *  Rule 3. <statement> -> DEF ID ( <params> ): EOL INDENT <statement_inside> <end> EOL DEDENT <statement>
+ *  Rule 4. <statement> -> IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE : EOL INDENT <statement_inside> EOL DEDENT <statement>
+ *  Rule 5. <statement> -> WHILE <expression_start>: EOL INDENT <statement_inside> EOL DEDENT <statement> 
+ *  Rule 6. <statement> -> ID = <expression_start> EOL <statement>
+ *  Rule 7. <statement> -> PASS EOL <statement>
+ *  Rule 9. <statement> -> PRINT ( <arg> )
+*/
 int statement(Parser *parser)
 {
     int err;
@@ -129,23 +156,23 @@ int statement(Parser *parser)
         GET_NEXT_TOKEN(); // ID
         /* STATE: DEF ID */
         CHECK_TOKEN(TOKEN_IDENTIFIER); // check if token type is ID
+        CHECK_ERROR(); //always check error 
        
-        tString key = parser->curr_token.attribute.string;
+        GET_KEY(); // Identifier is a special key in global or local symtable
         
-        generate_variable_key(&key); // generate uniq key 
-
-        parser->symbol_data = symtab_add(parser->global_table, key.str, &err);
+        parser->symbol_data = symtab_add(parser->global_table, key.str, &err); // add ID of function into global table
         CHECK_ERROR(); // check for internal error of used function
-        parser->symbol_data->symbol_type = SYMBOL_FUNC;
+        parser->symbol_data->symbol_type = SYMBOL_FUNC; // specifying it's function
+        parser->symbol_data->symbol_state = SYMBOL_DEFINED; // -||- defined
 
-       
-        GET_NEXT_TOKEN(); // (
+        GET_NEXT_TOKEN();
         /* STATE: DEF ID ( */
         CHECK_TOKEN(TOKEN_LEFT_BRACKET); // check if token type is left bracket
         CHECK_ERROR(); // check for error of CHECK_TOKEN()
         
-        /* */
-      //  params(parser);
+        /*Going to use next rule DEF ID ( <params> */
+        err = params(parser);
+        CHECK_ERROR();
     }
 }
 
@@ -157,13 +184,18 @@ int params(Parser *parser)
     int err;
     GET_NEXT_TOKEN();
     
-    if(parser->curr_token.type == TOKEN_RIGHT_BRACKET) return NO_ERROR; /* STATE: DEF ID ( ) */ 
+    if(parser->curr_token.type == TOKEN_RIGHT_BRACKET) return NO_ERROR; /* STATE: DEF ID ( ) (e.g. <params> -> eps)*/ 
     
     CHECK_TOKEN(TOKEN_IDENTIFIER);
     CHECK_ERROR();
 
     /* STATE: DEF ID ( <params> */
-    // insert parameters here
+    GET_KEY(); // get the ID of variable (it's a key in symtable)
+    // insert parameters here into local symtable ... also overwriting parser->symbol_data
+    parser->symbol_data = symtab_add(parser->local_table, key.str, &err);
+    func_str_insert(parser->symbol_data->function_params, &key); //parameter added 
+
+
     err = next_params(parser); // next rule
     CHECK_ERROR(); // always check the ret value
 }
