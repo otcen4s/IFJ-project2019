@@ -20,12 +20,12 @@ void test1(void)
     gen_defvar("dlzka");
 
     Value val1, val2;
-    val1.decimal = 10.19392933912193391;
-    val2.decimal = 2.332193;
+    val1.string = "2";
+    val2.string = "5";
 
-    gen_arit("add", TYPE_FLOAT, "dlzka", val1, val2);
+    gen_arit("add", TYPE_INT, "dlzka", val1, val2, true);
 
-    gen_var("neviem", TYPE_FLOAT, val1);
+    gen_var("neviem", TYPE_FLOAT, val1, true);
 
     gen_print("dlzka");
 

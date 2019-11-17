@@ -5,6 +5,7 @@
 #include <string.h>
 #include "string_lib.h"
 #include <stdio.h>
+#include <stdbool.h> 
 
 typedef union {
     char* string;
@@ -21,12 +22,12 @@ typedef enum
 } Type;
 
 int generator_begin();
-int generator_end();
+void generator_end();
 
 void gen_print(char *string);
-void gen_var(char *var, Type, Value value);
+void gen_var(char *var, Type, Value value, bool isGlobal);
 
-void gen_arit(char *instruct, Type type, char *var, Value symb1, Value symb2);
+void gen_arit(char *instruct, Type type, char *var, Value symb1, Value symb2, bool isGlobal);
 void gen_defvar();
 void generate_code(FILE *destFile);
 
