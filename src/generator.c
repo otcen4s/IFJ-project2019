@@ -71,7 +71,7 @@ void setScope(char *scope, bool isGlobal) {
     }
 }
 
-// add, sub, mul, lt, or, ...
+// add, sub, mul, lt, or, ... every function with 2 symb
 void gen_double_symb(char *instruct, Type type, char *var, Value symb1, Value symb2, bool isGlobal) {
 
     char scope[STRLEN];
@@ -93,6 +93,32 @@ void gen_double_symb(char *instruct, Type type, char *var, Value symb1, Value sy
         }
         
         str_concat(&line, instruct, scope, var, varType, symb1.string, varType, symb2.string, NULL);
+    }
+
+    ADDCODE(line.str);
+}
+
+void gen_single_symb(char *instruct, Type type, char *var, Value symb, bool isGlobal) {
+
+    char scope[STRLEN];
+    setScope(scope, isGlobal);
+
+    if (type == TYPE_FLOAT) {
+        char temp[STRLEN];
+        sprintf(temp, " float@%a", symb.decimal);
+
+        str_concat(&line, instruct, scope, var, temp, NULL);
+    } else {
+        char varType[STRLEN];
+        if (type == TYPE_INT) {
+            strcpy(varType, " int@");
+        } else if (type == TYPE_STRING) {
+            strcpy(varType, " string@");
+        } else if (type == TYPE_BOOL) {
+            strcpy(varType, " bool@");
+        }
+        
+        str_concat(&line, instruct, scope, var, varType, symb.string, NULL);
     }
 
     ADDCODE(line.str);
