@@ -8,9 +8,10 @@ str_append(&code, "\n"); \
 
 tString code;
 tString line;
-tString helper;
 
 int error;
+
+#define STRLEN 128
 
 int generator_begin() {
     if ((error = str_init(&code))) {
@@ -18,10 +19,6 @@ int generator_begin() {
     }
 
     if ((error = str_init(&line))) {
-        return error;
-    }
-
-    if ((error = str_init(&helper))) {
         return error;
     }
 
@@ -41,13 +38,12 @@ void generator_end() {
 
     str_destroy(&code);
     str_destroy(&line);
-    str_destroy(&helper);
 
 }
 
 void gen_var(char *var, Type type, Value value, bool isGlobal) {
-    setScope(isGlobal);
-    char *scope = helper.str;
+    char scope[STRLEN];
+    setScope(scope, isGlobal);
 
     str_concat(&line, "defvar", scope, var, NULL);
     ADDCODE(line.str);
@@ -57,7 +53,7 @@ void gen_var(char *var, Type type, Value value, bool isGlobal) {
     } else if (type == TYPE_INT) {
         str_concat(&line, "move", scope, var, " int@", value.string, NULL);
     } else if (type == TYPE_FLOAT) {
-        char temp[128];
+        char temp[STRLEN];
         sprintf(temp, "%a", value.decimal);
         str_concat(&line, "move", scope, var, " float@", temp, NULL);
     } else {
@@ -67,45 +63,49 @@ void gen_var(char *var, Type type, Value value, bool isGlobal) {
     ADDCODE(line.str);
 }
 
-void setScope(bool isGlobal) {
+void setScope(char *scope, bool isGlobal) {
     if (isGlobal) {
-        str_copy(&helper, " GF@");
+        strcpy(scope, " GF@");
     } else {
-        str_copy(&helper, " LF@");
+        strcpy(scope, " LF@");
     }
 }
 
-// add, sub, mul, div, idiv
-void gen_arit(char *instruct, Type type, char *var, Value symb1, Value symb2, bool isGlobal) {
+// add, sub, mul, lt, or, ...
+void gen_double_symb(char *instruct, Type type, char *var, Value symb1, Value symb2, bool isGlobal) {
 
-    // TODO not the best approach, bad readability
-    setScope(isGlobal);
-    char *scope = helper.str;
+    char scope[STRLEN];
+    setScope(scope, isGlobal);
 
     if (type == TYPE_FLOAT) {
-        char temp[128];
+        char temp[STRLEN];
         sprintf(temp, " float@%a float@%a", symb1.decimal, symb2.decimal);
 
         str_concat(&line, instruct, scope, var, temp, NULL);
     } else {
+        char varType[STRLEN];
         if (type == TYPE_INT) {
-            str_concat(&line, instruct, scope, var, " int@", symb1.string, " int@", symb2.string, NULL);
+            strcpy(varType, " int@");
         } else if (type == TYPE_STRING) {
-            str_concat(&line, instruct, scope, var, " string@", symb1.string, " string@", symb2.string, NULL);
+            strcpy(varType, " string@");
+        } else if (type == TYPE_BOOL) {
+            strcpy(varType, " bool@");
         }
+        
+        str_concat(&line, instruct, scope, var, varType, symb1.string, varType, symb2.string, NULL);
     }
 
     ADDCODE(line.str);
 }
 
 void gen_print(char *printStr) {
-    str_concat(&line, "write gf@", printStr, NULL);
+    str_concat(&line, "write GF@", printStr, NULL);
 
     ADDCODE(line.str);
 }
 
 void gen_defvar(char *var) {
-    str_concat(&line, "defvar gf@", var, NULL);
+    str_concat(&line, "defvar GF@", var, NULL);
 
     ADDCODE(line.str);
 }

@@ -20,12 +20,12 @@ void test1(void)
     gen_defvar("dlzka");
 
     Value val1, val2;
-    val1.string = "2";
-    val2.string = "5";
+    val1.string = "auto";
+    val2.string = "bus";
 
-    gen_arit("add", TYPE_INT, "dlzka", val1, val2, true);
+    gen_double_symb("concat", TYPE_STRING, "dlzka", val1, val2, true);
 
-    gen_var("neviem", TYPE_FLOAT, val1, true);
+    // gen_var("neviem", TYPE_FLOAT, val1, true);
 
     gen_print("dlzka");
 

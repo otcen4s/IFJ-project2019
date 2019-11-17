@@ -27,8 +27,10 @@ void generator_end();
 void gen_print(char *string);
 void gen_var(char *var, Type, Value value, bool isGlobal);
 
-void gen_arit(char *instruct, Type type, char *var, Value symb1, Value symb2, bool isGlobal);
+void gen_double_symb(char *instruct, Type type, char *var, Value symb1, Value symb2, bool isGlobal);
 void gen_defvar();
 void generate_code(FILE *destFile);
+
+void setScope(char *scope, bool isGlobal);
 
 #endif
