@@ -27,6 +27,9 @@ typedef enum{
 
 typedef enum{
 	E_PLUS_E,
+	E_MINUS_E,
+	E_MUL_E,
+	E_DIV_E,
 
 } Rules_enum; 
 

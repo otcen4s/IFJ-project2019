@@ -17,6 +17,7 @@ Symbol crete_symbol(Symbol_enum symbol, Sym_data_type type);
 int init_expr_parser(Expr_parser * expr_parser);
 void dispose_expr_parser(Expr_parser * expr_p);
 int reduce(Expr_parser * expr_parser);
+int get_reduction_rule(Expr_parser* expr_parser);
 
 
 //TODO needs a check
@@ -118,19 +119,74 @@ int  set_symbol_to_curr_token(Token token, Expr_parser* expr_parser)
 }
 
 /**
+ * Checks which rule should be now used for reduction 
+ * only for binary operations
+ * @return number of rule in rules enum
+ **/
+int get_reduction_rule(Expr_parser* expr_parser)
+{
+    int err = NO_ERROR;
+
+    /********* E -> E + E ***************/
+    if( expr_parser->op1.symbol == NON_TERM &&
+        expr_parser->op2.symbol == PLUS &&
+        expr_parser->op3.symbol == NON_TERM)
+    {
+        return E_PLUS_E;
+    }
+
+    /********* E -> E - E ***************/
+    if( expr_parser->op1.symbol == NON_TERM &&
+        expr_parser->op2.symbol == MINUS &&
+        expr_parser->op3.symbol == NON_TERM)
+    {
+        return E_MINUS_E;
+    }
+
+     /********* E -> E * E ***************/
+    if( expr_parser->op1.symbol == NON_TERM &&
+        expr_parser->op2.symbol == MUL &&
+        expr_parser->op3.symbol == NON_TERM)
+    {
+        return E_MUL_E;
+    }
+
+     /********* E -> E / E ***************/
+    if( expr_parser->op1.symbol == NON_TERM &&
+        expr_parser->op2.symbol == DIV &&
+        expr_parser->op3.symbol == NON_TERM)
+    {
+        return E_DIV_E;
+    }
+
+     /********* E -> E == E ***************/
+    if( expr_parser->op1.symbol == NON_TERM &&
+        expr_parser->op2.symbol == EQ &&
+        expr_parser->op3.symbol == NON_TERM)
+    {
+        return E_DIV_E;
+    }
+
+    
+
+    
+
+
+
+}
+
+/**
  * Reduces expression using production rules
  **/
 
 int reduce(Expr_parser * expr_parser)
 { 
-    /* 
-    replacing value on the stack with NON_TERMINAL by rule E-> i 
-    */
-
+    int err= NO_ERROR; 
+    
+    //(1 Operand) E->id
     if(expr_parser->stack_top_sym.symbol == VALUE)
     { 
         //pop replaced symbol from stack 
-        int err;
         Symbol replaced = stack_pop(expr_parser->stack, &err).symbol;
         if(err) return err;
 
@@ -142,10 +198,27 @@ int reduce(Expr_parser * expr_parser)
         // if it is value data type remains the same 
 
         //make it non-terminal
-        replaced.symbol = NON_TERM; 
-
-        stack_push(expr_parser->stack, replaced);        
+        replaced.symbol = NON_TERM;
+        stack_push(expr_parser->stack, replaced); 
+        return NO_ERROR;       
     }
+
+    //binary operators productions (must have 3 operands)
+    
+    expr_parser->op1= stack_pop(expr_parser->stack, &err).symbol;
+    if(err) return INTERNAL_ERROR;
+    if(expr_parser->op1.symbol == DOLLAR) return SYNTAX_ERROR; // wrong operands count
+
+    expr_parser->op2= stack_pop(expr_parser->stack, &err).symbol;
+    if(err) return INTERNAL_ERROR;
+    if(expr_parser->op2.symbol == DOLLAR) return SYNTAX_ERROR; // wrong operands count
+
+
+    expr_parser->op3= stack_pop(expr_parser->stack, &err).symbol;
+    if(err) return INTERNAL_ERROR;
+    if(expr_parser->op3.symbol == DOLLAR) return SYNTAX_ERROR; // wrong operands count
+    
+    return NO_ERROR;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -164,11 +237,8 @@ int expression(Parser* parser)
     
     
     //proceessing whole expression token by token
-    int i=10; // temp for debuging 
-    while(i)
-    {
-        i--; 
-        
+    while(1)
+    {        
         //set current symbol atributes in expr_parser based on currently readed token
         set_symbol_to_curr_token(parser->curr_token, expr_parser);
         DEBUG_PRINT("current readed sym %d \n",expr_parser->curr_sym.symbol);
@@ -204,7 +274,7 @@ int expression(Parser* parser)
 
             //get next token
             int err;
-             parser->curr_token = read_token(parser->scanner, &err);
+            parser->curr_token = read_token(parser->scanner, &err);
             if(err) return err;
         }
 
@@ -224,13 +294,14 @@ int expression(Parser* parser)
         /***************** ACEPT **********************************/
         if(parser_action == A )
         {
-            break;
+            break; 
         }
 
        /***************** ERROR ***********************************/
         if(parser_action == F)
         {
             dispose_expr_parser(expr_parser);
+            DEBUG_PRINT("here we go");
             return SYNTAX_ERROR;
         }
          
