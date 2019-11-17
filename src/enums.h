@@ -25,17 +25,19 @@ typedef enum {
 	KEYWORD_CHR, // return one char string
 
 	//token types until emty line are equivalent to symbol types
-	TOKEN_PLUS = 200,		// +
+	TOKEN_PLUS = 0 ,		// +
 	TOKEN_MINUS,	// -
 	TOKEN_MULTIPLICATION,	// *
 	TOKEN_DIVISION,		// /
-	TOKEN_LESSER_THAN,	// <
 	TOKEN_GREATER_THAN,	// >
+	TOKEN_EQUAL,		// ==
+	TOKEN_NOT_EQUAL,	// !=
 	TOKEN_LESSER_EQUAL, // <=
 	TOKEN_GREATER_EQUAL, // >=
+	TOKEN_LESSER_THAN,	// <
 	TOKEN_LEFT_BRACKET,		// (
 	TOKEN_RIGHT_BRACKET,	// )
-	TOKEN_IDENTIFIER = 200,
+	TOKEN_IDENTIFIER ,
 	TOKEN_INTEGER,
 	TOKEN_DECIMAL,
 	TOKEN_STRING,
@@ -53,26 +55,28 @@ typedef enum {
 	TOKEN_PERCENT,				// %
 	TOKEN_COLON,				// :
 	TOKEN_COMMA,				// ,
-	TOKEN_EQUAL,
 } Token_type;
 
 //enum is eqivalent of token type enum to make conversion from token type to symbol type easier
 typedef enum {
-	PLUS = 200,
+	PLUS ,
 	MINUS,
 	MUL,
 	DIV,
-	LTN,
-	GTH,	
-	LEQ, 
+	GTH,
+	EQ,
+	NEQ,
+	LEQ,
 	GEQ, 
-	LBRACKET,		// (
-	RBRACKET,	// )
-	ID,
-	INTEGER,
-	DECIMAL,
-	STRING,
+	LTN,	
+	LBRACKET,
+	RBRACKET,
+	
+	// from here its diferent  compared to token enum !
+	VALUE,
 	DOLLAR,
+	STOP,
+	NON_TERM,
 } Symbol_enum; 
 
 typedef enum {

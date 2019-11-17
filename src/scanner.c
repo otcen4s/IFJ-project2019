@@ -19,8 +19,6 @@ int init_scanner(Scanner *s, const char* file_name)
     s->state= STATE_START;
     s->curr_char=0;
 
-    //if(!(s->ungeted_stack = stack_create(TOKEN_TYPE)))
-
     //init string buffer
     if(str_init(s->atr_string)) return INTERNAL_ERROR; 
     
@@ -152,6 +150,7 @@ Token read_token(Scanner *scanner, int *err)
                 else if(scanner->curr_char == '+') scanner->state = STATE_PLUS;
                 else if (scanner->curr_char == '*') scanner->state = STATE_MULTIPLICATION;
                 else if (scanner->curr_char == '-') scanner->state = STATE_MINUS;
+                else if (scanner->curr_char == '!') scanner->state = STATE_NOT_EQUAL;
                 else if (scanner->curr_char == ':') scanner->state = STATE_COLON;
                 else if (scanner->curr_char == '[') scanner->state = STATE_LEFT_SQUARE_BRACKET;
                 else if (scanner->curr_char == ']') scanner->state = STATE_RIGHT_SQUARE_BRACKET;
@@ -261,6 +260,19 @@ Token read_token(Scanner *scanner, int *err)
                 ungetc(scanner->curr_char, scanner->src_file);
                 return token;
                 break;
+            
+            case STATE_NOT_EQUAL:
+                if(scanner->curr_char == '=')
+                {
+                    token.type= TOKEN_NOT_EQUAL; 
+                    return token;
+                    break;
+                }
+                else
+                {
+                    scanner->state = STATE_ERROR;
+                }
+                break; 
             
             case STATE_MINUS:
                 token.type= TOKEN_MINUS;

@@ -6,12 +6,15 @@
 #include "stack.h"
 #include "parser.h"
 
+//Symbol struct definition is in stack.h
+
 //operations of shift-reduce parser
 typedef enum{
 	S, //SHIFT
 	R, // REDUCE
 	E, //EQ
-	F // FAILED
+	F, // FAILED
+	A //ACCEPT
 } Expr_parser_actions; 
 
 typedef enum{
@@ -22,10 +25,17 @@ typedef enum{
 	SYM_UNDEF,
 } Sym_data_type;
 
+typedef enum{
+	E_PLUS_E,
+
+} Rules_enum; 
+
 typedef struct
 { 
 	int curr_symbol;
-	t_stack * stack; 
+	t_stack * stack;
+	Symbol stack_top_sym;
+	Symbol curr_sym; 
 	Symbol op1;
 	Symbol op2;
 	Symbol op3;

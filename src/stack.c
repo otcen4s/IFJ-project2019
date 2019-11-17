@@ -11,8 +11,7 @@ t_stack* stack_create  (const unsigned cap, const enum stack_type type)
     stack->type = type;
 
    if((stack->items = malloc(sizeof(t_stack_item)*cap)) == NULL) return NULL; 
-
-
+   
     return stack;
 }
 
@@ -69,7 +68,10 @@ int stack_push ( t_stack* s, ...)
    {
        return STACK_ERROR;
    }
+   
     }
+
+    Symbol sym; 
 
     //take value from argument based on type of stack
     switch ( s->type ) {
@@ -78,12 +80,15 @@ int stack_push ( t_stack* s, ...)
             break;
 
         case SYMBOL_TYPE:
+            sym = (Symbol) va_arg(ap,Symbol);
             s->items[++s->top].symbol = (Symbol) va_arg(ap,Symbol);
+            break; 
+
         default:
-            break;
+            return INTERNAL_ERROR;
     }
     
-    return 0;
+    return NO_ERROR;
 }
 
 void stack_free(t_stack* s)
@@ -91,3 +96,34 @@ void stack_free(t_stack* s)
     free(s->items);
     free(s);
 }
+
+
+////////////////// FUNCTIONS USED FOR EXPR PARSING ////////////////////
+
+Symbol stack_topmost_terminal(t_stack * s, int *err)
+{
+    *err = NO_ERROR; 
+
+    if ( stack_empty(s))
+    {
+        *err= INTERNAL_ERROR;
+        return;
+    } 
+
+    for (int i=s->top; i>= 0; i--)
+    {
+        if(s->items[i].symbol.symbol < NON_TERM) return s->items[i].symbol;
+    }
+
+    //terminal not found means internall error
+    err = INTERNAL_ERROR; 
+    return; 
+}
+
+/*
+
+int stack_insert_after_topmost_term(t_stack* stack, Symbol sym)
+{
+    
+}
+*/
