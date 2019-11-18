@@ -17,6 +17,7 @@ test : $(PATHB) $(BIN)
 	./$(PATHB)generator_test
 	./$(PATHB)parser_test
 	./$(PATHB)symtable_test
+	./$(PATHB)expr_test
 	### MEZIKOD ###
 	cat program.code
 	### OUTPUT ###

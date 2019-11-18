@@ -17,6 +17,11 @@ typedef enum{
 	A //ACCEPT
 } Expr_parser_actions; 
 
+typedef enum{
+	VAL,
+	SYM_UNDEF,
+} Sym_data_type;
+
 
 typedef enum{
 	E_PLUS_E,

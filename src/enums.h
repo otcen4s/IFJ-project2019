@@ -72,7 +72,7 @@ typedef enum {
 	LBRACKET,
 	RBRACKET,
 	
-	// from here its diferent  compared to token enum !
+	// fromhere is the diference  compared to token enum !
 	VALUE,
 	DOLLAR,
 	STOP,
