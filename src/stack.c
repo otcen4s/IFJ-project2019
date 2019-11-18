@@ -71,8 +71,6 @@ int stack_push ( t_stack* s, ...)
    
     }
 
-    Symbol sym; 
-
     //take value from argument based on type of stack
     switch ( s->type ) {
         case INTEGER_TYPE:
@@ -80,7 +78,6 @@ int stack_push ( t_stack* s, ...)
             break;
 
         case SYMBOL_TYPE:
-            sym = (Symbol) va_arg(ap,Symbol);
             s->items[++s->top].symbol = (Symbol) va_arg(ap,Symbol);
             break; 
 
@@ -102,12 +99,15 @@ void stack_free(t_stack* s)
 
 Symbol stack_topmost_terminal(t_stack * s, int *err)
 {
-    *err = NO_ERROR; 
+    *err = NO_ERROR;
+    Symbol emty_sym;
+    emty_sym.data_type=STACK_ERROR; 
+    //emty_sym.symbol= STACK_ERROR; 
 
     if ( stack_empty(s))
     {
         *err= INTERNAL_ERROR;
-        return;
+        return emty_sym;
     } 
 
     for (int i=s->top; i>= 0; i--)
@@ -116,8 +116,8 @@ Symbol stack_topmost_terminal(t_stack * s, int *err)
     }
 
     //terminal not found means internall error
-    err = INTERNAL_ERROR; 
-    return; 
+    *err = INTERNAL_ERROR; 
+    return emty_sym; 
 }
 
 /*

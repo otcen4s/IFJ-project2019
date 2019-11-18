@@ -12,7 +12,7 @@
 
 //forward declarations
 int token_enum_to_symb_enum (Token_type token);
-set_symbol_to_curr_token(Token token, Expr_parser* expr_parser);
+int set_symbol_to_curr_token(Token token, Expr_parser* expr_parser);
 Symbol crete_symbol(Symbol_enum symbol, Sym_data_type type);
 int init_expr_parser(Expr_parser * expr_parser);
 void dispose_expr_parser(Expr_parser * expr_p);
@@ -116,6 +116,7 @@ int  set_symbol_to_curr_token(Token token, Expr_parser* expr_parser)
 {
     expr_parser->curr_sym.symbol = token_enum_to_symb_enum(token.type);
     expr_parser->curr_sym.data_type =token.type;
+    return NO_ERROR; 
 }
 
 /**
@@ -125,7 +126,7 @@ int  set_symbol_to_curr_token(Token token, Expr_parser* expr_parser)
  **/
 int get_reduction_rule(Expr_parser* expr_parser)
 {
-    int err = NO_ERROR;
+    //int err = NO_ERROR;
 
     /********* E -> E + E ***************/
     if( expr_parser->op1.symbol == NON_TERM &&
@@ -174,13 +175,7 @@ int get_reduction_rule(Expr_parser* expr_parser)
     {
         return E_EQ_E;
     }
-
     
-
-    
-
-
-
 }
 
 /**
@@ -320,3 +315,4 @@ int expression(Parser* parser)
 }
 
 
+         /********* E -> E == E ***************/
