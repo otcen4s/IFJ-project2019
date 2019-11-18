@@ -1,4 +1,3 @@
-#include "stack.h"
 #include "scanner.h"
 
 int init_scanner(Scanner *s, const char* file_name)
@@ -18,7 +17,7 @@ int init_scanner(Scanner *s, const char* file_name)
     if (s->src_file == NULL || s->atr_string == NULL) return INTERNAL_ERROR;
     s->is_line_start= 1;
     s->state= STATE_START;
-    s->curr_char=0; 
+    s->curr_char=0;
 
     //init string buffer
     if(str_init(s->atr_string)) return INTERNAL_ERROR; 
@@ -101,6 +100,13 @@ Token create_string_token(tString string) {
     
     return token;
 }
+/*
+int unget_token(Scanner *scanner, Token token)
+{
+    int idx = ++scanner->ungeted_count;
+    scanner->ungeted_tokens[idx] = token;
+}
+*/
 
 Token read_token(Scanner *scanner, int *err)
 {
@@ -144,6 +150,7 @@ Token read_token(Scanner *scanner, int *err)
                 else if(scanner->curr_char == '+') scanner->state = STATE_PLUS;
                 else if (scanner->curr_char == '*') scanner->state = STATE_MULTIPLICATION;
                 else if (scanner->curr_char == '-') scanner->state = STATE_MINUS;
+                else if (scanner->curr_char == '!') scanner->state = STATE_NOT_EQUAL;
                 else if (scanner->curr_char == ':') scanner->state = STATE_COLON;
                 else if (scanner->curr_char == '[') scanner->state = STATE_LEFT_SQUARE_BRACKET;
                 else if (scanner->curr_char == ']') scanner->state = STATE_RIGHT_SQUARE_BRACKET;
@@ -253,6 +260,19 @@ Token read_token(Scanner *scanner, int *err)
                 ungetc(scanner->curr_char, scanner->src_file);
                 return token;
                 break;
+            
+            case STATE_NOT_EQUAL:
+                if(scanner->curr_char == '=')
+                {
+                    token.type= TOKEN_NOT_EQUAL; 
+                    return token;
+                    break;
+                }
+                else
+                {
+                    scanner->state = STATE_ERROR;
+                }
+                break; 
             
             case STATE_MINUS:
                 token.type= TOKEN_MINUS;

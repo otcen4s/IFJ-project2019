@@ -42,6 +42,10 @@ $(PATHB)parser_test : $(PATHT)parser_test.c $(PATHS)parser.c $(PATHS)string_lib.
 
 $(PATHB)symtable_test : $(PATHT)symtable_test.c $(PATHS)symtable.c $(PATHS)string_lib.c
 	$(CC) $(CFLAGS) $^ -o $@
+	
+$(PATHB)expr_test : $(PATHT)expr_test.c $(PATHS)parser.c $(PATHS)string_lib.c $(PATHS)scanner.c $(PATHS)symtable.c $(PATHS)stack.c $(PATHS)expr_parser.c  $(PATHS)scanner.c 
+	$(CC) $(CFLAGS) $^ -o $@
+
 
 clean :
 	rm -r $(PATHB)

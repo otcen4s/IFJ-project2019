@@ -1,12 +1,19 @@
 #include "parser.h"
 
 /************** MACROS **********/
+#define CHECK_ERROR() if(err) return err
+
 #define GET_NEXT_TOKEN() \
                         do{\
-                            parser->curr_token = read_token(parser->scanner, err); \
-                            if(err) return err; \
+                            parser->curr_token = read_token(parser->scanner, &err); \
+                            CHECK_ERROR(); \
                         }while(0)
-                        
+
+#define CHECK_TOKEN(token) \
+                         do{\
+                            if(parser->curr_token.type != token) err = SYNTAX_ERROR; \                 
+                            else err = NO_ERROR; \
+                         }while(0)
 
 /********* PREDECLARATIONS ***********/
 int statement (Parser *parser);
@@ -31,6 +38,8 @@ bool is_def = false;
 
 int init_parser(Parser* parser)
 {
+    if (!parser) return INTERNAL_ERROR;
+    
     parser->curr_token.type = -1;
 
     if( (parser->scanner = malloc(sizeof(Scanner))) == NULL ||
@@ -50,7 +59,7 @@ void dispose_parser(Parser* parser)
     free(parser->local_table);
 }
 
-void generate_variable_key(tString *var)
+void generate_variable_key(tString* var)
 {
     //clear
     var->str[0] = '\0';
@@ -102,19 +111,57 @@ int start_compiler(char* src_file_name)
 
 int statement(Parser *parser)
 {
-    int *err;
+    int err;
     GET_NEXT_TOKEN();
 
     /* Rule 1. <statement> -> EOL */
     if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
     
     /* Rule 2. <statement> -> EOF <statement>*/
-    if(parser->curr_token.type == TOKEN_EOL) statement(parser);
+    if(parser->curr_token.type == TOKEN_EOL) 
+    {
+        err = statement(parser);
+        CHECK_ERROR();
+    }
 
     /* Rule 3. <statement> -> DEF ID ( <params> ): EOL INDENT <statement_inside> <end> EOL DEDENT <statement> */
     if(parser->curr_token.type == KEYWORD_DEF)
     {
         
+        GET_NEXT_TOKEN(); // ID
+        /* STATE: DEF ID */
+        CHECK_TOKEN(TOKEN_IDENTIFIER); // check if token type is ID
+       
+        tString key = parser->curr_token.attribute.string;
+        
+        generate_variable_key(&key); // generate uniq key 
+
+        parser->symbol_data = symtab_add(parser->global_table, key.str, &err);
+        CHECK_ERROR(); // check for internal error of used function
+        parser->symbol_data->symbol_type = SYMBOL_FUNC;
+
+       
+        GET_NEXT_TOKEN(); // (
+        /* STATE: DEF ID ( */
+        CHECK_TOKEN(TOKEN_LEFT_BRACKET); // check if token type is left bracket
+        CHECK_ERROR(); // check for error of CHECK_TOKEN()
+        
+        /* */
+      //  params(parser);
     }
 }
 
+/* Rule 17. <params> -> ID <next_params> */
+int params(Parser *parser)
+{
+    int err;
+    GET_NEXT_TOKEN();
+    /* STATE: DEF ID ( ) */ 
+    if(parser->curr_token.type == TOKEN_RIGHT_BRACKET) return NO_ERROR;
+    
+    CHECK_TOKEN(TOKEN_IDENTIFIER);
+    CHECK_ERROR();
+
+    /* or we are in this STATE: DEF ID ( <params> */
+    
+}

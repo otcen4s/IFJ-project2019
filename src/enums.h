@@ -24,21 +24,27 @@ typedef enum {
 	KEYWORD_ORD, // return ordinal value 
 	KEYWORD_CHR, // return one char string
 
+	//token types until emty line are equivalent to symbol types
+	TOKEN_PLUS = 0 ,		// +
+	TOKEN_MINUS,	// -
+	TOKEN_MULTIPLICATION,	// *
+	TOKEN_DIVISION,		// /
+	TOKEN_GREATER_THAN,	// >
+	TOKEN_EQUAL,		// ==
+	TOKEN_NOT_EQUAL,	// !=
+	TOKEN_LESSER_EQUAL, // <=
+	TOKEN_GREATER_EQUAL, // >=
+	TOKEN_LESSER_THAN,	// <
+	TOKEN_LEFT_BRACKET,		// (
+	TOKEN_RIGHT_BRACKET,	// )
+	TOKEN_IDENTIFIER ,
+	TOKEN_INTEGER,
+	TOKEN_DECIMAL,
+	TOKEN_STRING,
 
-	TOKEN_IDENTIFIER = 200, 
 	TOKEN_EOL,		// end of line
 	TOKEN_EOF,		// end of file
 	TOKEN_ASSIGN,		// =
-	TOKEN_GREATER_THAN,	// >
-	TOKEN_LESSER_THAN,	// <
-	TOKEN_GREATER_EQUAL,
-	TOKEN_LESSER_EQUAL,
-	TOKEN_PLUS,		// +
-	TOKEN_MINUS,		// -
-	TOKEN_DIVISION,		// /
-	TOKEN_MULTIPLICATION,	// *
-	TOKEN_LEFT_BRACKET,		// (
-	TOKEN_RIGHT_BRACKET,	// )
 	TOKEN_LEFT_SQUARE_BRACKET, // [
 	TOKEN_RIGHT_SQUARE_BRACKET, // ]
 	TOKEN_SINGLE_QUOTE,			// '
@@ -49,11 +55,29 @@ typedef enum {
 	TOKEN_PERCENT,				// %
 	TOKEN_COLON,				// :
 	TOKEN_COMMA,				// ,
-	TOKEN_INTEGER,
-	TOKEN_DECIMAL,
-	TOKEN_STRING,
-	TOKEN_EQUAL,
 } Token_type;
+
+//enum is eqivalent of token type enum to make conversion from token type to symbol type easier
+typedef enum {
+	PLUS ,
+	MINUS,
+	MUL,
+	DIV,
+	GTH,
+	EQ,
+	NEQ,
+	LEQ,
+	GEQ, 
+	LTN,	
+	LBRACKET,
+	RBRACKET,
+	
+	// from here its diferent  compared to token enum !
+	VALUE,
+	DOLLAR,
+	STOP,
+	NON_TERM,
+} Symbol_enum; 
 
 typedef enum {
 	STATE_START =300,
@@ -100,5 +124,7 @@ typedef enum {
 	STATE_NUMBER_EXPONENT_VALID,
 	STATE_EXPONENT_SIGN, 
 } Scanner_state;
+
+
 
 #endif
