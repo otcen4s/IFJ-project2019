@@ -17,19 +17,13 @@ typedef enum{
 	A //ACCEPT
 } Expr_parser_actions; 
 
-typedef enum{
-	SYM_ID,
-	SYM_INT,
-	SYM_DECIM,
-	SYM_STRING,
-	SYM_UNDEF,
-} Sym_data_type;
 
 typedef enum{
 	E_PLUS_E,
 	E_MINUS_E,
 	E_MUL_E,
 	E_DIV_E,
+	E_EQ_E, 
 
 } Rules_enum; 
 

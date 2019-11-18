@@ -164,7 +164,15 @@ int get_reduction_rule(Expr_parser* expr_parser)
         expr_parser->op2.symbol == EQ &&
         expr_parser->op3.symbol == NON_TERM)
     {
-        return E_DIV_E;
+        return E_EQ_E;
+    }
+
+    /********* E -> E == E ***************/
+    if( expr_parser->op1.symbol == NON_TERM &&
+        expr_parser->op2.symbol == EQ &&
+        expr_parser->op3.symbol == NON_TERM)
+    {
+        return E_EQ_E;
     }
 
     
