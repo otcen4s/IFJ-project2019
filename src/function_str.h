@@ -12,13 +12,13 @@
 
 typedef struct
 {
-    tString* param_array;
+    tString* param;
     unsigned len;
     unsigned array_size;
-}tFunc_str;
+}tFunc_params;
 
-int func_str_init(tFunc_str* param_array[]);
-int func_str_clear(tString* param_array[]);
-int func_str_insert(tString* param_array[]);
-
+int func_str_init(tFunc_params* p);
+void func_str_clear(tFunc_params* p);
+int func_str_insert(tFunc_params* p, tString* param);
+int func_str_realloc(tFunc_params* p);
 #endif

@@ -6,6 +6,7 @@
 #include "symtable.h"
 #include "string_lib.h"
 #include "error.h"
+#include "function_str.h"
 #include <stdlib.h>
 
 typedef struct

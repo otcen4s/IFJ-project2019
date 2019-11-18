@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "string_lib.h"
+#include "function_str.h"
 #include "error.h"
 
 #define SYMTAB_SIZE 20047
@@ -32,12 +33,20 @@ typedef enum
     SYMBOL_DEFINED
 } Symbol_state;
 
-typedef union 
+/*typedef enum
+{
+    SYMBOL_GLOBAL,
+    SYMBOL_LOCAL,
+    SYMBOL_BUILT_IN
+}Symbol_validity;
+*/
+
+/*typedef union 
 {
     int int_val;
     double double_val;
     tString string_val;
-} Symbol_value;
+} Symbol_value;*/
 
 /**
  * This table is the inner one that stores all the data
@@ -50,8 +59,11 @@ typedef struct tSymbol_item
     struct tSymbol_item *next_symbol; // pointer to next table in case of linked list 
     Symbol_type symbol_type;
     Data_type data_type;
-    Symbol_value symbol_value;
     Symbol_state symbol_state;
+    //Symbol_value symbol_value;
+    //Symbol_validity symbol_validity;
+    //tFunc_params *function_params;
+    tString *params;
 }tSymbol_item;
 
 /**
@@ -72,7 +84,7 @@ void symtab_free(tSymbol *table);
 
 unsigned symtab_hash_function(const char *str);
 
-tSymbol_item *symtab_lookup(tSymbol *t, const char *key);
+tSymbol_item *symtab_lookup(tSymbol *t, const char *key, int* err);
 
 tSymbol_item* symtab_add(tSymbol *t, const char* key, int* err);
 
