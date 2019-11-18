@@ -18,7 +18,8 @@ typedef enum
     TYPE_FLOAT,
     TYPE_STRING,
     TYPE_BOOL,
-    TYPE_NIL
+    TYPE_NIL,
+    TYPE_VARIABLE
 } Type;
 
 int generator_begin();

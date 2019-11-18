@@ -23,7 +23,7 @@ void test1(void)
     val1.string = "auto";
     val2.decimal = 10.0;
 
-    gen_single_symb("STRLEN", TYPE_STRING, "dlzka", val1, true);
+    gen_single_symb("adds", TYPE_STRING, "dlzka", val1, true);
 
     // gen_var("neviem", TYPE_FLOAT, val1, true);
 

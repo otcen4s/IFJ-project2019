@@ -24,9 +24,9 @@ int generator_begin() {
 
     // generate header
     ADDCODE(".IFJcode19");
-    ADDCODE("label $main");
-    ADDCODE("createframe");
-    ADDCODE("pushframe");
+    // ADDCODE("label $main");
+    // ADDCODE("createframe");
+    // ADDCODE("pushframe");
 
     return NO_ERROR;
 }
@@ -123,6 +123,12 @@ void gen_single_symb(char *instruct, Type type, char *var, Value symb, bool isGl
 
     ADDCODE(line.str);
 }
+
+// gen_pushs(symb, Type type, Symb symb) {
+
+//     ADDCODE(strcat("PUSHS ", ));
+
+// }
 
 void gen_print(char *printStr) {
     str_concat(&line, "write GF@", printStr, NULL);
