@@ -68,7 +68,7 @@ typedef enum {
 	NEQ,
 	LEQ,
 	GEQ, 
-	LTN,	
+	LTH,	
 	LBRACKET,
 	RBRACKET,
 	

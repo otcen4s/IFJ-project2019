@@ -28,7 +28,13 @@ typedef enum{
 	E_MINUS_E,
 	E_MUL_E,
 	E_DIV_E,
-	E_EQ_E, 
+	E_EQ_E,
+	E_GTH_E,
+	E_LTH_E,
+	E_GEQ_E,
+	E_LEQ_E,
+	PAR_E_PAR,
+	NO_RULE,
 
 } Rules_enum; 
 

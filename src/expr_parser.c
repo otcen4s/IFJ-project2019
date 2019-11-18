@@ -3,14 +3,14 @@
 
 /******MACROS********/
 
-// debug prints
+//debug print 
 #ifdef DEBUG
 #define DEBUG_PRINT printf
 #else
 #define DEBUG_PRINT(...)
 #endif
 
-//forward declarations
+/******FORWARD DECLARATIONS********/
 int token_enum_to_symb_enum (Token_type token);
 int set_symbol_to_curr_token(Token token, Expr_parser* expr_parser);
 Symbol crete_symbol(Symbol_enum symbol, Sym_data_type type);
@@ -19,8 +19,11 @@ void dispose_expr_parser(Expr_parser * expr_p);
 int reduce(Expr_parser * expr_parser);
 int get_reduction_rule(Expr_parser* expr_parser);
 
-
-//TODO needs a check
+/**
+ * Parsing table to determine next parser action based on
+ * currently readed symbol and topmost terminal symbol
+ * on symbol stack
+ **/
 int parsing_table[14][14] =
 {
 //	  +  -  *  /  > ==  != <= >= <  (  )  o  $ 
@@ -34,7 +37,7 @@ int parsing_table[14][14] =
     { S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // <=
     { S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // >=
     { S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // <
-	{ S, S, S, S, S, S, S, S, S, S, S, E, S, F }, // (
+	{ S, S, S, S, S, S, S, S, S, S, S, S, S, F }, // (
 	{ R, R, R, R, R, R, R, R, R, R, F, R, F, R }, // )
 	{ R, R, R, R, R, R, R, R, R, R, F, R, F, R }, // o operand 
 	{ S, S, S, S, S, S, S, S, S, S, S, F, S, A }, // $
@@ -45,7 +48,6 @@ int parsing_table[14][14] =
     Helper function for creation of symbol struct
     @return return Symbol struct filled with given data
 **/
-
 Symbol create_symbol(Symbol_enum symbol, Sym_data_type type)
 {
     Symbol sym;
@@ -59,30 +61,28 @@ Symbol create_symbol(Symbol_enum symbol, Sym_data_type type)
     Converts token type enum to symbol enum
     token type and symbol enums are equivalent until TOKEN_STRING,
     any other token is considered to be end of expr- $ 
-
     @return symbol enum quivalent to given token type
 **/
-
 int token_enum_to_symb_enum (Token_type token_enum)
 {
     if(token_enum == TOKEN_STRING || token_enum == TOKEN_INTEGER 
        || token_enum == TOKEN_DECIMAL|| token_enum == TOKEN_IDENTIFIER
       ) return VALUE;
 
-    if(token_enum > TOKEN_STRING) return DOLLAR; // not part of expression
+    //indicates end of expression
+    if(token_enum > TOKEN_STRING) return DOLLAR;
 
-    else return token_enum; // here the enums matches each other, nothing to convert
+    // here the enums matches each other, nothing to convert
+    else return token_enum;
 }
 
 /**
     *Init of expr parser struct
     *@return NO_ERROR in case of success else err code 
 **/
-
 int init_expr_parser(Expr_parser * expr_parser)
 { 
     if (!expr_parser) return INTERNAL_ERROR;
-
     expr_parser->stack = stack_create(100,SYMBOL_TYPE);
     if (!expr_parser->stack) return INTERNAL_ERROR; 
     
@@ -90,11 +90,7 @@ int init_expr_parser(Expr_parser * expr_parser)
     if(stack_push(expr_parser->stack, create_symbol(DOLLAR, SYM_UNDEF)))
     {
         return INTERNAL_ERROR;
-    }
-    
-    
-
-    expr_parser->valid_sym_cnt= 0;
+    } 
 
     return NO_ERROR;
 }
@@ -102,7 +98,6 @@ int init_expr_parser(Expr_parser * expr_parser)
 /**
  * Destructor for exrpr parser 
  **/
-
 void dispose_expr_parser(Expr_parser * expr_p)
 { 
     stack_free(expr_p->stack);
@@ -168,46 +163,73 @@ int get_reduction_rule(Expr_parser* expr_parser)
         return E_EQ_E;
     }
 
-    /********* E -> E == E ***************/
+    /********* E -> E > E ***************/
     if( expr_parser->op1.symbol == NON_TERM &&
-        expr_parser->op2.symbol == EQ &&
+        expr_parser->op2.symbol == GTH &&
         expr_parser->op3.symbol == NON_TERM)
     {
-        return E_EQ_E;
+        return E_GTH_E;
     }
-    
+
+    /********* E -> E < E ***************/
+    if( expr_parser->op1.symbol == NON_TERM &&
+        expr_parser->op2.symbol == LTH &&
+        expr_parser->op3.symbol == NON_TERM)
+    {
+        return E_LTH_E;
+    }
+
+    /********* E -> E >= E ***************/
+    if( expr_parser->op1.symbol == NON_TERM &&
+        expr_parser->op2.symbol == GEQ &&
+        expr_parser->op3.symbol == NON_TERM)
+    {
+        return E_GEQ_E;
+    }
+
+    /********* E -> E <= E ***************/
+    if( expr_parser->op1.symbol == NON_TERM &&
+        expr_parser->op2.symbol == LEQ &&
+        expr_parser->op3.symbol == NON_TERM)
+    {
+        return E_LEQ_E;
+    }
+
+    /********* E-> (E) ***************/
+    if( expr_parser->op1.symbol == RBRACKET &&
+        expr_parser->op2.symbol == NON_TERM &&
+        expr_parser->op3.symbol == LBRACKET)
+    {
+        return PAR_E_PAR;
+    }
+
+    //cant be reduced by any of the above rules
+    return NO_RULE;    
 }
 
 /**
  * Reduces expression using production rules
  **/
-
 int reduce(Expr_parser * expr_parser)
-{ 
-    int err= NO_ERROR; 
-    
-    //(1 Operand) E->id
+{
+    int err = NO_ERROR;
+
+    /********* SINGLE OPERAND E-> id ******************/
     if(expr_parser->stack_top_sym.symbol == VALUE)
     { 
         //pop replaced symbol from stack 
         Symbol replaced = stack_pop(expr_parser->stack, &err).symbol;
         if(err) return err;
 
-        // now set data type
-        if(replaced.data_type == TOKEN_IDENTIFIER)
-        {
-            //get data type from symtable here 
-        }
-        // if it is value data type remains the same 
-
-        //make it non-terminal
+        //change it to non terminal
         replaced.symbol = NON_TERM;
         stack_push(expr_parser->stack, replaced); 
         return NO_ERROR;       
     }
 
-    //binary operators productions (must have 3 operands)
+    /********* BINARY OPERATORS RULES E-> E OPERATOR E  ******************/
     
+    //get operands from sym stack and check if there are correct op count 
     expr_parser->op1= stack_pop(expr_parser->stack, &err).symbol;
     if(err) return INTERNAL_ERROR;
     if(expr_parser->op1.symbol == DOLLAR) return SYNTAX_ERROR; // wrong operands count
@@ -220,8 +242,87 @@ int reduce(Expr_parser * expr_parser)
     expr_parser->op3= stack_pop(expr_parser->stack, &err).symbol;
     if(err) return INTERNAL_ERROR;
     if(expr_parser->op3.symbol == DOLLAR) return SYNTAX_ERROR; // wrong operands count
+
+    //determine which rule it is depending on operands
+    int rule_to_apply = get_reduction_rule(expr_parser);
+    if(rule_to_apply == NO_RULE) return SYNTAX_ERROR; //doesnt match any rule
+
+    ///////////apply rule////////////
+    switch (rule_to_apply)
+    {
+    case E_PLUS_E:
+       //TODO generate stack add here
+       //add new not terminal which represents result to the sym stack
+       err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
+       if(err) return INTERNAL_ERROR;
+       break;
+
+    case E_MINUS_E:
+       //TODO generate stack sub here
+       //add new not terminal which represents result to the sym stack
+       err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
+       if(err) return INTERNAL_ERROR;
+       break;
+
+    case E_MUL_E:
+       //TODO generate stack mul here
+       //add new not terminal which represents result to the sym stack
+       err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
+       if(err) return INTERNAL_ERROR;
+       break;
     
-    return NO_ERROR;
+    case E_DIV_E:
+       //TODO generate stack mul here
+       //add new not terminal which represents result to the sym stack
+       err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
+       if(err) return INTERNAL_ERROR;
+       break;
+    
+    case E_EQ_E:
+       //TODO generate stack compare here 
+       //add new not terminal which represents result to the sym stack
+       err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
+       if(err) return INTERNAL_ERROR;
+       break;
+    
+    case E_GTH_E:
+       //TODO generate stack compare here 
+       //add new not terminal which represents result to the sym stack
+       err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
+       if(err) return INTERNAL_ERROR;
+       break;
+    
+    case E_LTH_E:
+       //TODO generate stack compare here 
+       //add new not terminal which represents result to the sym stack
+       err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
+       if(err) return INTERNAL_ERROR;
+       break;
+    
+    case E_LEQ_E:
+       //TODO generate stack compare here 
+       //add new not terminal which represents result to the sym stack
+       err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
+       if(err) return INTERNAL_ERROR;
+       break;
+    
+    case E_GEQ_E:
+       //TODO generate stack compare here 
+       //add new not terminal which represents result to the sym stack
+       err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
+       if(err) return INTERNAL_ERROR;
+       break;
+
+    case PAR_E_PAR:
+       //TODO generate stack compare here 
+       //add new not terminal which represents result to the sym stack
+       err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
+       if(err) return INTERNAL_ERROR;
+       break;
+
+    default:
+        return INTERNAL_ERROR; 
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -294,25 +395,21 @@ int expression(Parser* parser)
             DEBUG_PRINT("non term je  %d, %d \n" ,top.data_type, top.symbol ); 
         }
 
-        /***************** ACEPT **********************************/
-        if(parser_action == A )
-        {
-            break; 
-        }
-
        /***************** ERROR ***********************************/
         if(parser_action == F)
         {
             dispose_expr_parser(expr_parser);
-            DEBUG_PRINT("here we go");
+            DEBUG_PRINT("INVALID EXPRESSION \n");
             return SYNTAX_ERROR;
         }
-         
+
+        /***************** ACCEPT **********************************/
+        if(parser_action == A )
+        {
+            DEBUG_PRINT("VALID EXPRESSION \n");
+            //TODO move result into rhs here
+            return NO_ERROR; 
+        }     
     }
-
-   return NO_ERROR; 
-
 }
 
-
-         /********* E -> E == E ***************/
