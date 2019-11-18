@@ -3,8 +3,8 @@
 
 #include "stack.h"
 #include "enums.h"
+#include "typedefs.h"
 #include "error.h"
-#include  "string_lib.h"
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h> 
@@ -13,17 +13,6 @@
 #include <stdbool.h> 
 
 #define MAX_UNGETED_TOKENS 100
-
-typedef union {
-	tString string;
-	int integer;
-	double decimal;
-} Token_attribute;
-
-typedef struct {
-	Token_type type;
-	Token_attribute attribute;
-} Token;
 
 typedef struct {
     FILE *src_file;

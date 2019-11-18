@@ -1,5 +1,18 @@
+#include "enums.h"
+#include  "string_lib.h"
 
+typedef union {
+	tString string;
+	int integer;
+	double decimal;
+} Token_attribute;
 
+typedef struct {
+	Token_type type;
+	Token_attribute attribute;
+} Token;
+
+// TODO maybe delete below
 typedef union {
     char* string;
 	double decimal;

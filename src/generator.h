@@ -4,23 +4,9 @@
 #include "error.h"
 #include <string.h>
 #include "string_lib.h"
+#include "typedefs.h"
 #include <stdio.h>
-#include <stdbool.h> 
-
-typedef union {
-    char* string;
-	double decimal;
-} Value;
-
-typedef enum 
-{
-    TYPE_INT,
-    TYPE_FLOAT,
-    TYPE_STRING,
-    TYPE_BOOL,
-    TYPE_NIL,
-    TYPE_VARIABLE
-} Type;
+#include <stdbool.h>
 
 int generator_begin();
 void generator_end();
