@@ -186,7 +186,7 @@ void setScope(char *scope, bool isGlobal) {
 //     ADDCODE(line.str);
 // }
 
-void gen_pushs(Token token) {
+void gen_pushs(Token token, bool isGlobal) {
 
     char temp[STRLEN];
 
@@ -194,8 +194,11 @@ void gen_pushs(Token token) {
         sprintf(temp, "PUSHS int@%d", token.attribute.integer);
     } else if (token.type == TOKEN_DECIMAL) {
         sprintf(temp, "PUSHS float@%a", token.attribute.decimal);
-    } else {
+    } else if (token.type == TOKEN_STRING) {
         sprintf(temp, "PUSHS string@%s", token.attribute.string.str);
+    } else if (token.type == TOKEN_IDENTIFIER) {
+        str_concat(&line, "PUSHS ", (isGlobal) ? "GF@" : "LF@", token.attribute.string.str, NULL);
+        strcpy(temp, line.str);
     }
 
     ADDCODE(temp);

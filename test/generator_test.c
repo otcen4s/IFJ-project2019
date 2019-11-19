@@ -18,15 +18,15 @@ void test1(void)
     TEST_ASSERT_EQUAL_INT32(NO_ERROR, generator_begin());
 
     Token token;
-    token.type = TOKEN_STRING;
+    token.type = TOKEN_IDENTIFIER;
     str_init(&(token.attribute.string));
-    str_copy(&(token.attribute.string), "Vysledok je ");
+    str_copy(&(token.attribute.string), "dlzka");
 
     Token token2;
     token2.type = TOKEN_INTEGER;
     token2.attribute.integer = 10;
 
-    gen_print(2, token, token2);
+    gen_pushs(token, true);
 
     generate_code(sourceCode);
 }
