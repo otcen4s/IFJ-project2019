@@ -134,7 +134,7 @@ Token read_token(Scanner *scanner, int *err)
                 {
                     if(scanner->curr_char == '\n')
                     {
-                        scanner->state == STATE_START;
+                        scanner->state = STATE_START;
                     }
                     else
                     {
@@ -571,21 +571,32 @@ Token read_token(Scanner *scanner, int *err)
 
 
             case STATE_DOCSTRING_VALID:
-                if(scanner->curr_char == '"') scanner->state = STATE_DOCSTRING_EXIT_1;
+                if(scanner->curr_char == '\\')
+                {
+                    scanner->state = STATE_DOCSTRING_ESCAPE_SEQ;
+                }
+                else if(scanner->curr_char == '"') scanner->state = STATE_DOCSTRING_EXIT_1;
                 else if (scanner->curr_char < 32) //invalid character
                 {
                     scanner->state = STATE_ERROR;
                 }         
-                else if(str_insert_char(scanner->atr_string,scanner->curr_char))
-                {
-                    *err= INTERNAL_ERROR;
-                    return empty_token;
-                }                    
+                else
+                { 
+                    if(str_insert_char(scanner->atr_string,scanner->curr_char))
+                    {
+                        *err= INTERNAL_ERROR;
+                        return empty_token;
+                    }
+                }                   
             break;
 
 
             case STATE_DOCSTRING_EXIT_1:
-                if(scanner->curr_char == '"') 
+                if(scanner->curr_char == '\\')
+                {
+                    scanner->state = STATE_DOCSTRING_ESCAPE_SEQ;
+                }
+                else if(scanner->curr_char == '"') 
                 {
                     scanner->state = STATE_DOCSTRING_EXIT_2; // "" readed
                 }
@@ -603,7 +614,11 @@ Token read_token(Scanner *scanner, int *err)
             break;          
 
             case STATE_DOCSTRING_EXIT_2:
-                if(scanner->curr_char == '"') 
+                if(scanner->curr_char == '\\')
+                {
+                    scanner->state = STATE_DOCSTRING_ESCAPE_SEQ;
+                }
+                else if(scanner->curr_char == '"') 
                 {
                     //docstring was propperly exited
                     token = create_string_token(*(scanner->atr_string));
@@ -622,6 +637,30 @@ Token read_token(Scanner *scanner, int *err)
                     }
                 }
             break;
+
+            case STATE_DOCSTRING_ESCAPE_SEQ:
+                //only supported escape sequence is \"
+                if(scanner->curr_char == '"')
+                {
+                     if(str_insert_char(scanner->atr_string,scanner->curr_char))
+                     {
+                        *err= INTERNAL_ERROR;
+                        return empty_token;
+                     }
+                     scanner->state = STATE_DOCSTRING_VALID;
+                }
+                else
+                {
+                    //not an escape sequence, insert normally as 2 chars
+                    if(str_insert_char(scanner->atr_string,'\\')||
+                       str_insert_char(scanner->atr_string,scanner->curr_char))
+                    {
+                    *err= INTERNAL_ERROR;
+                    return empty_token;
+                    }
+                    scanner->state = STATE_DOCSTRING_VALID;                    
+                }                
+                break;
     
             case STATE_ID:   
                 if(isalnum(scanner->curr_char) || scanner->curr_char == '_')
@@ -770,9 +809,8 @@ Token read_token(Scanner *scanner, int *err)
                     }
                     else return token;
                 }
-                break;       
-     
-     
+                break;  
+        
         }    
     }
 }
