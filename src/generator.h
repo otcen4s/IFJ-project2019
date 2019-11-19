@@ -19,6 +19,10 @@ void gen_single_symb(char *instruct, Type type, char *var, Value symb, bool isGl
 void gen_defvar();
 void generate_code(FILE *destFile);
 
+void gen_pushs(Token token);
+void gen_pops(char *var);
+void gen_adds();
+
 void setScope(char *scope, bool isGlobal);
 
 #endif

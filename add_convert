@@ -1,0 +1,66 @@
+.IFJcode19
+
+DEFVAR GF@$op1
+DEFVAR GF@$op2
+DEFVAR GF@$opType1
+DEFVAR GF@$opType2
+DEFVAR GF@$temp
+
+JUMP $$main
+
+LABEL $adds
+
+POPS GF@$op1
+TYPE GF@$opType1 GF@$op1
+
+POPS GF@$op2
+TYPE GF@$opType2 GF@$op2
+
+JUMPIFEQ $isInt GF@$opType1 string@int
+JUMPIFEQ $isFloat GF@$opType1 string@float
+JUMPIFEQ $isString GF@$opType1 string@string
+EXIT int@4
+
+LABEL $isIntFloat
+INT2FLOAT GF@$op1 GF@$op1
+JUMP $genAdd
+
+LABEL $isFloatInt
+INT2FLOAT GF@$op2 GF@$op2
+JUMP $genAdd
+
+LABEL $isInt
+JUMPIFEQ $genAdd GF@$opType1 GF@$opType2
+JUMPIFEQ $isIntFloat GF@$opType2 string@float
+EXIT int@4
+
+LABEL $isFloat
+JUMPIFEQ $genAdd GF@$opType1 GF@$opType2
+JUMPIFEQ $isFloatInt GF@$opType2 string@int
+EXIT int@4
+
+LABEL $isString
+JUMPIFEQ $genConcat GF@$opType1 GF@$opType2
+EXIT int@4
+
+LABEL $genAdd
+PUSHS GF@$op1
+PUSHS GF@$op2
+ADDS
+RETURN
+
+LABEL $genConcat
+CONCAT GF@$temp GF@$op2 GF@$op1
+PUSHS GF@$temp
+RETURN
+
+LABEL $$main
+
+PUSHS string@cau
+PUSHS string@ko
+
+CALL $adds
+
+DEFVAR GF@test
+POPS GF@test
+WRITE GF@test
