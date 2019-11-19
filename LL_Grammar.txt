@@ -6,7 +6,7 @@
 6. <statement> -> ID = <expression_start> <end> <statement>
 7. <statement> -> PASS <end> <statement>
 8. <statement> -> PRINT ( <arg> ) <end> <statement>
-9. <statement> -> <value> <end> <statement> // TODO nezahrna to ID, vstavane funkcie (tie sa musia priradit)
+9. <statement> -> <value> <end> <statement> // TODO nezahrna to ID
 9. <statement_inside> -> IF <expression>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> EOL DEDENT <statement> // tazko sa robia tieto statement_inside z dovodu ze mozu byt zanorene a v tom pripade by nefungovli korektne... bude potrebne v kode pocitat zanorenia 
 10. <statement_inside> -> WHILE <expression_start>: EOL INDENT <statement_inside> EOL DEDENT <statement>
 11. <statement_inside> -> ID = <expression_start> EOL <statement_inside>

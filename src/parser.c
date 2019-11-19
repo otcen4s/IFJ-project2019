@@ -33,6 +33,13 @@
                                     tmp->symbol_type = SYMBOL_FUNC;                         \
                                 }while(0)
 
+#define GET_CHECK_TOKEN(token)                          \
+                            do{                         \
+                                GET_NEXT_TOKEN();       \
+                                CHECK_TOKEN((token));   \
+                                CHECK_ERROR();          \
+                            }while(0)
+
 /********* PREDECLARATIONS ***********/
 int statement (Parser *parser);
 int statement_inside (Parser *parser);
@@ -45,9 +52,9 @@ int arg (Parser *parser);
 
 /********* GLOBAL VARIABELS ***********/
 int counter_var = 1;
-bool is_if = false;
-bool is_while = false;
-bool is_def = false;
+bool is_in_if = false;
+bool is_in_while = false;
+bool is_in_def = false;
 unsigned nested_cnt = 0;
 
 
@@ -59,7 +66,10 @@ int init_parser(Parser* parser)
 
     int err;
     parser->curr_token.type = -1;
-    parser->symbol_data = NULL;
+    parser->symbol_data_local = NULL;
+    parser->symbol_data_global = NULL;
+    //parser->symbol_data_global->params_count_defined = 0;
+    //parser->symbol_data_global->params_count_used = 0;
 
     /* Predefine built-in functions into global table*/
     ADD_BUILT_IN_FUNC("print",DATA_NONE);
@@ -144,6 +154,7 @@ int start_compiler(char* src_file_name)
 */
 int statement(Parser *parser)
 {
+    is_in_def = is_in_if = is_in_while = false;
     int err;
     GET_NEXT_TOKEN();
 
@@ -160,56 +171,53 @@ int statement(Parser *parser)
     /* Rule 3. <statement> -> DEF ID ( <params> ): EOL INDENT <statement_inside> <end> DEDENT <statement> */
     if(parser->curr_token.type == KEYWORD_DEF)
     {
-        is_def = true; // we are in the definition of function
-
-        GET_NEXT_TOKEN(); // ID
+        is_in_def = true; // we are in the definition of function
+        bool used_function = false; // help variable for detection of used function before definition
+        
         /* STATE: DEF ID */
-        CHECK_TOKEN(TOKEN_IDENTIFIER); // check if token type is ID
-        CHECK_ERROR(); //always check error 
+        GET_CHECK_TOKEN(TOKEN_IDENTIFIER);
        
         GET_KEY(); // Identifier is a special key in global or local symtable
 
-        parser->symbol_data = symtab_lookup(parser->global_table, key.str, &err);
+        parser->symbol_data_global = symtab_lookup(parser->global_table, key.str, &err);
         CHECK_ERROR();
 
-        if((parser->symbol_data == NULL) || (parser->symbol_data->symbol_type != SYMBOL_FUNC)) // no same identifier is in global table or if so, it was not a function ID
+        if((parser->symbol_data_global != NULL)                     && 
+        (parser->symbol_data_global->symbol_type == SYMBOL_FUNC)    && 
+        (parser->symbol_data_global->symbol_state == SYMBOL_USED))
         {
-            parser->symbol_data = symtab_add(parser->global_table, key.str, &err); // add ID of function into global table
-            CHECK_ERROR(); // check for internal error of used function
-            parser->symbol_data->symbol_type = SYMBOL_FUNC; // specifying it's function
-            parser->symbol_data->symbol_state = SYMBOL_DEFINED; // -||- defined
+            used_function = true;
         }
-    
+        
+        parser->symbol_data_global = symtab_add(parser->global_table, key.str, &err); // add ID of function into global table
+        CHECK_ERROR(); // check for internal error of used function
+        parser->symbol_data_global->symbol_type = SYMBOL_FUNC; // specifying it's function
+        parser->symbol_data_global->symbol_state = SYMBOL_DEFINED; // -||- defined
+        parser->symbol_data_global->params_count_defined = 0;
 
-        GET_NEXT_TOKEN();
         /* STATE: DEF ID ( */
-        CHECK_TOKEN(TOKEN_LEFT_BRACKET); // check if token type is left bracket
-        CHECK_ERROR(); // check for error of CHECK_TOKEN()
+        GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET); // check if token type is left bracket
+       
         
         /*Going to use next rule DEF ID ( <params> */
         err = params(parser);
         CHECK_ERROR();
-        
-        if(parser->symbol_data->symbol_state == SYMBOL_USED) // function with this ID was somewhere else used but not defined, we must check the count of parameters
+        if(used_function) // expands to if our function was firstly used and then defined
         {
-            parser->params_count_used = parser->symbol_data->params_count;
-            if(parser->params_count_used != parser->params_count_defined) return PARAM_COUNT_ERROR;
+            if(parser->symbol_data_global->params_count_defined != parser->symbol_data_global->params_count_used)
+            {
+                return PARAM_COUNT_ERROR;
+            }
         }
 
         /* If everything went well we are in this state -> STATE: DEF ID ( <params> ): */
-        GET_NEXT_TOKEN(); 
-        CHECK_TOKEN(TOKEN_COLON); // expected ':'
-        CHECK_ERROR();
-
+        GET_CHECK_TOKEN(TOKEN_COLON); // expected ':'
+        
         /* Expected state -> STATE: DEF ID ( <params> ): EOL */
-        GET_NEXT_TOKEN();
-        CHECK_TOKEN(TOKEN_EOL); // expected end of line (EOL)
-        CHECK_ERROR();
+        GET_CHECK_TOKEN(TOKEN_EOL);  // expected end of line (EOL)
 
         /* Expected state -> STATE: DEF ID ( <params> ): EOL INDENT */
-        GET_NEXT_TOKEN();
-        CHECK_TOKEN(TOKEN_INDENT); // python indentation expected
-        CHECK_ERROR();
+        GET_CHECK_TOKEN(TOKEN_INDENT); // python indentation expected
 
         /* Expected state -> STATE: DEF ID ( <params> ): EOL INDENT <statement_inside> */
         err = statement_inside(parser);
@@ -217,6 +225,7 @@ int statement(Parser *parser)
 
         /* Expected state -> STATE: DEF ID ( <params> ): EOL INDENT <statement_inside> <end> */
         GET_NEXT_TOKEN();
+
         /* Rule <end> is implemented simply as an if condition which makes it easier */
         /* In this state two tokens are valid -> EOF/EOL others cause syntax_error */
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
@@ -224,64 +233,49 @@ int statement(Parser *parser)
         else return SYNTAX_ERROR;
 
         /* Expected state -> STATE: DEF ID ( <params> ): EOL INDENT <statement_inside> <end> DEDENT */
-        GET_NEXT_TOKEN();
-        CHECK_TOKEN(TOKEN_DEDENT); // python dedentation expected
-        CHECK_ERROR();
+        GET_CHECK_TOKEN(TOKEN_DEDENT); // python dedentation expected
     }
 
     /* Rule 4. <statement> -> IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE : EOL INDENT <statement_inside> <end> DEDENT <statement> */
     if(parser->curr_token.type == KEYWORD_IF)
     {
-        is_if = true;
+        is_in_if = true;
+        STORE_NEXT_TOKEN();
+        GET_NEXT_TOKEN();
         // expression_parser function call
 
         /* STATE: IF <expression_start>: */
-        GET_NEXT_TOKEN();
-        CHECK_TOKEN(TOKEN_COLON); // expected ':'
+        CHECK_TOKEN(TOKEN_COLON);
         CHECK_ERROR();
-
+        //GET_CHECK_TOKEN(TOKEN_COLON); // expected ':'
+        
         /* STATE: IF <expression_start>: EOL */
-        GET_NEXT_TOKEN();
-        CHECK_TOKEN(TOKEN_EOL); // expected end of line(EOL)
-        CHECK_ERROR();
-
+        GET_CHECK_TOKEN(TOKEN_EOL); // expected end of line(EOL)
+    
         /* STATE: IF <expression_start>: EOL INDENT */
-        GET_NEXT_TOKEN();
-        CHECK_TOKEN(TOKEN_INDENT); // python dedentation expected
-        CHECK_ERROR();
-
+        GET_CHECK_TOKEN(TOKEN_INDENT); // python dedentation expected
+        
         err = statement_inside(parser);
         CHECK_ERROR();
 
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL */
-        GET_NEXT_TOKEN();
-        CHECK_TOKEN(TOKEN_EOL); // expected end of line(EOL)
-        CHECK_ERROR();
+        GET_CHECK_TOKEN(TOKEN_EOL); // expected end of line(EOL)
 
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT */
-        GET_NEXT_TOKEN();
-        CHECK_TOKEN(TOKEN_DEDENT); 
-        CHECK_ERROR();
+        GET_CHECK_TOKEN(TOKEN_DEDENT); 
 
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE */
-        GET_NEXT_TOKEN();
-        CHECK_TOKEN(KEYWORD_ELSE); // else statement always have tp be after if 
-        CHECK_ERROR();
-
+        GET_CHECK_TOKEN(KEYWORD_ELSE); // else statement always have tp be after if 
+        
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: */
-        GET_NEXT_TOKEN();
-        CHECK_TOKEN(TOKEN_COLON); // expected ':'
-        CHECK_ERROR();
+        GET_CHECK_TOKEN(TOKEN_COLON); // expected ':'
+        
 
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL */
-        GET_NEXT_TOKEN();
-        CHECK_TOKEN(TOKEN_EOL); // expected end of line(EOL)
-        CHECK_ERROR();
+        GET_CHECK_TOKEN(TOKEN_EOL); // expected end of line(EOL)
 
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT */
-        GET_NEXT_TOKEN();
-        CHECK_TOKEN(TOKEN_INDENT); 
-        CHECK_ERROR();
+        GET_CHECK_TOKEN(TOKEN_INDENT); 
 
          /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> */
         err = statement_inside(parser);
@@ -294,31 +288,26 @@ int statement(Parser *parser)
         else return SYNTAX_ERROR;
 
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> DEDENT */
-        GET_NEXT_TOKEN();
-        CHECK_TOKEN(TOKEN_DEDENT); 
-        CHECK_ERROR();
+        GET_CHECK_TOKEN(TOKEN_DEDENT); 
     }
 
     /* Rule 5. <statement> -> WHILE <expression_start>: EOL INDENT <statement_inside> <end> DEDENT <statement> */
     if(parser->curr_token.type == KEYWORD_WHILE)
     {
-        is_while = true;
+        is_in_while = true;
         // expression_parser function call
-        
+        STORE_NEXT_TOKEN();
+        GET_NEXT_TOKEN();
         /* STATE: WHILE <expression_start>: */
-        GET_NEXT_TOKEN();
-        CHECK_TOKEN(TOKEN_COLON); // expected ':'
+        CHECK_TOKEN(TOKEN_COLON);
         CHECK_ERROR();
-
+        //GET_CHECK_TOKEN(TOKEN_COLON); // expected ':'
+        
         /* STATE: WHILE <expression_start>: EOL */
-        GET_NEXT_TOKEN();
-        CHECK_TOKEN(TOKEN_EOL); // expected end of line(EOL)
-        CHECK_ERROR();
+        GET_CHECK_TOKEN(TOKEN_EOL); // expected end of line(EOL)
 
         /* STATE: WHILE <expression_start>: EOL INDENT */
-        GET_NEXT_TOKEN();
-        CHECK_TOKEN(TOKEN_INDENT); // python dedentation expected
-        CHECK_ERROR();
+        GET_CHECK_TOKEN(TOKEN_INDENT); // python dedentation expected
 
         err = statement_inside(parser);
         CHECK_ERROR();
@@ -330,9 +319,7 @@ int statement(Parser *parser)
         else return SYNTAX_ERROR;
 
          /* STATE: WHILE <expression_start>: EOL INDENT <statement_inside> <end>  DEDENT */
-        GET_NEXT_TOKEN();
-        CHECK_TOKEN(TOKEN_DEDENT); 
-        CHECK_ERROR();
+        GET_CHECK_TOKEN(TOKEN_DEDENT); 
     }
 
     /* Rule 6. <statement> -> ID = <expression_start> <end> <statement> */
@@ -340,23 +327,21 @@ int statement(Parser *parser)
     {
         GET_KEY(); // Identifier is a special key in global or local symtable
 
-        parser->symbol_data = symtab_lookup(parser->global_table, key.str, &err);
+        parser->symbol_data_global = symtab_lookup(parser->global_table, key.str, &err);
         CHECK_ERROR();
         
-        if(parser->symbol_data == NULL)
+        if(parser->symbol_data_global == NULL)
         {
-            parser->symbol_data = symtab_add(parser->global_table, key.str, &err); // add ID of variable into global table
+            parser->symbol_data_global = symtab_add(parser->global_table, key.str, &err); // add ID of variable into global table
             CHECK_ERROR(); // check for internal error of used function
-            parser->symbol_data->symbol_type = SYMBOL_VAR; // specifying for variable
-            parser->symbol_data->symbol_type = SYMBOL_DEFINED; 
+            parser->symbol_data_global->symbol_type = SYMBOL_VAR; // specifying for variable
+            parser->symbol_data_global->symbol_type = SYMBOL_DEFINED; 
         }
-        parser->left_side = parser->symbol_data; // this is for expression parser the left side ID to store value next
+        parser->left_side = parser->symbol_data_global; // this is for expression parser the left side ID to store value next
         
         
         /* STATE: ID = */
-        GET_NEXT_TOKEN();
-        CHECK_TOKEN(TOKEN_ASSIGN); 
-        CHECK_ERROR();
+        GET_CHECK_TOKEN(TOKEN_ASSIGN); 
 
         err = expression_start(parser);
         CHECK_ERROR();
@@ -382,9 +367,7 @@ int statement(Parser *parser)
     if(parser->curr_token.type == KEYWORD_PRINT)
     {
         /* STATE: PRINT ( */
-        GET_NEXT_TOKEN();
-        CHECK_TOKEN(TOKEN_LEFT_BRACKET); 
-        CHECK_ERROR();
+        GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET); 
 
         /* STATE: PRINT ( <arg> */
         err = arg(parser);
@@ -419,14 +402,15 @@ int params(Parser *parser)
     CHECK_TOKEN(TOKEN_IDENTIFIER);
     CHECK_ERROR();
 
-    /* STATE: DEF ID ( <params> */
+    /* STATE: DEF ID ( ID */
     GET_KEY(); // get the ID of variable (it's a key in symtable)
 
-    parser->symbol_data = symtab_add(parser->local_table, key.str, &err); // insert parameters here into local symtable ... also overwriting parser->symbol_data
+    parser->symbol_data_local = symtab_add(parser->local_table, key.str, &err); // insert parameters here into local symtable ... also overwriting parser->symbol_data
     CHECK_ERROR();
-    parser->symbol_data->params = &key; //parameter added
-    parser->symbol_data->symbol_type = SYMBOL_PARAM;
-    parser->params_count_defined++;
+    //parser->symbol_data->params = &key; //parameter added
+    parser->symbol_data_local->symbol_type = SYMBOL_PARAM;
+    parser->symbol_data_local->symbol_state = SYMBOL_DEFINED;
+    parser->symbol_data_global->params_count_defined++;
     
     err = next_params(parser); // next rule
     CHECK_ERROR(); // always check the ret value
@@ -451,25 +435,23 @@ int next_params(Parser *parser)
     CHECK_ERROR();
 
     /* STATE: DEF ID ( <params> , */
-    GET_NEXT_TOKEN();
-    CHECK_TOKEN(TOKEN_IDENTIFIER);
-    CHECK_ERROR();
+    GET_CHECK_TOKEN(TOKEN_IDENTIFIER);
     
     /* STATE: DEF ID (<params> , <params> ... */
     GET_KEY(); // get the ID of variable (it's a key in symtable)
 
-    parser->symbol_data = symtab_lookup(parser->local_table, key.str, &err);
-    CHECK_ERROR();
-    if((parser->symbol_data != NULL) && (parser->symbol_data->symbol_type == SYMBOL_PARAM)) // parameter with same ID was found in our local table which indicates syntax error
+    parser->symbol_data_local = symtab_lookup(parser->local_table, key.str, &err);
+    CHECK_ERROR(); //internal error
+    if((parser->symbol_data_local != NULL) && (parser->symbol_data_local->symbol_type == SYMBOL_PARAM)) // parameter with same ID was found in our local table which indicates syntax error
     {
         return SYNTAX_ERROR; // this causes error -> def foo(a,a): ...
     }
 
-    parser->symbol_data = symtab_add(parser->local_table, key.str, &err); // insert parameters into local symtable ... also overwriting parser->symbol_data
-    CHECK_ERROR();
-    parser->symbol_data->params = &key; //parameter added
-    parser->symbol_data->symbol_type = SYMBOL_PARAM; // symbol type set as parameter
-    parser->params_count_defined++;
+    parser->symbol_data_local = symtab_add(parser->local_table, key.str, &err); // insert parameters into local symtable ... also overwriting parser->symbol_data
+    CHECK_ERROR(); //internal error
+    //parser->symbol_data->params = &key; //parameter added
+    parser->symbol_data_local->symbol_type = SYMBOL_PARAM; // symbol type set as parameter
+    parser->symbol_data_global->params_count_defined++;
 
     err = next_params(parser); // recursively go to next rule
     CHECK_ERROR(); // always check the return value
@@ -484,7 +466,7 @@ int statement_inside(Parser *parser)
 
 
 /**
- * Rule 21. <expression_start> -> value <expression_next>
+ * Rule 21. <expression_start> -> <value> <expression_next>
  * Rule 22. <expression_next> -> eps (e.g. 'EOL')
  * Rule 23. <expression_next> -> OPERATOR <expression_start> 
  * Rule 24. <value> -> ID
@@ -505,60 +487,73 @@ int expression_start(Parser *parser)
 {
     int err;
 
-    /* STATE: ID = <expression_start> */
+    /* STATE: ID = (( ID */
     STORE_NEXT_TOKEN(); // same as GET_NEXT_TOKEN() but this stores token for later use
 
     switch(parser->previous_token.type)
     {
         /* STATE: ID = ID */
-        case TOKEN_IDENTIFIER:  
-            /* STATE: ID = ID EOL */
-            /* or STATE: ID = ID OPERATOR */
+        case TOKEN_IDENTIFIER:
+            GET_KEY();  
             GET_NEXT_TOKEN();
-            if((parser->curr_token.type == TOKEN_EOL) ||
-              ((parser->curr_token.type >= TOKEN_PLUS) && (parser->curr_token.type <= TOKEN_LESSER_THAN))) // indicates it's an operator                
-            {
-                // TODO call expression_parser
-            }
-
             /* STATE: ID = ID ( */
-            if(parser->curr_token.type == TOKEN_LEFT_BRACKET) // indicates it's an function call (not built_in function)
+            if(parser->curr_token.type != TOKEN_LEFT_BRACKET) // indicates it's an function call (not built_in function)
             {
+                parser->symbol_data_global = symtab_lookup(parser->global_table, key.str, &err);
+                CHECK_ERROR();
+                if((parser->symbol_data_global->symbol_state != SYMBOL_DEFINED) && (parser->symbol_data_global != NULL));
+                {
+                    return UNDEFINE_REDEFINE_ERROR;
+                }
                 err = arg(parser);
                 CHECK_ERROR();
             }
-                
-        /* STATE: ID = INT */
-        case TOKEN_INTEGER:
-            /* STATE: ID = INT EOL */
-            /* or STATE: ID = INT OPERATOR */
-            GET_NEXT_TOKEN();
-            if((parser->curr_token.type == TOKEN_EOL) ||
-              ((parser->curr_token.type >= TOKEN_PLUS) && (parser->curr_token.type <= TOKEN_LESSER_THAN))) // indicates it's an operator                
+            else
             {
-                // TODO call expression_parser
+                // call expr_parser 
             }
-
-        case TOKEN_DECIMAL:
-            /* STATE: ID = INT EOL */
-            /* or STATE: ID = INT OPERATOR */
-            GET_NEXT_TOKEN();
-            if((parser->curr_token.type == TOKEN_EOL) ||
-              ((parser->curr_token.type >= TOKEN_PLUS) && (parser->curr_token.type <= TOKEN_LESSER_THAN))) // indicates it's an operator                
-            {
-                // TODO call expression_parser
-            }
+            
             break;
+
 
         case TOKEN_STRING:
         case KEYWORD_NONE:
-        case KEYWORD_INPUTS:
+        case TOKEN_DECIMAL: 
+        case TOKEN_INTEGER:
+            GET_NEXT_TOKEN();
+            // call expression_parser
+            break;
+
         case KEYWORD_INPUTI:
         case KEYWORD_INPUTF:
+        case KEYWORD_INPUTS:
+            GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);
+
+            GET_CHECK_TOKEN(TOKEN_RIGHT_BRACKET);
+
+            GET_CHECK_TOKEN(TOKEN_EOL);
+
+            //call code_generator
+
+            
+            break;
+
         case KEYWORD_LEN:
+            GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);  
+
         case KEYWORD_SUBSTR:
+            GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);
+
         case KEYWORD_ORD:
+            GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);
+
         case KEYWORD_CHR:
+            GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);
+            
+            break;
+        default:
+            GET_NEXT_TOKEN();
+            //call expr_parser
             break;
     }
 

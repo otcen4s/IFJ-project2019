@@ -60,11 +60,12 @@ typedef struct tSymbol_item
     Symbol_type symbol_type;
     Data_type data_type;
     Symbol_state symbol_state;
-    int params_count;
+    int params_count_defined;
+    int params_count_used;
     //Symbol_value symbol_value;
     //Symbol_validity symbol_validity;
     //tFunc_params *function_params;
-    tString *params;
+    
 }tSymbol_item;
 
 /**

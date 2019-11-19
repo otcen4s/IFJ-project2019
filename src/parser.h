@@ -8,6 +8,7 @@
 #include "error.h"
 #include "function_str.h"
 #include <stdlib.h>
+#include <stdbool.h>
 
 typedef struct
 {
@@ -16,10 +17,10 @@ typedef struct
     Token previous_token; // this is for expression parser
     tSymbol* global_table;
     tSymbol* local_table;
-    tSymbol_item* symbol_data;
+    tSymbol_item* symbol_data_global;
+    tSymbol_item* symbol_data_local; 
     tSymbol_item* left_side; // for storing current left hand side identifier 
-    int params_count_used;
-    int params_count_defined;
+    //int params_count_defined;
 } Parser;
 
 int start_compiler(char* src_file_name);
