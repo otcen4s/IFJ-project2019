@@ -247,10 +247,49 @@ void gen_idivs() {
     ADDCODE("IDIVS");
 }
 
-void gen_print(char *printStr) {
-    str_concat(&line, "write GF@", printStr, NULL);
+void gen_print(unsigned n, Token token, ...) {
+
+    va_list ap;
+    char temp[STRLEN];
+
+    va_start(ap, token);
+
+    str_copy(&line, "WRITE string@");
+
+    for (unsigned i = 0; i < n; i++) {
+        if (token.type == TOKEN_INTEGER) {
+            sprintf(temp, "%d", token.attribute.integer);
+        } else if (token.type ==  TOKEN_DECIMAL) {
+            sprintf(temp, "%a", token.attribute.decimal);
+        } else if (token.type == KEYWORD_NONE) {
+            strcpy(temp, "None");
+        } else {
+            // KEYWORD_STRING
+            strcpy(temp, "");
+            int outJ = 0;
+            for (int j = 0; j < strlen(token.attribute.string.str); j++) {
+                if (token.attribute.string.str[j] == ' ') {
+                    temp[outJ++] = '\\';
+                    temp[outJ++] = '0';
+                    temp[outJ++] = '3';
+                    temp[outJ++] = '2';
+                } else {
+                    temp[outJ++] = token.attribute.string.str[j];
+                }
+            }
+        }
+
+        str_append(&line, temp);
+        token = va_arg(ap, Token);
+    }
+
+    va_end(ap);
+
+    // add new line at the end
+    str_append(&line, "\\010");
 
     ADDCODE(line.str);
+
 }
 
 void gen_defvar(char *var) {

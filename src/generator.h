@@ -11,7 +11,7 @@
 int generator_begin();
 void generator_end();
 
-void gen_print(char *string);
+void gen_print(unsigned n, Token token, ...);
 void gen_var(char *var, Type, Value value, bool isGlobal);
 
 void gen_double_symb(char *instruct, Type type, char *var, Value symb1, Value symb2, bool isGlobal);
