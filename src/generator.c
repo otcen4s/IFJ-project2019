@@ -257,17 +257,19 @@ void gen_print(unsigned n, bool isGlobal, Token token, ...) {
 
     va_start(ap, token);
 
-    str_copy(&line, "WRITE string@");
-
     for (unsigned i = 0; i < n; i++) {
+        str_copy(&line, "WRITE string@");
+
         if (token.type == TOKEN_INTEGER) {
             sprintf(temp, "%d", token.attribute.integer);
+            str_append(&line, temp);
         } else if (token.type ==  TOKEN_DECIMAL) {
             sprintf(temp, "%a", token.attribute.decimal);
+            str_append(&line, temp);
         } else if (token.type == KEYWORD_NONE) {
             strcpy(temp, "None");
+            str_append(&line, temp);
         } else if (token.type == TOKEN_STRING) {
-            // KEYWORD_STRING
             strcpy(temp, "");
             int outJ = 0;
             for (int j = 0; j < strlen(token.attribute.string.str); j++) {
@@ -280,22 +282,20 @@ void gen_print(unsigned n, bool isGlobal, Token token, ...) {
                     temp[outJ++] = token.attribute.string.str[j];
                 }
             }
+
+            str_append(&line, temp);
         } else if (token.type == TOKEN_IDENTIFIER) {
-            str_concat(&line, (isGlobal) ? "GF@" : "LF@", token.attribute.string.str, NULL);
-            strcpy(temp, line.str);
+            str_concat(&line, "WRITE ", (isGlobal) ? "GF@" : "LF@", token.attribute.string.str, NULL);
         }
 
-        // str_append(&line, temp);
-        ADDCODE(temp);
+        ADDCODE(line.str);
         token = va_arg(ap, Token);
     }
 
     va_end(ap);
 
     // add new line at the end
-    str_append(&line, "\\010");
-
-    ADDCODE(line.str);
+    ADDCODE("WRITE string@\\010");
 
 }
 

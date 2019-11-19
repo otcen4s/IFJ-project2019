@@ -24,9 +24,9 @@ void test1(void)
 
     Token token2;
     token2.type = TOKEN_INTEGER;
-    token2.attribute.integer = 10;
+    token2.attribute.integer = 69;
 
-    gen_pushs(token, true);
+    gen_print(2, true, token, token2);
 
     generate_code(sourceCode);
 }
