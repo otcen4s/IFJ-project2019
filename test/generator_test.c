@@ -19,13 +19,20 @@ void test1(void)
 
     gen_defvar("dlzka");
 
-    Value val1, val2;
-    val1.string = "auto";
-    val2.decimal = 10.0;
+    Token token;
+    token.attribute.integer = 3;
+    token.type = TOKEN_INTEGER;
 
-    gen_single_symb("adds", TYPE_STRING, "dlzka", val1, true);
+    gen_pushs(token);
 
-    // gen_var("neviem", TYPE_FLOAT, val1, true);
+    token.type = TOKEN_DECIMAL;
+    token.attribute.decimal = 5.0;
+
+    gen_pushs(token);
+
+    gen_adds();
+
+    gen_pops("GF@dlzka");
 
     gen_print("dlzka");
 

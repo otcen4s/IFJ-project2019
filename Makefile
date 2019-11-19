@@ -19,7 +19,7 @@ test : $(PATHB) $(BIN)
 	./$(PATHB)symtable_test
 	./$(PATHB)expr_test
 	### MEZIKOD ###
-	cat program.code
+	cat -n program.code
 	### OUTPUT ###
 	./ic19int program.code
 
