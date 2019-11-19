@@ -13,9 +13,13 @@ typedef struct
 {
     Scanner* scanner;
     Token curr_token;
+    Token previous_token; // this is for expression parser
     tSymbol* global_table;
     tSymbol* local_table;
     tSymbol_item* symbol_data;
+    tSymbol_item* left_side; // for storing current left hand side identifier 
+    int params_count_used;
+    int params_count_defined;
 } Parser;
 
 int start_compiler(char* src_file_name);

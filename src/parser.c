@@ -3,6 +3,12 @@
 /************** MACROS **********/
 #define CHECK_ERROR() if(err) return err
 
+#define STORE_NEXT_TOKEN()                                                              \
+                        do{                                                             \
+                            parser->previous_token = read_token(parser->scanner, &err); \
+                            CHECK_ERROR();                                              \
+                        }while(0)
+
 #define GET_NEXT_TOKEN()                                                            \
                         do{                                                         \
                             parser->curr_token = read_token(parser->scanner, &err); \
@@ -25,7 +31,6 @@
                                     tmp->data_type = (type);                                \
                                     tmp->symbol_state = SYMBOL_DEFINED;                     \
                                     tmp->symbol_type = SYMBOL_FUNC;                         \
-                                    /*tmp->symbol_validity = SYMBOL_BUILT_IN;  */               \
                                 }while(0)
 
 /********* PREDECLARATIONS ***********/
@@ -126,14 +131,16 @@ int start_compiler(char* src_file_name)
 
 /************************************ RULES ***********************************************/
 
-/** Rule 1. <statement> -> EOF
- *  Rule 2. <statement> -> EOL <statement>
- *  Rule 3. <statement> -> DEF ID ( <params> ): EOL INDENT <statement_inside> <end> DEDENT <statement>
- *  Rule 4. <statement> -> IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE : EOL INDENT <statement_inside> <end> DEDENT <statement>
- *  Rule 5. <statement> -> WHILE <expression_start>: EOL INDENT <statement_inside> <end> DEDENT <statement> 
- *  Rule 6. <statement> -> ID = <expression_start> <end> <statement>
- *  Rule 7. <statement> -> PASS <end> <statement>
- *  Rule 8. <statement> -> PRINT ( <arg> ) <end> <statement>
+/** 
+ * Rule 1. <statement> -> EOF
+ * Rule 2. <statement> -> EOL <statement>
+ * Rule 3. <statement> -> DEF ID ( <params> ): EOL INDENT <statement_inside> <end> DEDENT <statement>
+ * Rule 4. <statement> -> IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE : EOL INDENT <statement_inside> <end> DEDENT <statement>
+ * Rule 5. <statement> -> WHILE <expression_start>: EOL INDENT <statement_inside> <end> DEDENT <statement> 
+ * Rule 6. <statement> -> ID = <expression_start> <end> <statement>
+ * Rule 7. <statement> -> PASS <end> <statement>
+ * Rule 8. <statement> -> PRINT ( <arg> ) <end> <statement>
+ * Rule 9. <statement> -> <value> <end> <statement> 
 */
 int statement(Parser *parser)
 {
@@ -161,13 +168,18 @@ int statement(Parser *parser)
         CHECK_ERROR(); //always check error 
        
         GET_KEY(); // Identifier is a special key in global or local symtable
-        
-        parser->symbol_data = symtab_add(parser->global_table, key.str, &err); // add ID of function into global table
-        CHECK_ERROR(); // check for internal error of used function
-        parser->symbol_data->symbol_type = SYMBOL_FUNC; // specifying it's function
-        parser->symbol_data->symbol_state = SYMBOL_DEFINED; // -||- defined
-        //parser->symbol_data->symbol_validity = SYMBOL_GLOBAL;
 
+        parser->symbol_data = symtab_lookup(parser->global_table, key.str, &err);
+        CHECK_ERROR();
+
+        if((parser->symbol_data == NULL) || (parser->symbol_data->symbol_type != SYMBOL_FUNC)) // no same identifier is in global table or if so, it was not a function ID
+        {
+            parser->symbol_data = symtab_add(parser->global_table, key.str, &err); // add ID of function into global table
+            CHECK_ERROR(); // check for internal error of used function
+            parser->symbol_data->symbol_type = SYMBOL_FUNC; // specifying it's function
+            parser->symbol_data->symbol_state = SYMBOL_DEFINED; // -||- defined
+        }
+    
 
         GET_NEXT_TOKEN();
         /* STATE: DEF ID ( */
@@ -177,6 +189,12 @@ int statement(Parser *parser)
         /*Going to use next rule DEF ID ( <params> */
         err = params(parser);
         CHECK_ERROR();
+        
+        if(parser->symbol_data->symbol_state == SYMBOL_USED) // function with this ID was somewhere else used but not defined, we must check the count of parameters
+        {
+            parser->params_count_used = parser->symbol_data->params_count;
+            if(parser->params_count_used != parser->params_count_defined) return PARAM_COUNT_ERROR;
+        }
 
         /* If everything went well we are in this state -> STATE: DEF ID ( <params> ): */
         GET_NEXT_TOKEN(); 
@@ -324,24 +342,24 @@ int statement(Parser *parser)
 
         parser->symbol_data = symtab_lookup(parser->global_table, key.str, &err);
         CHECK_ERROR();
-        if(parser->symbol_data != NULL)
-        {
-            return SYNTAX_ERROR; 
-        }
         
-        parser->symbol_data = symtab_add(parser->global_table, key.str, &err); // add ID of variable into global table
-        CHECK_ERROR(); // check for internal error of used function
-        parser->symbol_data->symbol_type = SYMBOL_VAR; // specifying for variable
-        parser->symbol_data->symbol_type = SYMBOL_DEFINED; 
-        //parser->symbol_data->symbol_validity = SYMBOL_GLOBAL;
-
+        if(parser->symbol_data == NULL)
+        {
+            parser->symbol_data = symtab_add(parser->global_table, key.str, &err); // add ID of variable into global table
+            CHECK_ERROR(); // check for internal error of used function
+            parser->symbol_data->symbol_type = SYMBOL_VAR; // specifying for variable
+            parser->symbol_data->symbol_type = SYMBOL_DEFINED; 
+        }
+        parser->left_side = parser->symbol_data; // this is for expression parser the left side ID to store value next
+        
+        
         /* STATE: ID = */
         GET_NEXT_TOKEN();
         CHECK_TOKEN(TOKEN_ASSIGN); 
         CHECK_ERROR();
 
-        // expression_parser function call
-        // after expression call we can define our variable with more details (INT/FLOAT... value...)
+        err = expression_start(parser);
+        CHECK_ERROR();
 
         /* STATE: ID = <expression_start> <end> */
         GET_NEXT_TOKEN();
@@ -385,8 +403,9 @@ int statement(Parser *parser)
     return NO_ERROR;
 }
 
-/** Rule 17. <params> -> ID <next_params> 
- *  Rule 18. <params> -> eps
+/** 
+ * Rule 17. <params> -> ID <next_params> 
+ * Rule 18. <params> -> eps
 */
 int params(Parser *parser)
 {
@@ -407,7 +426,7 @@ int params(Parser *parser)
     CHECK_ERROR();
     parser->symbol_data->params = &key; //parameter added
     parser->symbol_data->symbol_type = SYMBOL_PARAM;
-    //parser->symbol_data->symbol_validity = SYMBOL_LOCAL;
+    parser->params_count_defined++;
     
     err = next_params(parser); // next rule
     CHECK_ERROR(); // always check the ret value
@@ -415,8 +434,9 @@ int params(Parser *parser)
     return NO_ERROR;
 }
 
-/** Rule 19. <next_params> -> , ID <next_params> 
- *  Rule 20. <next_params> -> eps
+/** 
+ * Rule 19. <next_params> -> , ID <next_params> 
+ * Rule 20. <next_params> -> eps
 */
 int next_params(Parser *parser)
 {
@@ -449,7 +469,7 @@ int next_params(Parser *parser)
     CHECK_ERROR();
     parser->symbol_data->params = &key; //parameter added
     parser->symbol_data->symbol_type = SYMBOL_PARAM; // symbol type set as parameter
-    //parser->symbol_data->symbol_validity = SYMBOL_LOCAL;
+    parser->params_count_defined++;
 
     err = next_params(parser); // recursively go to next rule
     CHECK_ERROR(); // always check the return value
@@ -462,8 +482,92 @@ int statement_inside(Parser *parser)
     int err;
 }
 
-/** Rule 37. <arg> -> eps
- *  Rule 38. <arg> -> <value> <arg>
+
+/**
+ * Rule 21. <expression_start> -> value <expression_next>
+ * Rule 22. <expression_next> -> eps (e.g. 'EOL')
+ * Rule 23. <expression_next> -> OPERATOR <expression_start> 
+ * Rule 24. <value> -> ID
+ * Rule 25. <value> -> INT
+ * Rule 26. <value> -> DOUBLE
+ * Rule 27. <value> -> STRING
+ * Rule 28. <value> -> NONE
+ * Rule 29. <value> -> ID ( <arg> )
+ * Rule 30. <value> -> INPUTS()
+ * Rule 31. <value> -> INPTUF()
+ * Rule 32. <value> -> INPUTI()
+ * Rule 33. <value> -> LEN ( <value> )
+ * Rule 34. <value> -> SUBSTR ( <value>, <value>, <value> )
+ * Rule 35. <value> -> ORD ( <value>, <value> )
+ * Rule 36. <value> -> CHR ( <value> )
+*/
+int expression_start(Parser *parser)
+{
+    int err;
+
+    /* STATE: ID = <expression_start> */
+    STORE_NEXT_TOKEN(); // same as GET_NEXT_TOKEN() but this stores token for later use
+
+    switch(parser->previous_token.type)
+    {
+        /* STATE: ID = ID */
+        case TOKEN_IDENTIFIER:  
+            /* STATE: ID = ID EOL */
+            /* or STATE: ID = ID OPERATOR */
+            GET_NEXT_TOKEN();
+            if((parser->curr_token.type == TOKEN_EOL) ||
+              ((parser->curr_token.type >= TOKEN_PLUS) && (parser->curr_token.type <= TOKEN_LESSER_THAN))) // indicates it's an operator                
+            {
+                // TODO call expression_parser
+            }
+
+            /* STATE: ID = ID ( */
+            if(parser->curr_token.type == TOKEN_LEFT_BRACKET) // indicates it's an function call (not built_in function)
+            {
+                err = arg(parser);
+                CHECK_ERROR();
+            }
+                
+        /* STATE: ID = INT */
+        case TOKEN_INTEGER:
+            /* STATE: ID = INT EOL */
+            /* or STATE: ID = INT OPERATOR */
+            GET_NEXT_TOKEN();
+            if((parser->curr_token.type == TOKEN_EOL) ||
+              ((parser->curr_token.type >= TOKEN_PLUS) && (parser->curr_token.type <= TOKEN_LESSER_THAN))) // indicates it's an operator                
+            {
+                // TODO call expression_parser
+            }
+
+        case TOKEN_DECIMAL:
+            /* STATE: ID = INT EOL */
+            /* or STATE: ID = INT OPERATOR */
+            GET_NEXT_TOKEN();
+            if((parser->curr_token.type == TOKEN_EOL) ||
+              ((parser->curr_token.type >= TOKEN_PLUS) && (parser->curr_token.type <= TOKEN_LESSER_THAN))) // indicates it's an operator                
+            {
+                // TODO call expression_parser
+            }
+            break;
+
+        case TOKEN_STRING:
+        case KEYWORD_NONE:
+        case KEYWORD_INPUTS:
+        case KEYWORD_INPUTI:
+        case KEYWORD_INPUTF:
+        case KEYWORD_LEN:
+        case KEYWORD_SUBSTR:
+        case KEYWORD_ORD:
+        case KEYWORD_CHR:
+            break;
+    }
+
+    return NO_ERROR;
+}
+
+/** 
+ * Rule 37. <arg> -> eps
+ * Rule 38. <arg> -> <value> <arg>
 */
 int arg(Parser *parser)
 {

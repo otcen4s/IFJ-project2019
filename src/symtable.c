@@ -1,9 +1,8 @@
 /* IFJ project
 **@brief Table of symbols (Symtable)  
 **
-**@author: Lívia Žitňanská
+**@author: 
 */
-//TODO THIS CODE IS STILL IN PROCESS AND MANY ERRORS MAY OCCURE (SRRY GUYS :/)
 
 #include "symtable.h"
 
@@ -38,7 +37,6 @@ int symtab_init(tSymbol *table)
 /**
  * Clears the entire hash table but the allocated structure of size SYMTAB_SIZE stays alive 
 */
-//TODO clear is not complete and it will change after the start of syn.analys.(PROBABLY!!)
 void symtab_clear(tSymbol *table)
 { 
     for(size_t i = 0; i < table->arr_size; i++)
@@ -50,16 +48,9 @@ void symtab_clear(tSymbol *table)
         {
             next = current->next_symbol;
 
-            // if it's variable which is string which is defined then call the function to destroy the string
-            //if((current->symbol_type == SYMBOL_VAR) && (current->data_type == DATA_STRING) && (current->symbol_state == SYMBOL_DEFINED)) 
-            //{
-            //    str_destroy(&current->symbol_value.string_val);
-            //}
-
             free(current->key);
             free(current);
-            //func_str_clear(current->function_params);
-
+    
             current = next;
         }
         table->item_array[i] = NULL;
@@ -125,7 +116,6 @@ tSymbol_item* symtab_add(tSymbol *table, const char *key, int* err)
     {
         new_symbol = malloc(sizeof(tSymbol_item));
         new_symbol->key = malloc(sizeof(char) * (strlen(key) + 1));
-        //*err = func_str_init(new_symbol->function_params); // creating space for function parameters array
         
         if((new_symbol == NULL) || (new_symbol->key == NULL)) 
         {
@@ -133,7 +123,6 @@ tSymbol_item* symtab_add(tSymbol *table, const char *key, int* err)
             return NULL;
         }
 
-        // bunch of assignes
         strcpy(new_symbol->key, key);
         new_symbol->next_symbol = NULL;
 
@@ -161,7 +150,6 @@ tSymbol_item* symtab_add(tSymbol *table, const char *key, int* err)
         }
         new_symbol = malloc(sizeof(tSymbol_item));
         new_symbol->key = malloc(sizeof(char) * (strlen(key) + 1));
-        //*err = func_str_init(new_symbol->function_params); // creating space for function parameters array
 
         if((new_symbol == NULL) || (new_symbol->key == NULL)) 
         {
@@ -169,7 +157,6 @@ tSymbol_item* symtab_add(tSymbol *table, const char *key, int* err)
             return NULL;
         }
 
-        // bunch of assignes
         strcpy(new_symbol->key, key);
         new_symbol->next_symbol = NULL;
 
