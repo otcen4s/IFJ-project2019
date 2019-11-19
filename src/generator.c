@@ -205,8 +205,8 @@ void gen_pushs(Token token, bool isGlobal) {
     
 }
 
-void gen_pops(char *var) {
-    str_concat(&line, "POPS ", var, NULL);
+void gen_pops(char *var, bool isGlobal) {
+    str_concat(&line, "POPS ", (isGlobal) ? "GF@" : "LF@", var, NULL);
 
     ADDCODE(line.str);
 
@@ -250,7 +250,7 @@ void gen_idivs() {
     ADDCODE("IDIVS");
 }
 
-void gen_print(unsigned n, Token token, ...) {
+void gen_print(unsigned n, bool isGlobal, Token token, ...) {
 
     va_list ap;
     char temp[STRLEN];
@@ -266,7 +266,7 @@ void gen_print(unsigned n, Token token, ...) {
             sprintf(temp, "%a", token.attribute.decimal);
         } else if (token.type == KEYWORD_NONE) {
             strcpy(temp, "None");
-        } else {
+        } else if (token.type == TOKEN_STRING) {
             // KEYWORD_STRING
             strcpy(temp, "");
             int outJ = 0;
@@ -280,9 +280,13 @@ void gen_print(unsigned n, Token token, ...) {
                     temp[outJ++] = token.attribute.string.str[j];
                 }
             }
+        } else if (token.type == TOKEN_IDENTIFIER) {
+            str_concat(&line, (isGlobal) ? "GF@" : "LF@", token.attribute.string.str, NULL);
+            strcpy(temp, line.str);
         }
 
-        str_append(&line, temp);
+        // str_append(&line, temp);
+        ADDCODE(temp);
         token = va_arg(ap, Token);
     }
 
@@ -295,6 +299,7 @@ void gen_print(unsigned n, Token token, ...) {
 
 }
 
+// TODO remove?
 void gen_defvar(char *var) {
     str_concat(&line, "defvar GF@", var, NULL);
 
