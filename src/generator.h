@@ -22,6 +22,9 @@ void generate_code(FILE *destFile);
 void gen_pushs(Token token);
 void gen_pops(char *var);
 void gen_adds();
+void gen_subs();
+void gen_divs();
+void gen_idivs();
 
 void setScope(char *scope, bool isGlobal);
 

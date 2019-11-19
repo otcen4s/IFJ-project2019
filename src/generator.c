@@ -31,55 +31,63 @@ int generator_begin() {
     ADDCODE("DEFVAR GF@$opType1");
     ADDCODE("DEFVAR GF@$opType2");
     ADDCODE("DEFVAR GF@$temp");
-
+    ADDCODE("DEFVAR GF@$operation");
+    
     ADDCODE("JUMP $$main");
-
-    ADDCODE("LABEL $adds");
-
-    ADDCODE("POPS GF@$op1");
-    ADDCODE("TYPE GF@$opType1 GF@$op1");
-
-    ADDCODE("POPS GF@$op2");
-    ADDCODE("TYPE GF@$opType2 GF@$op2");
-
-    ADDCODE("JUMPIFEQ $isInt GF@$opType1 string@int");
-    ADDCODE("JUMPIFEQ $isFloat GF@$opType1 string@float");
-    ADDCODE("JUMPIFEQ $isString GF@$opType1 string@string");
+    
+    ADDCODE("LABEL $error");
     ADDCODE("EXIT int@4");
-
-    ADDCODE("LABEL $isIntFloat");
-    ADDCODE("INT2FLOAT GF@$op1 GF@$op1");
-    ADDCODE("JUMP $genAdd");
-
-    ADDCODE("LABEL $isFloatInt");
-    ADDCODE("INT2FLOAT GF@$op2 GF@$op2");
-    ADDCODE("JUMP $genAdd");
-
-    ADDCODE("LABEL $isInt");
-    ADDCODE("JUMPIFEQ $genAdd GF@$opType1 GF@$opType2");
-    ADDCODE("JUMPIFEQ $isIntFloat GF@$opType2 string@float");
-    ADDCODE("EXIT int@4");
-
-    ADDCODE("LABEL $isFloat");
-    ADDCODE("JUMPIFEQ $genAdd GF@$opType1 GF@$opType2");
-    ADDCODE("JUMPIFEQ $isFloatInt GF@$opType2 string@int");
-    ADDCODE("EXIT int@4");
-
-    ADDCODE("LABEL $isString");
-    ADDCODE("JUMPIFEQ $genConcat GF@$opType1 GF@$opType2");
-    ADDCODE("EXIT int@4");
-
-    ADDCODE("LABEL $genAdd");
+    
+    ADDCODE("LABEL $finish");
     ADDCODE("PUSHS GF@$op1");
     ADDCODE("PUSHS GF@$op2");
-    ADDCODE("ADDS");
     ADDCODE("RETURN");
-
-    ADDCODE("LABEL $genConcat");
-    ADDCODE("CONCAT GF@$temp GF@$op2 GF@$op1");
+    
+    ADDCODE("LABEL $op1String");
+    ADDCODE("JUMPIFNEQ $error GF@$opType2 string@string");
+    ADDCODE("CONCAT GF@$temp GF@$op1 GF@$op2");
     ADDCODE("PUSHS GF@$temp");
     ADDCODE("RETURN");
+    
+    ADDCODE("LABEL $op1IntOp2Float");
+    ADDCODE("INT2FLOAT GF@$op1 GF@$op1");
+    ADDCODE("JUMP $finish");
+    
+    ADDCODE("LABEL $op1Int");
+    ADDCODE("JUMPIFEQ $error GF@$operation string@f");
+    ADDCODE("JUMPIFEQ $finish GF@$opType2 string@int");
+    ADDCODE("JUMPIFEQ $error GF@$operation string@i");
+    ADDCODE("JUMPIFEQ $op1IntOp2Float GF@$opType2 string@float");
+    ADDCODE("JUMP $error");
+    
+    ADDCODE("LABEL $op1FloatOp2Int");
+    ADDCODE("INT2FLOAT GF@$op2 GF@$op2");
+    ADDCODE("JUMP $finish");
+    
+    ADDCODE("LABEL $op1Float");
+    ADDCODE("JUMPIFEQ $finish GF@$opType2 string@float");
+    ADDCODE("JUMPIFEQ $error GF@$operation string@i");
+    ADDCODE("JUMPIFEQ $error GF@$operation string@f");
+    ADDCODE("JUMPIFEQ $op1FloatOp2Int GF@$opType2 string@int");
+    ADDCODE("JUMP $error");
 
+    ADDCODE("LABEL $typeCheck");
+    ADDCODE("POPS GF@$op1");
+    ADDCODE("TYPE GF@$opType1 GF@$op1");
+    
+    ADDCODE("POPS GF@$op2");
+    ADDCODE("TYPE GF@$opType2 GF@$op2");
+    
+    ADDCODE("JUMPIFEQ $op1Int GF@$opType1 string@int");
+    ADDCODE("JUMPIFEQ $error GF@$operation string@i");
+    
+    ADDCODE("JUMPIFEQ $op1Float GF@$opType1 string@float");
+    ADDCODE("JUMPIFEQ $error GF@$operation string@f");
+    
+    ADDCODE("JUMPIFNEQ $error GF@$operation string@ifs");
+    ADDCODE("JUMPIFEQ $op1String GF@$opType1 string@string");
+    ADDCODE("JUMP $error");
+    
     ADDCODE("LABEL $$main");
 
     return NO_ERROR;
@@ -202,7 +210,41 @@ void gen_pops(char *var) {
 }
 
 void gen_adds() {
-    ADDCODE("CALL $adds");
+    ADDCODE("MOVE GF@$operation string@ifs");
+    ADDCODE("CALL $typeCheck");
+
+    ADDCODE("JUMPIFEQ $isString GF@$opType1 string@string");
+    ADDCODE("ADDS");
+    ADDCODE("LABEL $isString");
+
+}
+
+void gen_subs() {
+    ADDCODE("MOVE GF@$operation string@if");
+    ADDCODE("CALL $typeCheck");
+
+    ADDCODE("SUBS");
+}
+
+void gen_muls() {
+    ADDCODE("MOVE GF@$operation string@if");
+    ADDCODE("CALL $typeCheck");
+
+    ADDCODE("MULS");
+}
+
+void gen_divs() {
+    ADDCODE("MOVE GF@$operation string@f");
+    ADDCODE("CALL $typeCheck");
+
+    ADDCODE("DIVS");
+}
+
+void gen_idivs() {
+    ADDCODE("MOVE GF@$operation string@i");
+    ADDCODE("CALL $typeCheck");
+
+    ADDCODE("IDIVS");
 }
 
 void gen_print(char *printStr) {

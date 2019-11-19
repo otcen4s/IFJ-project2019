@@ -20,17 +20,19 @@ void test1(void)
     gen_defvar("dlzka");
 
     Token token;
-    token.attribute.integer = 3;
+    // str_init(&(token.attribute.string));
+    // str_copy(&(token.attribute.string), "bus");
+    token.attribute.integer = 10;
     token.type = TOKEN_INTEGER;
 
     gen_pushs(token);
 
-    token.type = TOKEN_DECIMAL;
-    token.attribute.decimal = 5.0;
+    token.type = TOKEN_INTEGER;
+    token.attribute.integer = 21;
 
     gen_pushs(token);
 
-    gen_adds();
+    gen_idivs();
 
     gen_pops("GF@dlzka");
 
