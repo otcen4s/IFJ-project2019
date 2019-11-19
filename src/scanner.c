@@ -576,10 +576,6 @@ Token read_token(Scanner *scanner, int *err)
                     scanner->state = STATE_DOCSTRING_ESCAPE_SEQ;
                 }
                 else if(scanner->curr_char == '"') scanner->state = STATE_DOCSTRING_EXIT_1;
-                else if (scanner->curr_char < 32) //invalid character
-                {
-                    scanner->state = STATE_ERROR;
-                }         
                 else
                 { 
                     if(str_insert_char(scanner->atr_string,scanner->curr_char))

@@ -5,7 +5,7 @@ PATHT = test/
 PATHB = bin/
 
 CC := gcc
-CFLAGS = -Wall -W -std=c99 -I unity/src unity/src/unity.c
+CFLAGS = -Wall -g -W -std=c99 -I unity/src unity/src/unity.c
 
 SRC = $(wildcard $(PATHT)*.c)
 BIN = $(addprefix $(PATHB), $(basename $(notdir $(SRC))))

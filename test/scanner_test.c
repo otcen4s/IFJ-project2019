@@ -388,6 +388,26 @@ def my_function():
 
 }
 
+void test10_docstring_escape_seq(void)
+{
+    /* test file
+
+    """some multi line 
+    \"""continues \""""
+
+    */
+    
+    int err = 0; 
+    Token token; 
+    Scanner s; 
+    Scanner *scanner = &s; 
+    init_scanner(scanner, "test/test_data/scanner_test_10.txt");
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(NO_ERROR, err);
+    TEST_ASSERT_EQUAL_INT32(TOKEN_STRING, token.type);
+    TEST_ASSERT_EQUAL_STRING( " sadsad \" \"\"\ncontinue sasasdasd \"\"\" ",token.attribute.string.str);
+}
+
 int main(void) 
 {
     UNITY_BEGIN();
@@ -400,6 +420,7 @@ int main(void)
     RUN_TEST(test7_numbers);
     RUN_TEST(test8_indent);
     RUN_TEST(test9_function);
+    RUN_TEST(test10_docstring_escape_seq);
 
     return UNITY_END();
 }
