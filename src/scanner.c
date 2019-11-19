@@ -100,13 +100,6 @@ Token create_string_token(tString string) {
     
     return token;
 }
-/*
-int unget_token(Scanner *scanner, Token token)
-{
-    int idx = ++scanner->ungeted_count;
-    scanner->ungeted_tokens[idx] = token;
-}
-*/
 
 Token read_token(Scanner *scanner, int *err)
 {
@@ -136,15 +129,20 @@ Token read_token(Scanner *scanner, int *err)
         switch (scanner->state)
         {
         
-            case STATE_START:
+            case STATE_START:  
                 if (scanner->is_line_start) 
                 {
-                    scanner->state = STATE_INDENTATION_CHECK;   // indentation check
-                    scanner->indent_cnt = 0; //init indent counter to zero
-                    ungetc(scanner->curr_char, scanner->src_file); //nothing should be readed here
+                    if(scanner->curr_char == '\n')
+                    {
+                        scanner->state == STATE_START;
+                    }
+                    else
+                    {
+                        scanner->state = STATE_INDENTATION_CHECK;   // indentation check
+                        scanner->indent_cnt = 0; //init indent counter to zero
+                        ungetc(scanner->curr_char, scanner->src_file); //nothing should be readed here
+                    }
                 }
-                else if((scanner->curr_char == '\n') && 
-                       (scanner->is_line_start)) scanner->state = STATE_START; //ignore empty lines   
                 else if((scanner->curr_char == ' ') && 
                         (!scanner->is_line_start)) scanner->state = STATE_START; //ignore space if its not indent
                 else if(scanner->curr_char == '+') scanner->state = STATE_PLUS;
@@ -287,10 +285,19 @@ Token read_token(Scanner *scanner, int *err)
                 break;
             
             case STATE_DIVISON:
-                token.type= TOKEN_DIVISION;
-                ungetc(scanner->curr_char, scanner->src_file);
-                return token; 
-                break;
+                if(scanner->curr_char == '/')
+                { 
+                    token.type = TOKEN_IDIV;
+                    return token; 
+
+                }
+                else
+                {
+                    token.type= TOKEN_DIVISION;
+                    ungetc(scanner->curr_char, scanner->src_file);
+                    return token; 
+                }
+                    break;
 
             case STATE_GREATER_THAN:
                 if(scanner->curr_char == '=')
@@ -423,7 +430,7 @@ Token read_token(Scanner *scanner, int *err)
                 else if (scanner->curr_char < 32) //invalid character
                 {
                     scanner->state = STATE_ERROR;
-                    *err = INTERNAL_ERROR;
+                    return empty_token;
                 }
          
                 else
@@ -565,18 +572,55 @@ Token read_token(Scanner *scanner, int *err)
 
             case STATE_DOCSTRING_VALID:
                 if(scanner->curr_char == '"') scanner->state = STATE_DOCSTRING_EXIT_1;
+                else if (scanner->curr_char < 32) //invalid character
+                {
+                    scanner->state = STATE_ERROR;
+                }         
+                else if(str_insert_char(scanner->atr_string,scanner->curr_char))
+                {
+                    *err= INTERNAL_ERROR;
+                    return empty_token;
+                }                    
             break;
 
 
             case STATE_DOCSTRING_EXIT_1:
-                if(scanner->curr_char == '"') scanner->state = STATE_DOCSTRING_EXIT_2; // "" readed
-                else scanner->state = STATE_DOCSTRING_VALID; //docstring wasnt exited yet
-            break;
-            
+                if(scanner->curr_char == '"') 
+                {
+                    scanner->state = STATE_DOCSTRING_EXIT_2; // "" readed
+                }
+                else
+                {
+                    //doscstring is valid, we must insert " and current char into string
+                    scanner->state = STATE_DOCSTRING_VALID;
+                    if(str_insert_char(scanner->atr_string,'"') ||
+                       str_insert_char(scanner->atr_string,scanner->curr_char))
+                    {
+                    *err= INTERNAL_ERROR;
+                    return empty_token;
+                    }
+                }                    
+            break;          
 
             case STATE_DOCSTRING_EXIT_2:
-                if(scanner->curr_char == '"') scanner->state = STATE_START; //docstring was propperly exited
-                else scanner->state = STATE_DOCSTRING_VALID; //docstring wasnt exited yet
+                if(scanner->curr_char == '"') 
+                {
+                    //docstring was propperly exited
+                    token = create_string_token(*(scanner->atr_string));
+                    return token;
+                }
+                else
+                {
+                    //doscstring is valid, we must insert "" and current char into string
+                    scanner->state = STATE_DOCSTRING_VALID;
+                    if(str_insert_char(scanner->atr_string,'"') ||
+                       str_insert_char(scanner->atr_string,'"') ||
+                       str_insert_char(scanner->atr_string,scanner->curr_char))
+                    {
+                    *err= INTERNAL_ERROR;
+                    return empty_token;
+                    }
+                }
             break;
     
             case STATE_ID:   

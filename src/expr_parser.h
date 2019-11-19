@@ -12,7 +12,6 @@
 typedef enum{
 	S, //SHIFT
 	R, // REDUCE
-	E, //EQ
 	F, // FAILED
 	A //ACCEPT
 } Expr_parser_actions; 

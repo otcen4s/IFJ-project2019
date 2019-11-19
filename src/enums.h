@@ -42,6 +42,7 @@ typedef enum {
 	TOKEN_DECIMAL,
 	TOKEN_STRING,
 
+
 	TOKEN_EOL,		// end of line
 	TOKEN_EOF,		// end of file
 	TOKEN_ASSIGN,		// =
@@ -55,6 +56,7 @@ typedef enum {
 	TOKEN_PERCENT,				// %
 	TOKEN_COLON,				// :
 	TOKEN_COMMA,				// ,
+	TOKEN_IDIV,         // // 
 } Token_type;
 
 //enum is eqivalent of token type enum to make conversion from token type to symbol type easier

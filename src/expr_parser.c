@@ -1,5 +1,5 @@
 #include "expr_parser.h"
-#define DEBUG
+//#define DEBUG
 
 /******MACROS********/
 
@@ -371,7 +371,10 @@ int expression(Parser* parser)
             } 
 
             if (expr_parser->curr_sym.symbol == VALUE)
-            {                 
+            {   
+                //check if all current id is deffined 
+                //if()
+
                 //generate stack push instruction here
                 DEBUG_PRINT("pushing value to the stack \n");
             }            

@@ -100,8 +100,32 @@ void test4_doscstring(void)
 
 
     token = read_token(scanner, &err);
-    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_EOL);
-    TEST_ASSERT_EQUAL_INT32(err, NO_ERROR);    
+    TEST_ASSERT_EQUAL_INT(TOKEN_STRING, token.type);
+    TEST_ASSERT_EQUAL_STRING("this is first doc st\"\"ring",token.attribute.string.str);
+    TEST_ASSERT_EQUAL_INT(err, NO_ERROR);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT(TOKEN_EOL, token.type);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT(token.type, TOKEN_STRING);
+    TEST_ASSERT_EQUAL_STRING("first line \"\nsecond line",token.attribute.string.str);
+    TEST_ASSERT_EQUAL_INT(err, NO_ERROR); 
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT(TOKEN_EOL, token.type);  
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT(TOKEN_IDENTIFIER, token.type); 
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT(TOKEN_ASSIGN, token.type);
+
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT(token.type, TOKEN_STRING);
+    TEST_ASSERT_EQUAL_STRING("some string",token.attribute.string.str);
+    TEST_ASSERT_EQUAL_INT(err, NO_ERROR);
+    
 }
 
 void test5_string(void)
