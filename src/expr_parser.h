@@ -27,6 +27,7 @@ typedef enum{
 	E_MINUS_E,
 	E_MUL_E,
 	E_DIV_E,
+	E_IDIV_E,
 	E_EQ_E,
 	E_GTH_E,
 	E_LTH_E,

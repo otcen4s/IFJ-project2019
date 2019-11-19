@@ -24,23 +24,24 @@ int get_reduction_rule(Expr_parser* expr_parser);
  * currently readed symbol and topmost terminal symbol
  * on symbol stack
  **/
-int parsing_table[14][14] =
+int parsing_table[15][15] =
 {
-//	  +  -  *  /  > ==  != <= >= <  (  )  o  $ 
-	{ R, R, S, S, R, R, R, R, R, R, S, R, S, R }, // +
-    { R, R, S, S, R, R, R, R, R, R, S, R, S, R }, //-
-	{ R, R, R, R, R, R, R, R, R, R, S, R, S, R }, // *
-    { R, R, R, R, R, R, R, R, R, R, S, R, S, R }, // /
-    { S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // >
-	{ S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // ==
-    { S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // !=
-    { S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // <=
-    { S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // >=
-    { S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // <
-	{ S, S, S, S, S, S, S, S, S, S, S, S, S, F }, // (
-	{ R, R, R, R, R, R, R, R, R, R, F, R, F, R }, // )
-	{ R, R, R, R, R, R, R, R, R, R, F, R, F, R }, // o operand 
-	{ S, S, S, S, S, S, S, S, S, S, S, F, S, A }, // $
+//	  +  -  *  /  // > ==  != <= >= <  (  )  o  $ 
+	{ R, R, S, S, S, R, R, R, R, R, R, S, R, S, R }, // +
+    { R, R, S, S, S, R, R, R, R, R, R, S, R, S, R }, //-
+	{ R, R, R, R, R, R, R, R, R, R, R, S, R, S, R }, // *
+    { R, R, R, R, R, R, R, R, R, R, R, S, R, S, R }, // /
+    { R, R, R, R, R, R, R, R, R, R, R, S, R, S, R }, // //
+    { S, S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // >
+	{ S, S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // ==
+    { S, S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // !=
+    { S, S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // <=
+    { S, S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // >=
+    { S, S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // <
+	{ S, S, S, S, S, S, S, S, S, S, S, S, S, S, F }, // (
+	{ R, R, R, R, R, R, R, R, R, R, R, F, R, F, R }, // )
+	{ R, R, R, R, R, R, R, R, R, R, R, F, R, F, R }, // o operand 
+	{ S, S, S, S, S, S, S, S, S, S, S, S, F, S, A }, // $
 };
 
 
@@ -153,6 +154,15 @@ int get_reduction_rule(Expr_parser* expr_parser)
         expr_parser->op3.symbol == NON_TERM)
     {
         return E_DIV_E;
+    }
+
+        
+    /********* E -> E // E ***************/
+    if( expr_parser->op1.symbol == NON_TERM &&
+        expr_parser->op2.symbol == IDIV &&
+        expr_parser->op3.symbol == NON_TERM)
+    {
+        return E_IDIV_E;
     }
 
      /********* E -> E == E ***************/
@@ -272,6 +282,13 @@ int reduce(Expr_parser * expr_parser)
        break;
     
     case E_DIV_E:
+       //TODO generate stack mul here
+       //add new not terminal which represents result to the sym stack
+       err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
+       if(err) return INTERNAL_ERROR;
+       break;
+    
+    case E_IDIV_E:
        //TODO generate stack mul here
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
