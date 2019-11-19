@@ -5,61 +5,74 @@ DEFVAR GF@$op2
 DEFVAR GF@$opType1
 DEFVAR GF@$opType2
 DEFVAR GF@$temp
+DEFVAR GF@$operation
 
 JUMP $$main
 
-LABEL $adds
+LABEL $error
+EXIT int@4
 
+LABEL $finish
+PUSHS GF@$op1
+PUSHS GF@$op2
+RETURN
+
+LABEL $op1String
+JUMPIFNEQ $error GF@$opType2 string@string
+RETURN
+
+LABEL $op1IntOp2Float
+INT2FLOAT GF@$op1 GF@$op1
+JUMP $finish
+
+LABEL $op1Int
+JUMPIFEQ $finish GF@$opType2 string@int
+JUMPIFEQ $error GF@$operation string@i
+JUMPIFEQ $error GF@$operation string@f
+JUMPIFEQ $op1IntOp2Float GF@$opType2 string@float
+JUMP $error
+
+LABEL $op1FloatOp2Int
+INT2FLOAT GF@$op2 GF@$op2
+JUMP $finish
+
+LABEL $op1Float
+JUMPIFEQ $finish GF@$opType2 string@float
+JUMPIFEQ $error GF@$operation string@i
+JUMPIFEQ $error GF@$operation string@f
+JUMPIFEQ $op1FloatOp2Int GF@$opType2 string@int
+JUMP $error
+
+LABEL $typeCheck
 POPS GF@$op1
 TYPE GF@$opType1 GF@$op1
 
 POPS GF@$op2
 TYPE GF@$opType2 GF@$op2
 
-JUMPIFEQ $isInt GF@$opType1 string@int
-JUMPIFEQ $isFloat GF@$opType1 string@float
-JUMPIFEQ $isString GF@$opType1 string@string
-EXIT int@4
+JUMPIFEQ $op1Int GF@$opType1 string@int
+JUMPIFEQ $error GF@$operation string@i
 
-LABEL $isIntFloat
-INT2FLOAT GF@$op1 GF@$op1
-JUMP $genAdd
+JUMPIFEQ $op1Float GF@$opType1 string@float
+JUMPIFEQ $error GF@$operation string@f
 
-LABEL $isFloatInt
-INT2FLOAT GF@$op2 GF@$op2
-JUMP $genAdd
-
-LABEL $isInt
-JUMPIFEQ $genAdd GF@$opType1 GF@$opType2
-JUMPIFEQ $isIntFloat GF@$opType2 string@float
-EXIT int@4
-
-LABEL $isFloat
-JUMPIFEQ $genAdd GF@$opType1 GF@$opType2
-JUMPIFEQ $isFloatInt GF@$opType2 string@int
-EXIT int@4
-
-LABEL $isString
-JUMPIFEQ $genConcat GF@$opType1 GF@$opType2
-EXIT int@4
-
-LABEL $genAdd
-PUSHS GF@$op1
-PUSHS GF@$op2
-ADDS
-RETURN
-
-LABEL $genConcat
-CONCAT GF@$temp GF@$op2 GF@$op1
-PUSHS GF@$temp
-RETURN
+JUMPIFNEQ $error GF@$operation string@ifs
+JUMPIFEQ $op1String GF@$opType1 string@string
+JUMP $error
 
 LABEL $$main
 
-PUSHS string@cau
-PUSHS string@ko
+PUSHS string@bus
+PUSHS string@auto
+MOVE GF@$operation string@ifs
 
-CALL $adds
+CALL $typeCheck
+
+JUMPIFEQ $concat GF@$operation string@ifs
+ADDS
+LABEL $concat
+CONCAT GF@$temp GF@$op1 GF@$op2
+PUSHS GF@$temp
 
 DEFVAR GF@test
 POPS GF@test
