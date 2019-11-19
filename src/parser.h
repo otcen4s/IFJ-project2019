@@ -8,6 +8,7 @@
 #include "error.h"
 #include "function_str.h"
 #include <stdlib.h>
+#include <stdbool.h>
 
 typedef struct
 {
@@ -20,6 +21,7 @@ typedef struct
     tSymbol_item* left_side; // for storing current left hand side identifier 
     int params_count_used;
     int params_count_defined;
+    bool in_function;
 } Parser;
 
 int start_compiler(char* src_file_name);

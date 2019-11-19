@@ -1,6 +1,7 @@
 #include  "../src/parser.h"
 #include  "../src/scanner.h"
 #include "../src/expr_parser.h"
+#include "../src/typedefs.h"
 #include "unity.h"
 
 void setUp(void)
@@ -33,8 +34,24 @@ void expr_test1(void)
 
     ////////////////////////  ACTUAL TESTING  /////////////////////////////
 
+    //init of code generator
+    generator_begin();
+
     TEST_ASSERT_EQUAL_INT(NO_ERROR, expression(pars));
 
+    //print result
+    gen_defvar("test_res");
+    gen_pops("test_res", true);
+
+    Token print_var;
+    print_var.type=TOKEN_IDENTIFIER;
+    str_init(&(print_var.attribute.string));
+    str_copy(&(print_var.attribute.string), "test_res");
+
+    gen_print(1, true,  print_var);
+
+    FILE *file = fopen("program.code", "w+");
+    generate_code(file);
 }
 
 int main(void) 

@@ -261,35 +261,35 @@ int reduce(Expr_parser * expr_parser)
     switch (rule_to_apply)
     {
     case E_PLUS_E:
-       //TODO generate stack add here
+       gen_adds();
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
        break;
 
     case E_MINUS_E:
-       //TODO generate stack sub here
+       gen_subs();
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
        break;
 
     case E_MUL_E:
-       //TODO generate stack mul here
+       gen_muls();
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
        break;
     
     case E_DIV_E:
-       //TODO generate stack mul here
+       gen_divs();
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
        break;
     
     case E_IDIV_E:
-       //TODO generate stack mul here
+       gen_idivs();
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
@@ -389,10 +389,10 @@ int expression(Parser* parser)
 
             if (expr_parser->curr_sym.symbol == VALUE)
             {   
-                //check if all current id is deffined 
-                //if()
+                //TODO check if all current id is deffined 
 
                 //generate stack push instruction here
+                gen_pushs(parser->curr_token, !parser->in_function);
                 DEBUG_PRINT("pushing value to the stack \n");
             }            
 

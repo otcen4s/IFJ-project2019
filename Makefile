@@ -14,7 +14,7 @@ test : $(PATHB) $(BIN)
 	./$(PATHB)string_lib_test
 	./$(PATHB)scanner_test
 	./$(PATHB)stack_test
-	./$(PATHB)generator_test
+	#./$(PATHB)generator_test
 	./$(PATHB)parser_test
 	./$(PATHB)symtable_test
 	./$(PATHB)expr_test
@@ -44,7 +44,7 @@ $(PATHB)parser_test : $(PATHT)parser_test.c $(PATHS)parser.c $(PATHS)string_lib.
 $(PATHB)symtable_test : $(PATHT)symtable_test.c $(PATHS)symtable.c $(PATHS)string_lib.c
 	$(CC) $(CFLAGS) $^ -o $@
 	
-$(PATHB)expr_test : $(PATHT)expr_test.c $(PATHS)parser.c $(PATHS)string_lib.c $(PATHS)scanner.c $(PATHS)symtable.c $(PATHS)stack.c $(PATHS)expr_parser.c  $(PATHS)scanner.c 
+$(PATHB)expr_test : $(PATHT)expr_test.c $(PATHS)parser.c $(PATHS)string_lib.c $(PATHS)scanner.c $(PATHS)symtable.c $(PATHS)stack.c $(PATHS)expr_parser.c  $(PATHS)scanner.c $(PATHS)generator.c
 	$(CC) $(CFLAGS) $^ -o $@
 
 

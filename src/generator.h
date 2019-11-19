@@ -25,6 +25,8 @@ void gen_adds();
 void gen_subs();
 void gen_divs();
 void gen_idivs();
+void gen_muls();
+
 
 void setScope(char *scope, bool isGlobal);
 
