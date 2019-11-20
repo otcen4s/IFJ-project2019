@@ -340,6 +340,7 @@ int reduce(Expr_parser * expr_parser)
     default:
         return INTERNAL_ERROR; 
     }
+    return NO_ERROR; 
 }
 
 /////////////////////////////////////////////////////////////////////////////////
