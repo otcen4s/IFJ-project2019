@@ -356,13 +356,26 @@ int expression(Parser* parser)
     Expr_parser e;
     Expr_parser * expr_parser = &e; 
     init_expr_parser(expr_parser);
-    
+
+    //first 2 token are alredy readed 
+    //this var helps to determine if they were processed alredy
+    int token_cnt= 0;    
     
     //proceessing whole expression token by token
     while(1)
-    {        
+    {
+        token_cnt ++;
         //set current symbol atributes in expr_parser based on currently readed token
-        set_symbol_to_curr_token(parser->curr_token, expr_parser);
+        //need to check which token we are on because 2 were prereaded and passed in args 
+        if(token_cnt == 1)
+        {
+            set_symbol_to_curr_token(parser->previous_token, expr_parser);
+        }
+        else
+        {
+            set_symbol_to_curr_token(parser->curr_token, expr_parser);
+        }
+        
         DEBUG_PRINT("current readed sym %d \n",expr_parser->curr_sym.symbol);
         //get current stack top symbol
         int err = NO_ERROR;
@@ -397,10 +410,13 @@ int expression(Parser* parser)
                 DEBUG_PRINT("pushing value to the stack \n");
             }            
 
-            //get next token
-            int err;
-            parser->curr_token = read_token(parser->scanner, &err);
-            if(err) return err;
+            //get next token but only if 2 prereded tokens were processed alredy
+            if(token_cnt >= 2)
+            {
+                int err;
+                parser->curr_token = read_token(parser->scanner, &err);
+                if(err) return err;
+            }
         }
 
         /***************** REDUCE *********************************/
