@@ -52,9 +52,6 @@ int arg (Parser *parser);
 
 /********* GLOBAL VARIABELS ***********/
 int counter_var = 1;
-bool is_in_if = false;
-bool is_in_while = false;
-bool is_in_def = false;
 unsigned nested_cnt = 0;
 
 
@@ -68,6 +65,9 @@ int init_parser(Parser* parser)
     parser->curr_token.type = -1;
     parser->symbol_data_local = NULL;
     parser->symbol_data_global = NULL;
+    parser->is_in_def = false;
+    parser->is_in_if = false;
+    parser->is_in_while = false;
     //parser->symbol_data_global->params_count_defined = 0;
     //parser->symbol_data_global->params_count_used = 0;
 
@@ -154,7 +154,7 @@ int start_compiler(char* src_file_name)
 */
 int statement(Parser *parser)
 {
-    is_in_def = is_in_if = is_in_while = false;
+    parser->is_in_def = parser->is_in_if = parser->is_in_while = false;
     int err;
     GET_NEXT_TOKEN();
 
@@ -171,7 +171,7 @@ int statement(Parser *parser)
     /* Rule 3. <statement> -> DEF ID ( <params> ): EOL INDENT <statement_inside> <end> DEDENT <statement> */
     if(parser->curr_token.type == KEYWORD_DEF)
     {
-        is_in_def = true; // we are in the definition of function
+        parser->is_in_def = true; // we are in the definition of function
         bool used_function = false; // help variable for detection of used function before definition
         
         /* STATE: DEF ID */
@@ -239,7 +239,7 @@ int statement(Parser *parser)
     /* Rule 4. <statement> -> IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE : EOL INDENT <statement_inside> <end> DEDENT <statement> */
     if(parser->curr_token.type == KEYWORD_IF)
     {
-        is_in_if = true;
+        parser->is_in_if = true;
         STORE_NEXT_TOKEN();
         GET_NEXT_TOKEN();
         // expression_parser function call
@@ -294,7 +294,7 @@ int statement(Parser *parser)
     /* Rule 5. <statement> -> WHILE <expression_start>: EOL INDENT <statement_inside> <end> DEDENT <statement> */
     if(parser->curr_token.type == KEYWORD_WHILE)
     {
-        is_in_while = true;
+        parser->is_in_while = true;
         // expression_parser function call
         STORE_NEXT_TOKEN();
         GET_NEXT_TOKEN();

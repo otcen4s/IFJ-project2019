@@ -20,6 +20,9 @@ typedef struct
     tSymbol_item* symbol_data_global;
     tSymbol_item* symbol_data_local; 
     tSymbol_item* left_side; // for storing current left hand side identifier 
+    bool is_in_if;
+    bool is_in_while;
+    bool is_in_def;
     //int params_count_defined;
 } Parser;
 
