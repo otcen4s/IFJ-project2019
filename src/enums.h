@@ -29,6 +29,7 @@ typedef enum {
 	TOKEN_MINUS,	// -
 	TOKEN_MULTIPLICATION,	// *
 	TOKEN_DIVISION,		// /
+	TOKEN_IDIV,         // // 
 	TOKEN_GREATER_THAN,	// >
 	TOKEN_EQUAL,		// ==
 	TOKEN_NOT_EQUAL,	// !=
@@ -41,6 +42,7 @@ typedef enum {
 	TOKEN_INTEGER,
 	TOKEN_DECIMAL,
 	TOKEN_STRING,
+
 
 	TOKEN_EOL,		// end of line
 	TOKEN_EOF,		// end of file
@@ -63,6 +65,7 @@ typedef enum {
 	MINUS,
 	MUL,
 	DIV,
+	IDIV,
 	GTH,
 	EQ,
 	NEQ,
@@ -118,6 +121,7 @@ typedef enum {
 	STATE_DOCSTRING_VALID,
 	STATE_DOCSTRING_EXIT_1,
 	STATE_DOCSTRING_EXIT_2,
+	STATE_DOCSTRING_ESCAPE_SEQ,
 	STATE_NUMBER,
 	STATE_NUMBER_DECIMAL,
 	STATE_NUMBER_EXPONENT,

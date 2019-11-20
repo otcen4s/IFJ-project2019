@@ -5,6 +5,8 @@
 #include "enums.h"
 #include "stack.h"
 #include "parser.h"
+#include "generator.h"
+#include "typedefs.h"
 
 //Symbol struct definition is in stack.h
 
@@ -12,7 +14,6 @@
 typedef enum{
 	S, //SHIFT
 	R, // REDUCE
-	E, //EQ
 	F, // FAILED
 	A //ACCEPT
 } Expr_parser_actions; 
@@ -28,6 +29,7 @@ typedef enum{
 	E_MINUS_E,
 	E_MUL_E,
 	E_DIV_E,
+	E_IDIV_E,
 	E_EQ_E,
 	E_GTH_E,
 	E_LTH_E,

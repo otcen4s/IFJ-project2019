@@ -24,9 +24,71 @@ int generator_begin() {
 
     // generate header
     ADDCODE(".IFJcode19");
-    // ADDCODE("label $main");
-    // ADDCODE("createframe");
-    // ADDCODE("pushframe");
+
+    // TODO defining global variables to use in functions, maybe not the best approach
+    ADDCODE("DEFVAR GF@$op1");
+    ADDCODE("DEFVAR GF@$op2");
+    ADDCODE("DEFVAR GF@$opType1");
+    ADDCODE("DEFVAR GF@$opType2");
+    ADDCODE("DEFVAR GF@$temp");
+    ADDCODE("DEFVAR GF@$operation");
+    
+    ADDCODE("JUMP $$main");
+    
+    ADDCODE("LABEL $error");
+    ADDCODE("EXIT int@4");
+    
+    ADDCODE("LABEL $finish");
+    ADDCODE("PUSHS GF@$op1");
+    ADDCODE("PUSHS GF@$op2");
+    ADDCODE("RETURN");
+    
+    ADDCODE("LABEL $op1String");
+    ADDCODE("JUMPIFNEQ $error GF@$opType2 string@string");
+    ADDCODE("CONCAT GF@$temp GF@$op1 GF@$op2");
+    ADDCODE("PUSHS GF@$temp");
+    ADDCODE("RETURN");
+    
+    ADDCODE("LABEL $op1IntOp2Float");
+    ADDCODE("INT2FLOAT GF@$op1 GF@$op1");
+    ADDCODE("JUMP $finish");
+    
+    ADDCODE("LABEL $op1Int");
+    ADDCODE("JUMPIFEQ $error GF@$operation string@f");
+    ADDCODE("JUMPIFEQ $finish GF@$opType2 string@int");
+    ADDCODE("JUMPIFEQ $error GF@$operation string@i");
+    ADDCODE("JUMPIFEQ $op1IntOp2Float GF@$opType2 string@float");
+    ADDCODE("JUMP $error");
+    
+    ADDCODE("LABEL $op1FloatOp2Int");
+    ADDCODE("INT2FLOAT GF@$op2 GF@$op2");
+    ADDCODE("JUMP $finish");
+    
+    ADDCODE("LABEL $op1Float");
+    ADDCODE("JUMPIFEQ $finish GF@$opType2 string@float");
+    ADDCODE("JUMPIFEQ $error GF@$operation string@i");
+    ADDCODE("JUMPIFEQ $error GF@$operation string@f");
+    ADDCODE("JUMPIFEQ $op1FloatOp2Int GF@$opType2 string@int");
+    ADDCODE("JUMP $error");
+
+    ADDCODE("LABEL $typeCheck");
+    ADDCODE("POPS GF@$op1");
+    ADDCODE("TYPE GF@$opType1 GF@$op1");
+    
+    ADDCODE("POPS GF@$op2");
+    ADDCODE("TYPE GF@$opType2 GF@$op2");
+    
+    ADDCODE("JUMPIFEQ $op1Int GF@$opType1 string@int");
+    ADDCODE("JUMPIFEQ $error GF@$operation string@i");
+    
+    ADDCODE("JUMPIFEQ $op1Float GF@$opType1 string@float");
+    ADDCODE("JUMPIFEQ $error GF@$operation string@f");
+    
+    ADDCODE("JUMPIFNEQ $error GF@$operation string@ifs");
+    ADDCODE("JUMPIFEQ $op1String GF@$opType1 string@string");
+    ADDCODE("JUMP $error");
+    
+    ADDCODE("LABEL $$main");
 
     return NO_ERROR;
 }
@@ -41,27 +103,27 @@ void generator_end() {
 
 }
 
-void gen_var(char *var, Type type, Value value, bool isGlobal) {
-    char scope[STRLEN];
-    setScope(scope, isGlobal);
+// void gen_var(char *var, Type type, Value value, bool isGlobal) {
+//     char scope[STRLEN];
+//     setScope(scope, isGlobal);
 
-    str_concat(&line, "defvar", scope, var, NULL);
-    ADDCODE(line.str);
+//     str_concat(&line, "defvar", scope, var, NULL);
+//     ADDCODE(line.str);
 
-    if (type == TYPE_STRING) {
-        str_concat(&line, "move", scope, var, " string@", value.string, NULL);
-    } else if (type == TYPE_INT) {
-        str_concat(&line, "move", scope, var, " int@", value.string, NULL);
-    } else if (type == TYPE_FLOAT) {
-        char temp[STRLEN];
-        sprintf(temp, "%a", value.decimal);
-        str_concat(&line, "move", scope, var, " float@", temp, NULL);
-    } else {
-        str_concat(&line, "move", scope, var, " nil@nil", NULL);
-    }
+//     if (type == TYPE_STRING) {
+//         str_concat(&line, "move", scope, var, " string@", value.string, NULL);
+//     } else if (type == TYPE_INT) {
+//         str_concat(&line, "move", scope, var, " int@", value.string, NULL);
+//     } else if (type == TYPE_FLOAT) {
+//         char temp[STRLEN];
+//         sprintf(temp, "%a", value.decimal);
+//         str_concat(&line, "move", scope, var, " float@", temp, NULL);
+//     } else {
+//         str_concat(&line, "move", scope, var, " nil@nil", NULL);
+//     }
 
-    ADDCODE(line.str);
-}
+//     ADDCODE(line.str);
+// }
 
 void setScope(char *scope, bool isGlobal) {
     if (isGlobal) {
@@ -72,70 +134,172 @@ void setScope(char *scope, bool isGlobal) {
 }
 
 // add, sub, mul, lt, or, ... every function with 2 symb
-void gen_double_symb(char *instruct, Type type, char *var, Value symb1, Value symb2, bool isGlobal) {
+// void gen_double_symb(char *instruct, Type type, char *var, Value symb1, Value symb2, bool isGlobal) {
 
-    char scope[STRLEN];
-    setScope(scope, isGlobal);
+//     char scope[STRLEN];
+//     setScope(scope, isGlobal);
 
-    if (type == TYPE_FLOAT) {
-        char temp[STRLEN];
-        sprintf(temp, " float@%a float@%a", symb1.decimal, symb2.decimal);
+//     if (type == TYPE_FLOAT) {
+//         char temp[STRLEN];
+//         sprintf(temp, " float@%a float@%a", symb1.decimal, symb2.decimal);
 
-        str_concat(&line, instruct, scope, var, temp, NULL);
-    } else {
-        char varType[STRLEN];
-        if (type == TYPE_INT) {
-            strcpy(varType, " int@");
-        } else if (type == TYPE_STRING) {
-            strcpy(varType, " string@");
-        } else if (type == TYPE_BOOL) {
-            strcpy(varType, " bool@");
-        }
+//         str_concat(&line, instruct, scope, var, temp, NULL);
+//     } else {
+//         char varType[STRLEN];
+//         if (type == TYPE_INT) {
+//             strcpy(varType, " int@");
+//         } else if (type == TYPE_STRING) {
+//             strcpy(varType, " string@");
+//         } else if (type == TYPE_BOOL) {
+//             strcpy(varType, " bool@");
+//         }
         
-        str_concat(&line, instruct, scope, var, varType, symb1.string, varType, symb2.string, NULL);
-    }
+//         str_concat(&line, instruct, scope, var, varType, symb1.string, varType, symb2.string, NULL);
+//     }
 
-    ADDCODE(line.str);
-}
-
-void gen_single_symb(char *instruct, Type type, char *var, Value symb, bool isGlobal) {
-
-    char scope[STRLEN];
-    setScope(scope, isGlobal);
-
-    if (type == TYPE_FLOAT) {
-        char temp[STRLEN];
-        sprintf(temp, " float@%a", symb.decimal);
-
-        str_concat(&line, instruct, scope, var, temp, NULL);
-    } else {
-        char varType[STRLEN];
-        if (type == TYPE_INT) {
-            strcpy(varType, " int@");
-        } else if (type == TYPE_STRING) {
-            strcpy(varType, " string@");
-        } else if (type == TYPE_BOOL) {
-            strcpy(varType, " bool@");
-        }
-        
-        str_concat(&line, instruct, scope, var, varType, symb.string, NULL);
-    }
-
-    ADDCODE(line.str);
-}
-
-// gen_pushs(symb, Type type, Symb symb) {
-
-//     ADDCODE(strcat("PUSHS ", ));
-
+//     ADDCODE(line.str);
 // }
 
-void gen_print(char *printStr) {
-    str_concat(&line, "write GF@", printStr, NULL);
+// void gen_single_symb(char *instruct, Type type, char *var, Value symb, bool isGlobal) {
 
-    ADDCODE(line.str);
+//     char scope[STRLEN];
+//     setScope(scope, isGlobal);
+
+//     if (type == TYPE_FLOAT) {
+//         char temp[STRLEN];
+//         sprintf(temp, " float@%a", symb.decimal);
+
+//         str_concat(&line, instruct, scope, var, temp, NULL);
+//     } else {
+//         char varType[STRLEN];
+//         if (type == TYPE_INT) {
+//             strcpy(varType, " int@");
+//         } else if (type == TYPE_STRING) {
+//             strcpy(varType, " string@");
+//         } else if (type == TYPE_BOOL) {
+//             strcpy(varType, " bool@");
+//         }
+        
+//         str_concat(&line, instruct, scope, var, varType, symb.string, NULL);
+//     }
+
+//     ADDCODE(line.str);
+// }
+
+void gen_pushs(Token token, bool isGlobal) {
+
+    char temp[STRLEN];
+
+    if (token.type == TOKEN_INTEGER) {
+        sprintf(temp, "PUSHS int@%d", token.attribute.integer);
+    } else if (token.type == TOKEN_DECIMAL) {
+        sprintf(temp, "PUSHS float@%a", token.attribute.decimal);
+    } else if (token.type == TOKEN_STRING) {
+        sprintf(temp, "PUSHS string@%s", token.attribute.string.str);
+    } else if (token.type == TOKEN_IDENTIFIER) {
+        str_concat(&line, "PUSHS ", (isGlobal) ? "GF@" : "LF@", token.attribute.string.str, NULL);
+        strcpy(temp, line.str);
+    }
+
+    ADDCODE(temp);
+    
 }
 
+void gen_pops(char *var, bool isGlobal) {
+    str_concat(&line, "POPS ", (isGlobal) ? "GF@" : "LF@", var, NULL);
+
+    ADDCODE(line.str);
+
+}
+
+void gen_adds() {
+    ADDCODE("MOVE GF@$operation string@ifs");
+    ADDCODE("CALL $typeCheck");
+
+    ADDCODE("JUMPIFEQ $isString GF@$opType1 string@string");
+    ADDCODE("ADDS");
+    ADDCODE("LABEL $isString");
+
+}
+
+void gen_subs() {
+    ADDCODE("MOVE GF@$operation string@if");
+    ADDCODE("CALL $typeCheck");
+
+    ADDCODE("SUBS");
+}
+
+void gen_muls() {
+    ADDCODE("MOVE GF@$operation string@if");
+    ADDCODE("CALL $typeCheck");
+
+    ADDCODE("MULS");
+}
+
+void gen_divs() {
+    ADDCODE("MOVE GF@$operation string@f");
+    ADDCODE("CALL $typeCheck");
+
+    ADDCODE("DIVS");
+}
+
+void gen_idivs() {
+    ADDCODE("MOVE GF@$operation string@i");
+    ADDCODE("CALL $typeCheck");
+
+    ADDCODE("IDIVS");
+}
+
+void gen_print(unsigned n, bool isGlobal, Token token, ...) {
+
+    va_list ap;
+    char temp[STRLEN];
+
+    va_start(ap, token);
+
+    for (unsigned i = 0; i < n; i++) {
+        str_copy(&line, "WRITE string@");
+
+        if (token.type == TOKEN_INTEGER) {
+            sprintf(temp, "%d", token.attribute.integer);
+            str_append(&line, temp);
+        } else if (token.type ==  TOKEN_DECIMAL) {
+            sprintf(temp, "%a", token.attribute.decimal);
+            str_append(&line, temp);
+        } else if (token.type == KEYWORD_NONE) {
+            strcpy(temp, "None");
+            str_append(&line, temp);
+        } else if (token.type == TOKEN_STRING) {
+            strcpy(temp, "");
+            int outJ = 0;
+            for (int j = 0; j < strlen(token.attribute.string.str); j++) {
+                if (token.attribute.string.str[j] == ' ') {
+                    temp[outJ++] = '\\';
+                    temp[outJ++] = '0';
+                    temp[outJ++] = '3';
+                    temp[outJ++] = '2';
+                } else {
+                    temp[outJ++] = token.attribute.string.str[j];
+                }
+            }
+
+            str_append(&line, temp);
+        } else if (token.type == TOKEN_IDENTIFIER) {
+            str_concat(&line, "WRITE ", (isGlobal) ? "GF@" : "LF@", token.attribute.string.str, NULL);
+        }
+
+        ADDCODE(line.str);
+        token = va_arg(ap, Token);
+    }
+
+    va_end(ap);
+
+    // add new line at the end
+    ADDCODE("WRITE string@\\010");
+
+}
+
+// TODO remove?
 void gen_defvar(char *var) {
     str_concat(&line, "defvar GF@", var, NULL);
 

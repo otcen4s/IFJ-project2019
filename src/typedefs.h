@@ -1,3 +1,6 @@
+#ifndef _TYPEDEFS_H
+#define _TYPEDEFS_H
+
 #include "enums.h"
 #include  "string_lib.h"
 
@@ -26,3 +29,5 @@ typedef enum
     TYPE_INTEGER,
     TYPE_VARIABLE
 } Type;
+
+#endif

@@ -17,17 +17,16 @@ void test1(void)
 
     TEST_ASSERT_EQUAL_INT32(NO_ERROR, generator_begin());
 
-    gen_defvar("dlzka");
+    Token token;
+    token.type = TOKEN_IDENTIFIER;
+    str_init(&(token.attribute.string));
+    str_copy(&(token.attribute.string), "dlzka");
 
-    Value val1, val2;
-    val1.string = "auto";
-    val2.decimal = 10.0;
+    Token token2;
+    token2.type = TOKEN_INTEGER;
+    token2.attribute.integer = 69;
 
-    gen_single_symb("adds", TYPE_STRING, "dlzka", val1, true);
-
-    // gen_var("neviem", TYPE_FLOAT, val1, true);
-
-    gen_print("dlzka");
+    gen_print(2, true, token, token2);
 
     generate_code(sourceCode);
 }

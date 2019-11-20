@@ -1,5 +1,5 @@
 #include "expr_parser.h"
-#define DEBUG
+//#define DEBUG
 
 /******MACROS********/
 
@@ -24,23 +24,24 @@ int get_reduction_rule(Expr_parser* expr_parser);
  * currently readed symbol and topmost terminal symbol
  * on symbol stack
  **/
-int parsing_table[14][14] =
+int parsing_table[15][15] =
 {
-//	  +  -  *  /  > ==  != <= >= <  (  )  o  $ 
-	{ R, R, S, S, R, R, R, R, R, R, S, R, S, R }, // +
-    { R, R, S, S, R, R, R, R, R, R, S, R, S, R }, //-
-	{ R, R, R, R, R, R, R, R, R, R, S, R, S, R }, // *
-    { R, R, R, R, R, R, R, R, R, R, S, R, S, R }, // /
-    { S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // >
-	{ S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // ==
-    { S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // !=
-    { S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // <=
-    { S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // >=
-    { S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // <
-	{ S, S, S, S, S, S, S, S, S, S, S, S, S, F }, // (
-	{ R, R, R, R, R, R, R, R, R, R, F, R, F, R }, // )
-	{ R, R, R, R, R, R, R, R, R, R, F, R, F, R }, // o operand 
-	{ S, S, S, S, S, S, S, S, S, S, S, F, S, A }, // $
+//	  +  -  *  /  // > ==  != <= >= <  (  )  o  $ 
+	{ R, R, S, S, S, R, R, R, R, R, R, S, R, S, R }, // +
+    { R, R, S, S, S, R, R, R, R, R, R, S, R, S, R }, //-
+	{ R, R, R, R, R, R, R, R, R, R, R, S, R, S, R }, // *
+    { R, R, R, R, R, R, R, R, R, R, R, S, R, S, R }, // /
+    { R, R, R, R, R, R, R, R, R, R, R, S, R, S, R }, // //
+    { S, S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // >
+	{ S, S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // ==
+    { S, S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // !=
+    { S, S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // <=
+    { S, S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // >=
+    { S, S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // <
+	{ S, S, S, S, S, S, S, S, S, S, S, S, S, S, F }, // (
+	{ R, R, R, R, R, R, R, R, R, R, R, F, R, F, R }, // )
+	{ R, R, R, R, R, R, R, R, R, R, R, F, R, F, R }, // o operand 
+	{ S, S, S, S, S, S, S, S, S, S, S, S, F, S, A }, // $
 };
 
 
@@ -155,6 +156,15 @@ int get_reduction_rule(Expr_parser* expr_parser)
         return E_DIV_E;
     }
 
+        
+    /********* E -> E // E ***************/
+    if( expr_parser->op1.symbol == NON_TERM &&
+        expr_parser->op2.symbol == IDIV &&
+        expr_parser->op3.symbol == NON_TERM)
+    {
+        return E_IDIV_E;
+    }
+
      /********* E -> E == E ***************/
     if( expr_parser->op1.symbol == NON_TERM &&
         expr_parser->op2.symbol == EQ &&
@@ -251,28 +261,35 @@ int reduce(Expr_parser * expr_parser)
     switch (rule_to_apply)
     {
     case E_PLUS_E:
-       //TODO generate stack add here
+       gen_adds();
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
        break;
 
     case E_MINUS_E:
-       //TODO generate stack sub here
+       gen_subs();
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
        break;
 
     case E_MUL_E:
-       //TODO generate stack mul here
+       gen_muls();
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
        break;
     
     case E_DIV_E:
-       //TODO generate stack mul here
+       gen_divs();
+       //add new not terminal which represents result to the sym stack
+       err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
+       if(err) return INTERNAL_ERROR;
+       break;
+    
+    case E_IDIV_E:
+       gen_idivs();
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
@@ -371,8 +388,11 @@ int expression(Parser* parser)
             } 
 
             if (expr_parser->curr_sym.symbol == VALUE)
-            {                 
+            {   
+                //TODO check if all current id is deffined 
+
                 //generate stack push instruction here
+                gen_pushs(parser->curr_token, !parser->in_function);
                 DEBUG_PRINT("pushing value to the stack \n");
             }            
 
