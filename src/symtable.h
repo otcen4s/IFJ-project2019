@@ -78,7 +78,7 @@ typedef struct tSymbol
     tSymbol_item *item_array[]; // pointer to array of structures
 }tSymbol;
 
-int symtab_init(tSymbol *table);
+int symtab_init(tSymbol **table);
 
 void symtab_clear(tSymbol *table);
 

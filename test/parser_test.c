@@ -12,7 +12,7 @@ void tearDown(void)
 
 void test1(void)
 {
-    //TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/parser_test1.txt"));
+    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/parser_test1.txt"));
 }
 
 

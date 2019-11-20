@@ -59,7 +59,10 @@ unsigned nested_cnt = 0;
 
 int init_parser(Parser* parser)
 {
-    if(((parser->scanner = malloc(sizeof(Scanner))) == NULL) || (symtab_init(parser->global_table)) || (symtab_init(parser->local_table))) return INTERNAL_ERROR;
+    if(((parser->scanner = malloc(sizeof(Scanner))) == NULL) || 
+    (symtab_init(&(parser->global_table))) || 
+    (symtab_init(&(parser->local_table)))) 
+    return INTERNAL_ERROR;
 
     int err;
     parser->curr_token.type = -1;
@@ -114,7 +117,7 @@ int start_compiler(char* src_file_name)
     Parser p;
     Parser *parser = &p; 
     if(init_parser(parser))  return INTERNAL_ERROR;
-
+    
     //initialisation of scanner 
     if(init_scanner(parser->scanner, src_file_name)) return INTERNAL_ERROR;
 
@@ -160,10 +163,11 @@ int statement(Parser *parser)
 
     /* Rule 1. <statement> -> EOL */
     if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
-    
+  
     /* Rule 2. <statement> -> EOF <statement>*/
     if(parser->curr_token.type == TOKEN_EOL) 
     {
+        printf("in eol \n");
         err = statement(parser);
         CHECK_ERROR();
     }
