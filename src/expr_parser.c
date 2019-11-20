@@ -392,7 +392,7 @@ int expression(Parser* parser)
                 //TODO check if all current id is deffined 
 
                 //generate stack push instruction here
-                gen_pushs(parser->curr_token, !parser->in_function);
+                gen_pushs(parser->curr_token, !parser->is_in_def);
                 DEBUG_PRINT("pushing value to the stack \n");
             }            
 

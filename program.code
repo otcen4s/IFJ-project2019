@@ -48,11 +48,11 @@ JUMPIFNEQ $error GF@$operation string@ifs
 JUMPIFEQ $op1String GF@$opType1 string@string
 JUMP $error
 LABEL $$main
-PUSHS int@4
+PUSHS int@2
 PUSHS int@3
-MOVE GF@$operation string@if
+MOVE GF@$operation string@i
 CALL $typeCheck
-SUBS
+IDIVS
 defvar GF@test_res
 POPS GF@test_res
 WRITE GF@test_res
