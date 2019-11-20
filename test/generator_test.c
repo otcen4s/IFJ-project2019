@@ -18,9 +18,9 @@ void test1(void)
     TEST_ASSERT_EQUAL_INT32(NO_ERROR, generator_begin());
 
     Token token;
-    token.type = TOKEN_IDENTIFIER;
+    token.type = TOKEN_STRING;
     str_init(&(token.attribute.string));
-    str_copy(&(token.attribute.string), "dlzka");
+    str_copy(&(token.attribute.string), "Dlzka mojej ciciny je ");
 
     Token token2;
     token2.type = TOKEN_INTEGER;

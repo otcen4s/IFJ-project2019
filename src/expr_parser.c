@@ -261,35 +261,35 @@ int reduce(Expr_parser * expr_parser)
     switch (rule_to_apply)
     {
     case E_PLUS_E:
-       gen_adds();
+       gen_stack("adds");
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
        break;
 
     case E_MINUS_E:
-       gen_subs();
+       gen_stack("subs");
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
        break;
 
     case E_MUL_E:
-       gen_muls();
+       gen_stack("muls");
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
        break;
     
     case E_DIV_E:
-       gen_divs();
+       gen_stack("divs");
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
        break;
     
     case E_IDIV_E:
-       gen_idivs();
+       gen_stack("idivs");
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;

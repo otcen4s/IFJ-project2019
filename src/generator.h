@@ -29,5 +29,6 @@ void gen_muls();
 
 
 void setScope(char *scope, bool isGlobal);
+const char * replace_space(char *string);
 
 #endif
