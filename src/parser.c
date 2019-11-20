@@ -486,22 +486,24 @@ int statement_inside(Parser *parser)
 int expression_start(Parser *parser)
 {
     int err;
-
+    tString key;
     /* STATE: ID = (( ID */
     STORE_NEXT_TOKEN(); // same as GET_NEXT_TOKEN() but this stores token for later use
-
+    
+    
+    
     switch(parser->previous_token.type)
     {
         /* STATE: ID = ID */
         case TOKEN_IDENTIFIER:
-            GET_KEY();  
+            key = parser->curr_token.attribute.string;  
             GET_NEXT_TOKEN();
             /* STATE: ID = ID ( */
             if(parser->curr_token.type != TOKEN_LEFT_BRACKET) // indicates it's an function call (not built_in function)
             {
                 parser->symbol_data_global = symtab_lookup(parser->global_table, key.str, &err);
                 CHECK_ERROR();
-                if((parser->symbol_data_global->symbol_state != SYMBOL_DEFINED) && (parser->symbol_data_global != NULL));
+                if((parser->symbol_data_global->symbol_state != SYMBOL_DEFINED) && (parser->symbol_data_global != NULL))
                 {
                     return UNDEFINE_REDEFINE_ERROR;
                 }
@@ -539,14 +541,17 @@ int expression_start(Parser *parser)
             break;
 
         case KEYWORD_LEN:
-            GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);  
-
+            GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);
+            
+            break;  
         case KEYWORD_SUBSTR:
             GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);
-
+            
+            break;
         case KEYWORD_ORD:
             GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);
-
+            
+            break;
         case KEYWORD_CHR:
             GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);
             
