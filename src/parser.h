@@ -9,6 +9,7 @@
 #include "function_str.h"
 #include <stdlib.h>
 #include <stdbool.h>
+#include "expr_parser.h"
 
 typedef struct
 {
@@ -23,7 +24,8 @@ typedef struct
     bool is_in_if;
     bool is_in_while;
     bool is_in_def;
-    //int params_count_defined;
+    bool is_in_print;
+    unsigned nested_cnt = 0;
 } Parser;
 
 int start_compiler(char* src_file_name);
