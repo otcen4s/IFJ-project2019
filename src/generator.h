@@ -24,6 +24,11 @@ void gen_pushs(Token token, bool global);
 void gen_pops(char *var, bool global);
 void gen_stack(const char *instruct);
 
+void gen_if_start();
+void gen_if_end();
+void gen_else_start();
+void gen_else_end();
+
 const char *replace_space(char *string);
 
 #endif

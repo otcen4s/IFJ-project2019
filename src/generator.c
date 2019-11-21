@@ -12,13 +12,15 @@ str_append(&code, line); \
 #define ISGLOBAL(global) \
 global ? "GF@" : "LF@" \
 
+#define STRLEN 128
+
 tString code;
 tString line;
 tString helper;
 
 int error;
-
-#define STRLEN 128
+int uid = 0;
+char uidStr[STRLEN];
 
 int generator_begin() {
     if ((error = str_init(&code))) {
@@ -214,6 +216,41 @@ int generator_begin() {
     ADDLINE("IDIVS");
     ADDLINE("RETURN");
 
+    // if function definition
+    ADDLINE("LABEL $if");
+    ADDLINE("POPS GF@$op1");
+    ADDLINE("TYPE GF@$op1Type GF@$op1");
+
+    ADDLINE("JUMPIFEQ $ifInt GF@$op1Type string@int");
+    ADDLINE("JUMPIFEQ $ifFloat GF@$op1Type string@float");
+    ADDLINE("JUMPIFEQ $ifString GF@$op1Type string@string");
+    ADDLINE("JUMPIFEQ $ifFalse GF@$op1Type string@nil");
+    ADDLINE("JUMPIFEQ $ifBool GF@$op1Type string@bool");
+
+    ADDLINE("LABEL $ifInt");
+    ADDLINE("JUMPIFEQ $ifFalse GF@$op1 int@0");
+    ADDLINE("JUMP $ifTrue");
+
+    ADDLINE("LABEL $ifFloat");
+    ADDLINE("JUMPIFEQ $ifFalse GF@$op1 float@0x0p+0");
+    ADDLINE("JUMP $ifTrue");
+
+    ADDLINE("LABEL $ifString");
+    ADDLINE("JUMPIFEQ $ifFalse GF@$op1 string@");
+    ADDLINE("JUMP $ifTrue");
+
+    ADDLINE("LABEL $ifBool");
+    ADDLINE("JUMPIFEQ $ifFalse GF@$op1 bool@false");
+    ADDLINE("JUMP $ifTrue");
+
+    ADDLINE("LABEL $ifTrue");
+    ADDLINE("MOVE GF@$temp bool@true");
+    ADDLINE("RETURN");
+
+    ADDLINE("LABEL $ifFalse");
+    ADDLINE("MOVE GF@$temp bool@false");
+    ADDLINE("RETURN");
+
     ADDLINE("LABEL $$main");
 
     return NO_ERROR;
@@ -329,6 +366,28 @@ void gen_stack(const char *instruct) {
 // generate instruction with no parameter
 void gen_instruct(const char *instruct) {
     ADDLINE(instruct);
+}
+
+void gen_if_start() {
+    sprintf(uidStr, "%d", uid++);
+
+    ADDLINE("CALL $if");
+
+    ADDCODE("JUMPIFEQ $if"); ADDCODE(uidStr); ADDLINE("Else GF@$temp bool@false");
+}
+
+void gen_if_end() {
+    ADDCODE("JUMP $if"); ADDCODE(uidStr); ADDLINE("End");
+}
+
+void gen_else_start() {
+    ADDCODE("LABEL $if"); ADDCODE(uidStr); ADDLINE("Else");
+}
+
+void gen_else_end() {
+    ADDCODE("JUMP $if"); ADDCODE(uidStr); ADDLINE("End");
+
+    ADDCODE("LABEL $if"); ADDCODE(uidStr); ADDLINE("End");
 }
 
 // TODO print must return None

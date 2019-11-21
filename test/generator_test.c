@@ -22,20 +22,23 @@ void test1(void)
     token.attribute.integer = 10;
 
     gen_pushs(token, true);
-    gen_pushs(token, true);
 
-    //gen_var("dlzka", true);
-    //gen_stack("adds");
-    
-    gen_instruct("ADDS");
+    gen_if_start();
 
-    gen_defvar("jej");
+    gen_instruct("WRITE string@TRUE\\032");
 
-    gen_pops("jej", true);
-    token.type = TOKEN_IDENTIFIER;
     str_init(&token.attribute.string);
-    str_copy(&token.attribute.string, "jej");
+    str_copy(&token.attribute.string, "Vysla nam nenulova hodnota!");
+    token.type = TOKEN_STRING;
     gen_print(1, true, token);
+
+    gen_if_end();
+
+    gen_else_start();
+
+    gen_instruct("WRITE string@FALSE");
+
+    gen_else_end();
 
     generate_code(sourceCode);
 }

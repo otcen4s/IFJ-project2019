@@ -134,11 +134,41 @@ PUSHS GF@$op1
 PUSHS GF@$op2
 IDIVS
 RETURN
+LABEL $if
+POPS GF@$op1
+TYPE GF@$op1Type GF@$op1
+JUMPIFEQ $ifInt GF@$op1Type string@int
+JUMPIFEQ $ifFloat GF@$op1Type string@float
+JUMPIFEQ $ifString GF@$op1Type string@string
+JUMPIFEQ $ifFalse GF@$op1Type string@nil
+JUMPIFEQ $ifBool GF@$op1Type string@bool
+LABEL $ifInt
+JUMPIFEQ $ifFalse GF@$op1 int@0
+JUMP $ifTrue
+LABEL $ifFloat
+JUMPIFEQ $ifFalse GF@$op1 float@0x0p+0
+JUMP $ifTrue
+LABEL $ifString
+JUMPIFEQ $ifFalse GF@$op1 string@
+JUMP $ifTrue
+LABEL $ifBool
+JUMPIFEQ $ifFalse GF@$op1 bool@false
+JUMP $ifTrue
+LABEL $ifTrue
+MOVE GF@$temp bool@true
+RETURN
+LABEL $ifFalse
+MOVE GF@$temp bool@false
+RETURN
 LABEL $$main
 PUSHS int@10
-PUSHS int@10
-ADDS
-defvar GF@jej
-POPS GF@jej
-WRITE GF@jej
+CALL $if
+JUMPIFEQ $if0Else GF@$temp bool@false
+WRITE string@TRUE\032
+WRITE string@Vysla\032nam\032nenulova\032hodnota!
 WRITE string@\010
+JUMP $if0End
+LABEL $if0Else
+WRITE string@FALSE
+JUMP $if0End
+LABEL $if0End
