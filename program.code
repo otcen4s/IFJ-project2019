@@ -7,44 +7,138 @@ DEFVAR GF@$temp
 JUMP $$main
 LABEL $error
 EXIT int@4
+LABEL $divisionByZero
+EXIT int@9
 LABEL $adds
-POPS GF@$op2
-POPS GF@$op1
-TYPE GF@$op1Type GF@$op1
-TYPE GF@$op2Type GF@$op2
-JUMPIFEQ $sameType GF@$op1Type GF@$op2Type
-JUMPIFEQ $op1Int GF@$op1Type string@int
-JUMPIFEQ $op1Float GF@$op1Type string@float
+JUMPIFEQ $addsSameType GF@$op1Type GF@$op2Type
+JUMPIFEQ $addsOp1Int GF@$op1Type string@int
+JUMPIFEQ $addsOp1Float GF@$op1Type string@float
 JUMP $error
-LABEL $op1Int
+LABEL $addsOp1Int
 JUMPIFNEQ $error GF@$op2Type string@float
 INT2FLOAT GF@$op1 GF@$op1
-JUMP $addFinish
-LABEL $op1Float
+JUMP $addsAddFinish
+LABEL $addsOp1Float
 JUMPIFNEQ $error GF@$op2Type string@int
 INT2FLOAT GF@$op2 GF@$op2
-JUMP $addFinish
-LABEL $sameType
-JUMPIFEQ $addFinish GF@$op1Type string@int
-JUMPIFEQ $addFinish GF@$op1Type string@float
-JUMPIFEQ $concatFinish GF@$op1Type string@string
+JUMP $addsAddFinish
+LABEL $addsSameType
+JUMPIFEQ $addsAddFinish GF@$op1Type string@int
+JUMPIFEQ $addsAddFinish GF@$op1Type string@float
+JUMPIFEQ $addsConcatFinish GF@$op1Type string@string
 JUMP $error
-LABEL $addFinish
+LABEL $addsAddFinish
 PUSHS GF@$op1
 PUSHS GF@$op2
 ADDS
 RETURN
-LABEL $concatFinish
+LABEL $addsConcatFinish
 CONCAT GF@$temp GF@$op1 GF@$op2
 PUSHS GF@$temp
 RETURN
+LABEL $subs
+JUMPIFEQ $subsSameType GF@$op1Type GF@$op2Type
+JUMPIFEQ $subsOp1Int GF@$op1Type string@int
+JUMPIFEQ $subsOp1Float GF@$op1Type string@float
+JUMP $error
+LABEL $subsOp1Int
+JUMPIFNEQ $error GF@$op2Type string@float
+INT2FLOAT GF@$op1 GF@$op1
+JUMP $subsFinish
+LABEL $subsOp1Float
+JUMPIFNEQ $error GF@$op2Type string@int
+INT2FLOAT GF@$op2 GF@$op2
+JUMP $subsFinish
+LABEL $subsSameType
+JUMPIFEQ $subsFinish GF@$op1Type string@int
+JUMPIFEQ $subsFinish GF@$op1Type string@float
+JUMP $error
+LABEL $subsFinish
+PUSHS GF@$op1
+PUSHS GF@$op2
+SUBS
+RETURN
+LABEL $muls
+JUMPIFEQ $mulsSameType GF@$op1Type GF@$op2Type
+JUMPIFEQ $mulsOp1Int GF@$op1Type string@int
+JUMPIFEQ $mulsOp1Float GF@$op1Type string@float
+JUMP $error
+LABEL $mulsOp1Int
+JUMPIFNEQ $error GF@$op2Type string@float
+INT2FLOAT GF@$op1 GF@$op1
+JUMP $mulsFinish
+LABEL $mulsOp1Float
+JUMPIFNEQ $error GF@$op2Type string@int
+INT2FLOAT GF@$op2 GF@$op2
+JUMP $mulsFinish
+LABEL $mulsSameType
+JUMPIFEQ $mulsFinish GF@$op1Type string@int
+JUMPIFEQ $mulsFinish GF@$op1Type string@float
+JUMP $error
+LABEL $mulsFinish
+PUSHS GF@$op1
+PUSHS GF@$op2
+MULS
+RETURN
+LABEL $divs
+JUMPIFEQ $divsSameType GF@$op1Type GF@$op2Type
+JUMPIFEQ $divsOp1Int GF@$op1Type string@int
+JUMPIFEQ $divsOp1Float GF@$op1Type string@float
+JUMP $error
+LABEL $divsOp1Int
+JUMPIFNEQ $error GF@$op2Type string@float
+INT2FLOAT GF@$op1 GF@$op1
+JUMP $divsFinish
+LABEL $divsOp1Float
+JUMPIFNEQ $error GF@$op2Type string@int
+INT2FLOAT GF@$op2 GF@$op2
+JUMP $divsFinish
+LABEL $divsSameType
+JUMPIFEQ $divsFinish GF@$op1Type string@float
+JUMPIFEQ $divsSameTypeInt GF@$op1Type string@int
+JUMP $error
+LABEL $divsSameTypeInt
+INT2FLOAT GF@$op1 GF@$op1
+INT2FLOAT GF@$op2 GF@$op2
+JUMP $divsFinish
+LABEL $divsFinish
+JUMPIFEQ $divisionByZero GF@$op2 float@0x0p+0
+PUSHS GF@$op1
+PUSHS GF@$op2
+DIVS
+RETURN
+LABEL $idivs
+JUMPIFEQ $idivsSameType GF@$op1Type GF@$op2Type
+JUMPIFEQ $idivsOp1Int GF@$op1Type string@int
+JUMPIFEQ $idivsOp1Float GF@$op1Type string@float
+JUMP $error
+LABEL $idivsOp1Int
+JUMPIFNEQ $error GF@$op2Type string@float
+FLOAT2INT GF@$op2 GF@$op2
+JUMP $idivsFinish
+LABEL $idivsOp1Float
+JUMPIFNEQ $error GF@$op2Type string@int
+FLOAT2INT GF@$op1 GF@$op1
+JUMP $idivsFinish
+LABEL $idivsSameType
+JUMPIFEQ $idivsFinish GF@$op1Type string@int
+JUMPIFEQ $idivsSameTypeFloat GF@$op1Type string@float
+JUMP $error
+LABEL $idivsSameTypeFloat
+FLOAT2INT GF@$op1 GF@$op1
+FLOAT2INT GF@$op2 GF@$op2
+JUMP $idivsFinish
+LABEL $idivsFinish
+JUMPIFEQ $divisionByZero GF@$op2 int@0
+PUSHS GF@$op1
+PUSHS GF@$op2
+IDIVS
+RETURN
 LABEL $$main
-PUSHS string@(null)
-PUSHS string@(null)
-CALL $adds
-PUSHS string@(null)
-CALL $adds
-defvar GF@test_res
-POPS GF@test_res
-WRITE GF@test_res
+PUSHS int@10
+PUSHS int@10
+ADDS
+defvar GF@jej
+POPS GF@jej
+WRITE GF@jej
 WRITE string@\010
