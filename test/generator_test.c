@@ -18,15 +18,24 @@ void test1(void)
     TEST_ASSERT_EQUAL_INT32(NO_ERROR, generator_begin());
 
     Token token;
+    token.type = TOKEN_INTEGER;
+    token.attribute.integer = 10;
+
+    gen_pushs(token, true);
+    gen_pushs(token, true);
+
+    //gen_var("dlzka", true);
+    //gen_stack("adds");
+    
+    gen_instruct("ADDS");
+
+    gen_defvar("jej");
+
+    gen_pops("jej", true);
     token.type = TOKEN_IDENTIFIER;
-    str_init(&(token.attribute.string));
-    str_copy(&(token.attribute.string), "dlzka");
-
-    Token token2;
-    token2.type = TOKEN_INTEGER;
-    token2.attribute.integer = 69;
-
-    gen_print(2, true, token, token2);
+    str_init(&token.attribute.string);
+    str_copy(&token.attribute.string, "jej");
+    gen_print(1, true, token);
 
     generate_code(sourceCode);
 }

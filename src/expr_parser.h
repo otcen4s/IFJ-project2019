@@ -7,6 +7,7 @@
 #include "parser.h"
 #include "generator.h"
 #include "typedefs.h"
+#include "symtable.h"
 
 //Symbol struct definition is in stack.h
 

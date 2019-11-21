@@ -1,59 +1,144 @@
 .IFJcode19
 DEFVAR GF@$op1
 DEFVAR GF@$op2
-DEFVAR GF@$opType1
-DEFVAR GF@$opType2
+DEFVAR GF@$op1Type
+DEFVAR GF@$op2Type
 DEFVAR GF@$temp
-DEFVAR GF@$operation
 JUMP $$main
 LABEL $error
 EXIT int@4
-LABEL $finish
+LABEL $divisionByZero
+EXIT int@9
+LABEL $adds
+JUMPIFEQ $addsSameType GF@$op1Type GF@$op2Type
+JUMPIFEQ $addsOp1Int GF@$op1Type string@int
+JUMPIFEQ $addsOp1Float GF@$op1Type string@float
+JUMP $error
+LABEL $addsOp1Int
+JUMPIFNEQ $error GF@$op2Type string@float
+INT2FLOAT GF@$op1 GF@$op1
+JUMP $addsAddFinish
+LABEL $addsOp1Float
+JUMPIFNEQ $error GF@$op2Type string@int
+INT2FLOAT GF@$op2 GF@$op2
+JUMP $addsAddFinish
+LABEL $addsSameType
+JUMPIFEQ $addsAddFinish GF@$op1Type string@int
+JUMPIFEQ $addsAddFinish GF@$op1Type string@float
+JUMPIFEQ $addsConcatFinish GF@$op1Type string@string
+JUMP $error
+LABEL $addsAddFinish
 PUSHS GF@$op1
 PUSHS GF@$op2
+ADDS
 RETURN
-LABEL $op1String
-JUMPIFNEQ $error GF@$opType2 string@string
+LABEL $addsConcatFinish
 CONCAT GF@$temp GF@$op1 GF@$op2
 PUSHS GF@$temp
 RETURN
-LABEL $op1IntOp2Float
+LABEL $subs
+JUMPIFEQ $subsSameType GF@$op1Type GF@$op2Type
+JUMPIFEQ $subsOp1Int GF@$op1Type string@int
+JUMPIFEQ $subsOp1Float GF@$op1Type string@float
+JUMP $error
+LABEL $subsOp1Int
+JUMPIFNEQ $error GF@$op2Type string@float
 INT2FLOAT GF@$op1 GF@$op1
-JUMP $finish
-LABEL $op1Int
-JUMPIFEQ $error GF@$operation string@f
-JUMPIFEQ $finish GF@$opType2 string@int
-JUMPIFEQ $error GF@$operation string@i
-JUMPIFEQ $op1IntOp2Float GF@$opType2 string@float
-JUMP $error
-LABEL $op1FloatOp2Int
+JUMP $subsFinish
+LABEL $subsOp1Float
+JUMPIFNEQ $error GF@$op2Type string@int
 INT2FLOAT GF@$op2 GF@$op2
-JUMP $finish
-LABEL $op1Float
-JUMPIFEQ $finish GF@$opType2 string@float
-JUMPIFEQ $error GF@$operation string@i
-JUMPIFEQ $error GF@$operation string@f
-JUMPIFEQ $op1FloatOp2Int GF@$opType2 string@int
+JUMP $subsFinish
+LABEL $subsSameType
+JUMPIFEQ $subsFinish GF@$op1Type string@int
+JUMPIFEQ $subsFinish GF@$op1Type string@float
 JUMP $error
-LABEL $typeCheck
-POPS GF@$op1
-TYPE GF@$opType1 GF@$op1
-POPS GF@$op2
-TYPE GF@$opType2 GF@$op2
-JUMPIFEQ $op1Int GF@$opType1 string@int
-JUMPIFEQ $error GF@$operation string@i
-JUMPIFEQ $op1Float GF@$opType1 string@float
-JUMPIFEQ $error GF@$operation string@f
-JUMPIFNEQ $error GF@$operation string@ifs
-JUMPIFEQ $op1String GF@$opType1 string@string
+LABEL $subsFinish
+PUSHS GF@$op1
+PUSHS GF@$op2
+SUBS
+RETURN
+LABEL $muls
+JUMPIFEQ $mulsSameType GF@$op1Type GF@$op2Type
+JUMPIFEQ $mulsOp1Int GF@$op1Type string@int
+JUMPIFEQ $mulsOp1Float GF@$op1Type string@float
 JUMP $error
-LABEL $$main
-PUSHS int@2
-PUSHS int@3
-MOVE GF@$operation string@i
-CALL $typeCheck
+LABEL $mulsOp1Int
+JUMPIFNEQ $error GF@$op2Type string@float
+INT2FLOAT GF@$op1 GF@$op1
+JUMP $mulsFinish
+LABEL $mulsOp1Float
+JUMPIFNEQ $error GF@$op2Type string@int
+INT2FLOAT GF@$op2 GF@$op2
+JUMP $mulsFinish
+LABEL $mulsSameType
+JUMPIFEQ $mulsFinish GF@$op1Type string@int
+JUMPIFEQ $mulsFinish GF@$op1Type string@float
+JUMP $error
+LABEL $mulsFinish
+PUSHS GF@$op1
+PUSHS GF@$op2
+MULS
+RETURN
+LABEL $divs
+JUMPIFEQ $divsSameType GF@$op1Type GF@$op2Type
+JUMPIFEQ $divsOp1Int GF@$op1Type string@int
+JUMPIFEQ $divsOp1Float GF@$op1Type string@float
+JUMP $error
+LABEL $divsOp1Int
+JUMPIFNEQ $error GF@$op2Type string@float
+INT2FLOAT GF@$op1 GF@$op1
+JUMP $divsFinish
+LABEL $divsOp1Float
+JUMPIFNEQ $error GF@$op2Type string@int
+INT2FLOAT GF@$op2 GF@$op2
+JUMP $divsFinish
+LABEL $divsSameType
+JUMPIFEQ $divsFinish GF@$op1Type string@float
+JUMPIFEQ $divsSameTypeInt GF@$op1Type string@int
+JUMP $error
+LABEL $divsSameTypeInt
+INT2FLOAT GF@$op1 GF@$op1
+INT2FLOAT GF@$op2 GF@$op2
+JUMP $divsFinish
+LABEL $divsFinish
+JUMPIFEQ $divisionByZero GF@$op2 float@0x0p+0
+PUSHS GF@$op1
+PUSHS GF@$op2
+DIVS
+RETURN
+LABEL $idivs
+JUMPIFEQ $idivsSameType GF@$op1Type GF@$op2Type
+JUMPIFEQ $idivsOp1Int GF@$op1Type string@int
+JUMPIFEQ $idivsOp1Float GF@$op1Type string@float
+JUMP $error
+LABEL $idivsOp1Int
+JUMPIFNEQ $error GF@$op2Type string@float
+FLOAT2INT GF@$op2 GF@$op2
+JUMP $idivsFinish
+LABEL $idivsOp1Float
+JUMPIFNEQ $error GF@$op2Type string@int
+FLOAT2INT GF@$op1 GF@$op1
+JUMP $idivsFinish
+LABEL $idivsSameType
+JUMPIFEQ $idivsFinish GF@$op1Type string@int
+JUMPIFEQ $idivsSameTypeFloat GF@$op1Type string@float
+JUMP $error
+LABEL $idivsSameTypeFloat
+FLOAT2INT GF@$op1 GF@$op1
+FLOAT2INT GF@$op2 GF@$op2
+JUMP $idivsFinish
+LABEL $idivsFinish
+JUMPIFEQ $divisionByZero GF@$op2 int@0
+PUSHS GF@$op1
+PUSHS GF@$op2
 IDIVS
-defvar GF@test_res
-POPS GF@test_res
-WRITE GF@test_res
+RETURN
+LABEL $$main
+PUSHS int@10
+PUSHS int@10
+ADDS
+defvar GF@jej
+POPS GF@jej
+WRITE GF@jej
 WRITE string@\010

@@ -21,15 +21,15 @@ unsigned int symtab_hash_function(const char *str)
 /**
  * Basic initialization of symbol table
 */
-int symtab_init(tSymbol *table)
+int symtab_init(tSymbol **table)
 {
-    if((table = malloc(sizeof(tSymbol) + SYMTAB_SIZE * sizeof(struct tSymbol_item))) == NULL) {return INTERNAL_ERROR;}
-    table->size = 0;
-    table->arr_size = SYMTAB_SIZE;
+    if((*table = malloc(sizeof(tSymbol) + SYMTAB_SIZE * sizeof(struct tSymbol_item))) == NULL) {return INTERNAL_ERROR;}
+    (*table)->size = 0;
+    (*table)->arr_size = SYMTAB_SIZE;
 
     for(size_t i = 0; i < SYMTAB_SIZE; i++)
     {
-        table->item_array[i] = NULL;
+        (*table)->item_array[i] = NULL;
     }
     return 0;
 }

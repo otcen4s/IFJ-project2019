@@ -1,13 +1,20 @@
 #include "generator.h"
 
-#define ADDCODE(line) \
+#define ADDLINE(line) \
 do { \
 str_append(&code, line); \
 str_append(&code, "\n"); \
  } while (0) \
 
+#define ADDCODE(line) \
+str_append(&code, line); \
+
+#define ISGLOBAL(global) \
+global ? "GF@" : "LF@" \
+
 tString code;
 tString line;
+tString helper;
 
 int error;
 
@@ -22,122 +29,219 @@ int generator_begin() {
         return error;
     }
 
+    if ((error = str_init(&helper))) {
+        return error;
+    }
+
     // generate header
-    ADDCODE(".IFJcode19");
+    ADDLINE(".IFJcode19");
 
     // TODO defining global variables to use in functions, maybe not the best approach
-    ADDCODE("DEFVAR GF@$op1");
-    ADDCODE("DEFVAR GF@$op2");
-    ADDCODE("DEFVAR GF@$opType1");
-    ADDCODE("DEFVAR GF@$opType2");
-    ADDCODE("DEFVAR GF@$temp");
-    ADDCODE("DEFVAR GF@$operation");
+    ADDLINE("DEFVAR GF@$op1");
+    ADDLINE("DEFVAR GF@$op2");
+    ADDLINE("DEFVAR GF@$op1Type");
+    ADDLINE("DEFVAR GF@$op2Type");
+    ADDLINE("DEFVAR GF@$temp");
     
-    ADDCODE("JUMP $$main");
+    ADDLINE("JUMP $$main");
     
-    ADDCODE("LABEL $error");
-    ADDCODE("EXIT int@4");
-    
-    ADDCODE("LABEL $finish");
-    ADDCODE("PUSHS GF@$op1");
-    ADDCODE("PUSHS GF@$op2");
-    ADDCODE("RETURN");
-    
-    ADDCODE("LABEL $op1String");
-    ADDCODE("JUMPIFNEQ $error GF@$opType2 string@string");
-    ADDCODE("CONCAT GF@$temp GF@$op1 GF@$op2");
-    ADDCODE("PUSHS GF@$temp");
-    ADDCODE("RETURN");
-    
-    ADDCODE("LABEL $op1IntOp2Float");
-    ADDCODE("INT2FLOAT GF@$op1 GF@$op1");
-    ADDCODE("JUMP $finish");
-    
-    ADDCODE("LABEL $op1Int");
-    ADDCODE("JUMPIFEQ $error GF@$operation string@f");
-    ADDCODE("JUMPIFEQ $finish GF@$opType2 string@int");
-    ADDCODE("JUMPIFEQ $error GF@$operation string@i");
-    ADDCODE("JUMPIFEQ $op1IntOp2Float GF@$opType2 string@float");
-    ADDCODE("JUMP $error");
-    
-    ADDCODE("LABEL $op1FloatOp2Int");
-    ADDCODE("INT2FLOAT GF@$op2 GF@$op2");
-    ADDCODE("JUMP $finish");
-    
-    ADDCODE("LABEL $op1Float");
-    ADDCODE("JUMPIFEQ $finish GF@$opType2 string@float");
-    ADDCODE("JUMPIFEQ $error GF@$operation string@i");
-    ADDCODE("JUMPIFEQ $error GF@$operation string@f");
-    ADDCODE("JUMPIFEQ $op1FloatOp2Int GF@$opType2 string@int");
-    ADDCODE("JUMP $error");
+    ADDLINE("LABEL $error");
+    ADDLINE("EXIT int@4");
 
-    ADDCODE("LABEL $typeCheck");
-    ADDCODE("POPS GF@$op1");
-    ADDCODE("TYPE GF@$opType1 GF@$op1");
+    ADDLINE("LABEL $divisionByZero");
+    ADDLINE("EXIT int@9");
     
-    ADDCODE("POPS GF@$op2");
-    ADDCODE("TYPE GF@$opType2 GF@$op2");
+    // defining function adds
+    ADDLINE("LABEL $adds");
+
+    ADDLINE("JUMPIFEQ $addsSameType GF@$op1Type GF@$op2Type");
+    ADDLINE("JUMPIFEQ $addsOp1Int GF@$op1Type string@int");
+    ADDLINE("JUMPIFEQ $addsOp1Float GF@$op1Type string@float");
+    ADDLINE("JUMP $error");
+
+    ADDLINE("LABEL $addsOp1Int");
+    ADDLINE("JUMPIFNEQ $error GF@$op2Type string@float");
+    ADDLINE("INT2FLOAT GF@$op1 GF@$op1");
+    ADDLINE("JUMP $addsAddFinish");
+
+    ADDLINE("LABEL $addsOp1Float");
+    ADDLINE("JUMPIFNEQ $error GF@$op2Type string@int");
+    ADDLINE("INT2FLOAT GF@$op2 GF@$op2");
+    ADDLINE("JUMP $addsAddFinish");
+
+    ADDLINE("LABEL $addsSameType");
+    ADDLINE("JUMPIFEQ $addsAddFinish GF@$op1Type string@int");
+    ADDLINE("JUMPIFEQ $addsAddFinish GF@$op1Type string@float");
+    ADDLINE("JUMPIFEQ $addsConcatFinish GF@$op1Type string@string");
+    ADDLINE("JUMP $error");
+
+    ADDLINE("LABEL $addsAddFinish");
+    ADDLINE("PUSHS GF@$op1");
+    ADDLINE("PUSHS GF@$op2");
+    ADDLINE("ADDS");
+    ADDLINE("RETURN");
+
+    ADDLINE("LABEL $addsConcatFinish");
+    ADDLINE("CONCAT GF@$temp GF@$op1 GF@$op2");
+    ADDLINE("PUSHS GF@$temp");
+    ADDLINE("RETURN");
     
-    ADDCODE("JUMPIFEQ $op1Int GF@$opType1 string@int");
-    ADDCODE("JUMPIFEQ $error GF@$operation string@i");
-    
-    ADDCODE("JUMPIFEQ $op1Float GF@$opType1 string@float");
-    ADDCODE("JUMPIFEQ $error GF@$operation string@f");
-    
-    ADDCODE("JUMPIFNEQ $error GF@$operation string@ifs");
-    ADDCODE("JUMPIFEQ $op1String GF@$opType1 string@string");
-    ADDCODE("JUMP $error");
-    
-    ADDCODE("LABEL $$main");
+    // defining function subs
+    ADDLINE("LABEL $subs");
+
+    ADDLINE("JUMPIFEQ $subsSameType GF@$op1Type GF@$op2Type");
+    ADDLINE("JUMPIFEQ $subsOp1Int GF@$op1Type string@int");
+    ADDLINE("JUMPIFEQ $subsOp1Float GF@$op1Type string@float");
+    ADDLINE("JUMP $error");
+
+    ADDLINE("LABEL $subsOp1Int");
+    ADDLINE("JUMPIFNEQ $error GF@$op2Type string@float");
+    ADDLINE("INT2FLOAT GF@$op1 GF@$op1");
+    ADDLINE("JUMP $subsFinish");
+
+    ADDLINE("LABEL $subsOp1Float");
+    ADDLINE("JUMPIFNEQ $error GF@$op2Type string@int");
+    ADDLINE("INT2FLOAT GF@$op2 GF@$op2");
+    ADDLINE("JUMP $subsFinish");
+
+    ADDLINE("LABEL $subsSameType");
+    ADDLINE("JUMPIFEQ $subsFinish GF@$op1Type string@int");
+    ADDLINE("JUMPIFEQ $subsFinish GF@$op1Type string@float");
+    ADDLINE("JUMP $error");
+
+    ADDLINE("LABEL $subsFinish");
+    ADDLINE("PUSHS GF@$op1");
+    ADDLINE("PUSHS GF@$op2");
+    ADDLINE("SUBS");
+    ADDLINE("RETURN");
+
+    // defining function muls
+    ADDLINE("LABEL $muls");
+
+    ADDLINE("JUMPIFEQ $mulsSameType GF@$op1Type GF@$op2Type");
+    ADDLINE("JUMPIFEQ $mulsOp1Int GF@$op1Type string@int");
+    ADDLINE("JUMPIFEQ $mulsOp1Float GF@$op1Type string@float");
+    ADDLINE("JUMP $error");
+
+    ADDLINE("LABEL $mulsOp1Int");
+    ADDLINE("JUMPIFNEQ $error GF@$op2Type string@float");
+    ADDLINE("INT2FLOAT GF@$op1 GF@$op1");
+    ADDLINE("JUMP $mulsFinish");
+
+    ADDLINE("LABEL $mulsOp1Float");
+    ADDLINE("JUMPIFNEQ $error GF@$op2Type string@int");
+    ADDLINE("INT2FLOAT GF@$op2 GF@$op2");
+    ADDLINE("JUMP $mulsFinish");
+
+    ADDLINE("LABEL $mulsSameType");
+    ADDLINE("JUMPIFEQ $mulsFinish GF@$op1Type string@int");
+    ADDLINE("JUMPIFEQ $mulsFinish GF@$op1Type string@float");
+    ADDLINE("JUMP $error");
+
+    ADDLINE("LABEL $mulsFinish");
+    ADDLINE("PUSHS GF@$op1");
+    ADDLINE("PUSHS GF@$op2");
+    ADDLINE("MULS");
+    ADDLINE("RETURN");
+
+    // defining function divs
+    ADDLINE("LABEL $divs");
+
+    ADDLINE("JUMPIFEQ $divsSameType GF@$op1Type GF@$op2Type");
+    ADDLINE("JUMPIFEQ $divsOp1Int GF@$op1Type string@int");
+    ADDLINE("JUMPIFEQ $divsOp1Float GF@$op1Type string@float");
+    ADDLINE("JUMP $error");
+
+    ADDLINE("LABEL $divsOp1Int");
+    ADDLINE("JUMPIFNEQ $error GF@$op2Type string@float");
+    ADDLINE("INT2FLOAT GF@$op1 GF@$op1");
+    ADDLINE("JUMP $divsFinish");
+
+    ADDLINE("LABEL $divsOp1Float");
+    ADDLINE("JUMPIFNEQ $error GF@$op2Type string@int");
+    ADDLINE("INT2FLOAT GF@$op2 GF@$op2");
+    ADDLINE("JUMP $divsFinish");
+
+    ADDLINE("LABEL $divsSameType");
+    ADDLINE("JUMPIFEQ $divsFinish GF@$op1Type string@float");
+    ADDLINE("JUMPIFEQ $divsSameTypeInt GF@$op1Type string@int");
+    ADDLINE("JUMP $error");
+
+    ADDLINE("LABEL $divsSameTypeInt");
+    ADDLINE("INT2FLOAT GF@$op1 GF@$op1");
+    ADDLINE("INT2FLOAT GF@$op2 GF@$op2");
+    ADDLINE("JUMP $divsFinish");
+
+    ADDLINE("LABEL $divsFinish");
+    ADDLINE("JUMPIFEQ $divisionByZero GF@$op2 float@0x0p+0");
+    ADDLINE("PUSHS GF@$op1");
+    ADDLINE("PUSHS GF@$op2");
+    ADDLINE("DIVS");
+    ADDLINE("RETURN");
+
+    // defining function idivs
+    ADDLINE("LABEL $idivs");
+
+    ADDLINE("JUMPIFEQ $idivsSameType GF@$op1Type GF@$op2Type");
+    ADDLINE("JUMPIFEQ $idivsOp1Int GF@$op1Type string@int");
+    ADDLINE("JUMPIFEQ $idivsOp1Float GF@$op1Type string@float");
+    ADDLINE("JUMP $error");
+
+    ADDLINE("LABEL $idivsOp1Int");
+    ADDLINE("JUMPIFNEQ $error GF@$op2Type string@float");
+    ADDLINE("FLOAT2INT GF@$op2 GF@$op2");
+    ADDLINE("JUMP $idivsFinish");
+
+    ADDLINE("LABEL $idivsOp1Float");
+    ADDLINE("JUMPIFNEQ $error GF@$op2Type string@int");
+    ADDLINE("FLOAT2INT GF@$op1 GF@$op1");
+    ADDLINE("JUMP $idivsFinish");
+
+    ADDLINE("LABEL $idivsSameType");
+    ADDLINE("JUMPIFEQ $idivsFinish GF@$op1Type string@int");
+    ADDLINE("JUMPIFEQ $idivsSameTypeFloat GF@$op1Type string@float");
+    ADDLINE("JUMP $error");
+
+    ADDLINE("LABEL $idivsSameTypeFloat");
+    ADDLINE("FLOAT2INT GF@$op1 GF@$op1");
+    ADDLINE("FLOAT2INT GF@$op2 GF@$op2");
+    ADDLINE("JUMP $idivsFinish");
+
+    ADDLINE("LABEL $idivsFinish");
+    ADDLINE("JUMPIFEQ $divisionByZero GF@$op2 int@0");
+    ADDLINE("PUSHS GF@$op1");
+    ADDLINE("PUSHS GF@$op2");
+    ADDLINE("IDIVS");
+    ADDLINE("RETURN");
+
+    ADDLINE("LABEL $$main");
 
     return NO_ERROR;
 }
 
 void generator_end() {
 
-    ADDCODE("popframe");
-    ADDCODE("clears");
+    ADDLINE("popframe");
+    ADDLINE("clears");
 
     str_destroy(&code);
     str_destroy(&line);
+    str_destroy(&helper);
 
 }
 
-// void gen_var(char *var, Type type, Value value, bool isGlobal) {
-//     char scope[STRLEN];
-//     setScope(scope, isGlobal);
+void gen_var(char *varName, bool global) {
+    str_concat(&line, ISGLOBAL(global), varName, NULL);
 
-//     str_concat(&line, "defvar", scope, var, NULL);
-//     ADDCODE(line.str);
-
-//     if (type == TYPE_STRING) {
-//         str_concat(&line, "move", scope, var, " string@", value.string, NULL);
-//     } else if (type == TYPE_INT) {
-//         str_concat(&line, "move", scope, var, " int@", value.string, NULL);
-//     } else if (type == TYPE_FLOAT) {
-//         char temp[STRLEN];
-//         sprintf(temp, "%a", value.decimal);
-//         str_concat(&line, "move", scope, var, " float@", temp, NULL);
-//     } else {
-//         str_concat(&line, "move", scope, var, " nil@nil", NULL);
-//     }
-
-//     ADDCODE(line.str);
-// }
-
-void setScope(char *scope, bool isGlobal) {
-    if (isGlobal) {
-        strcpy(scope, " GF@");
-    } else {
-        strcpy(scope, " LF@");
-    }
+    ADDCODE("DEFVAR "); ADDLINE(line.str);
+    ADDCODE("POPS "); ADDLINE(line.str);
 }
 
 // add, sub, mul, lt, or, ... every function with 2 symb
-// void gen_double_symb(char *instruct, Type type, char *var, Value symb1, Value symb2, bool isGlobal) {
+// void gen_double_symb(char *instruct, Type type, char *var, Value symb1, Value symb2, bool global) {
 
 //     char scope[STRLEN];
-//     setScope(scope, isGlobal);
+//     setScope(scope, global);
 
 //     if (type == TYPE_FLOAT) {
 //         char temp[STRLEN];
@@ -157,13 +261,13 @@ void setScope(char *scope, bool isGlobal) {
 //         str_concat(&line, instruct, scope, var, varType, symb1.string, varType, symb2.string, NULL);
 //     }
 
-//     ADDCODE(line.str);
+//     ADDLINE(line.str);
 // }
 
-// void gen_single_symb(char *instruct, Type type, char *var, Value symb, bool isGlobal) {
+// void gen_single_symb(char *instruct, Type type, char *var, Value symb, bool global) {
 
 //     char scope[STRLEN];
-//     setScope(scope, isGlobal);
+//     setScope(scope, global);
 
 //     if (type == TYPE_FLOAT) {
 //         char temp[STRLEN];
@@ -183,10 +287,10 @@ void setScope(char *scope, bool isGlobal) {
 //         str_concat(&line, instruct, scope, var, varType, symb.string, NULL);
 //     }
 
-//     ADDCODE(line.str);
+//     ADDLINE(line.str);
 // }
 
-void gen_pushs(Token token, bool isGlobal) {
+void gen_pushs(Token token, bool global) {
 
     char temp[STRLEN];
 
@@ -195,62 +299,40 @@ void gen_pushs(Token token, bool isGlobal) {
     } else if (token.type == TOKEN_DECIMAL) {
         sprintf(temp, "PUSHS float@%a", token.attribute.decimal);
     } else if (token.type == TOKEN_STRING) {
-        sprintf(temp, "PUSHS string@%s", token.attribute.string.str);
+        sprintf(temp, "PUSHS string@%s", replace_space(token.attribute.string.str));
     } else if (token.type == TOKEN_IDENTIFIER) {
-        str_concat(&line, "PUSHS ", (isGlobal) ? "GF@" : "LF@", token.attribute.string.str, NULL);
+        str_concat(&line, "PUSHS ", ISGLOBAL(global), token.attribute.string.str, NULL);
         strcpy(temp, line.str);
     }
 
-    ADDCODE(temp);
+    ADDLINE(temp);
     
 }
 
-void gen_pops(char *var, bool isGlobal) {
-    str_concat(&line, "POPS ", (isGlobal) ? "GF@" : "LF@", var, NULL);
+void gen_pops(char *var, bool global) {
+    str_concat(&line, "POPS ", ISGLOBAL(global), var, NULL);
 
-    ADDCODE(line.str);
-
-}
-
-void gen_adds() {
-    ADDCODE("MOVE GF@$operation string@ifs");
-    ADDCODE("CALL $typeCheck");
-
-    ADDCODE("JUMPIFEQ $isString GF@$opType1 string@string");
-    ADDCODE("ADDS");
-    ADDCODE("LABEL $isString");
+    ADDLINE(line.str);
 
 }
 
-void gen_subs() {
-    ADDCODE("MOVE GF@$operation string@if");
-    ADDCODE("CALL $typeCheck");
+void gen_stack(const char *instruct) {
+    ADDLINE("POPS GF@$op2");
+    ADDLINE("POPS GF@$op1");
+    ADDLINE("TYPE GF@$op1Type GF@$op1");
+    ADDLINE("TYPE GF@$op2Type GF@$op2");
 
-    ADDCODE("SUBS");
+    // TODO maybe relplace every str_concat with this: (str_concat is practically useless)
+    ADDCODE("CALL $"); ADDLINE(instruct);
 }
 
-void gen_muls() {
-    ADDCODE("MOVE GF@$operation string@if");
-    ADDCODE("CALL $typeCheck");
-
-    ADDCODE("MULS");
+// generate instruction with no parameter
+void gen_instruct(const char *instruct) {
+    ADDLINE(instruct);
 }
 
-void gen_divs() {
-    ADDCODE("MOVE GF@$operation string@f");
-    ADDCODE("CALL $typeCheck");
-
-    ADDCODE("DIVS");
-}
-
-void gen_idivs() {
-    ADDCODE("MOVE GF@$operation string@i");
-    ADDCODE("CALL $typeCheck");
-
-    ADDCODE("IDIVS");
-}
-
-void gen_print(unsigned n, bool isGlobal, Token token, ...) {
+// TODO print must return None
+void gen_print(unsigned n, bool global, Token token, ...) {
 
     va_list ap;
     char temp[STRLEN];
@@ -267,43 +349,48 @@ void gen_print(unsigned n, bool isGlobal, Token token, ...) {
             sprintf(temp, "%a", token.attribute.decimal);
             str_append(&line, temp);
         } else if (token.type == KEYWORD_NONE) {
-            strcpy(temp, "None");
-            str_append(&line, temp);
+            str_append(&line, "None");
         } else if (token.type == TOKEN_STRING) {
-            strcpy(temp, "");
-            int outJ = 0;
-            for (int j = 0; j < strlen(token.attribute.string.str); j++) {
-                if (token.attribute.string.str[j] == ' ') {
-                    temp[outJ++] = '\\';
-                    temp[outJ++] = '0';
-                    temp[outJ++] = '3';
-                    temp[outJ++] = '2';
-                } else {
-                    temp[outJ++] = token.attribute.string.str[j];
-                }
-            }
-
-            str_append(&line, temp);
+            str_append(&line, replace_space(token.attribute.string.str));
         } else if (token.type == TOKEN_IDENTIFIER) {
-            str_concat(&line, "WRITE ", (isGlobal) ? "GF@" : "LF@", token.attribute.string.str, NULL);
+            str_concat(&line, "WRITE ", ISGLOBAL(global), token.attribute.string.str, NULL);
         }
 
-        ADDCODE(line.str);
+        ADDLINE(line.str);
         token = va_arg(ap, Token);
     }
 
     va_end(ap);
 
     // add new line at the end
-    ADDCODE("WRITE string@\\010");
+    ADDLINE("WRITE string@\\010");
 
+}
+
+// TODO we must convert every ASCII chars from 000-032 035 and 092, not just spaces !
+const char *replace_space (char *string) {
+
+    str_copy(&helper, "");
+
+    for (size_t j = 0; j < strlen(string); j++) {
+        if (string[j] == ' ') {
+            str_append(&helper, "\\032");
+        } else {
+            char temp[2];
+            temp[0] = string[j];
+            temp[1] = '\0';
+            str_append(&helper, temp);
+        }
+    }
+
+    return helper.str;
 }
 
 // TODO remove?
 void gen_defvar(char *var) {
     str_concat(&line, "defvar GF@", var, NULL);
 
-    ADDCODE(line.str);
+    ADDLINE(line.str);
 }
 
 void generate_code(FILE *destFile) {
