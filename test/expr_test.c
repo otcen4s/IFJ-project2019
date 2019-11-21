@@ -27,8 +27,10 @@ void expr_test1(void)
     init_parser(pars);
     pars->scanner = scan; 
 
-    //preread token as if it was called from parser
+    //preread 2 tokens as if it was called from parser
     int err= NO_ERROR; 
+    pars->previous_token = read_token(scan, &err);
+    TEST_ASSERT_EQUAL_INT(err, NO_ERROR);
     pars->curr_token = read_token(scan, &err);
     TEST_ASSERT_EQUAL_INT(err, NO_ERROR);
 

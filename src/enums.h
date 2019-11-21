@@ -77,8 +77,8 @@ typedef enum {
 	
 	// fromhere is the diference  compared to token enum !
 	VALUE,
+	ID,
 	DOLLAR,
-	STOP,
 	NON_TERM,
 } Symbol_enum; 
 

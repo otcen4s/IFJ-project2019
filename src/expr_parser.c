@@ -18,32 +18,59 @@ int init_expr_parser(Expr_parser * expr_parser);
 void dispose_expr_parser(Expr_parser * expr_p);
 int reduce(Expr_parser * expr_parser);
 int get_reduction_rule(Expr_parser* expr_parser);
+bool is_defined(Parser* parser); 
 
 /**
  * Parsing table to determine next parser action based on
  * currently readed symbol and topmost terminal symbol
  * on symbol stack
  **/
-int parsing_table[15][15] =
+int parsing_table[16][16] =
 {
-//	  +  -  *  /  // > ==  != <= >= <  (  )  o  $ 
-	{ R, R, S, S, S, R, R, R, R, R, R, S, R, S, R }, // +
-    { R, R, S, S, S, R, R, R, R, R, R, S, R, S, R }, //-
-	{ R, R, R, R, R, R, R, R, R, R, R, S, R, S, R }, // *
-    { R, R, R, R, R, R, R, R, R, R, R, S, R, S, R }, // /
-    { R, R, R, R, R, R, R, R, R, R, R, S, R, S, R }, // //
-    { S, S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // >
-	{ S, S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // ==
-    { S, S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // !=
-    { S, S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // <=
-    { S, S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // >=
-    { S, S, S, S, S, F, F, F, F, F, F, S, R, S, R }, // <
-	{ S, S, S, S, S, S, S, S, S, S, S, S, S, S, F }, // (
-	{ R, R, R, R, R, R, R, R, R, R, R, F, R, F, R }, // )
-	{ R, R, R, R, R, R, R, R, R, R, R, F, R, F, R }, // o operand 
-	{ S, S, S, S, S, S, S, S, S, S, S, S, F, S, A }, // $
+//	  +  -  *  /  // > ==  != <= >= <  (  )  v  id $ 
+	{ R, R, S, S, S, R, R, R, R, R, R, S, R, S, S, R }, // +
+    { R, R, S, S, S, R, R, R, R, R, R, S, R, S, S, R }, //-
+	{ R, R, R, R, R, R, R, R, R, R, R, S, R, S, S, R }, // *
+    { R, R, R, R, R, R, R, R, R, R, R, S, R, S, S, R }, // /
+    { R, R, R, R, R, R, R, R, R, R, R, S, R, S, S, R }, // //
+    { S, S, S, S, S, F, F, F, F, F, F, S, R, S, S, R }, // >
+	{ S, S, S, S, S, F, F, F, F, F, F, S, R, S, S, R }, // ==
+    { S, S, S, S, S, F, F, F, F, F, F, S, R, S, S, R }, // !=
+    { S, S, S, S, S, F, F, F, F, F, F, S, R, S, S, R }, // <=
+    { S, S, S, S, S, F, F, F, F, F, F, S, R, S, S, R }, // >=
+    { S, S, S, S, S, F, F, F, F, F, F, S, R, S, S, R }, // <
+	{ S, S, S, S, S, S, S, S, S, S, S, S, S, S, S, F }, // (
+	{ R, R, R, R, R, R, R, R, R, R, R, F, R, F, F, R }, // )
+	{ R, R, R, R, R, R, R, R, R, R, R, F, R, F, F, R }, // value v
+    { R, R, R, R, R, R, R, R, R, R, R, F, R, F, F, R }, // id  
+	{ S, S, S, S, S, S, S, S, S, S, S, S, F, S, S, A }, // $
 };
 
+/**
+ * Check if identifier from last token was defined
+ **/
+
+
+bool is_defined(Parser* parser)
+{
+    int err= NO_ERROR;
+    char* id_name = parser->curr_token.attribute.string.str;
+    if(parser->is_in_def)
+    {
+        if(symtab_lookup(parser->local_table,id_name, &err)==NULL &&
+            symtab_lookup(parser->global_table,id_name, &err)==NULL)
+        {
+            return UNDEFINE_REDEFINE_ERROR;
+        }
+    }
+    else
+    {
+        if(symtab_lookup(parser->global_table,id_name, &err)== NULL)
+        {
+            return UNDEFINE_REDEFINE_ERROR;
+        }
+    }                                      
+}
 
 /**
     Helper function for creation of symbol struct
@@ -66,9 +93,14 @@ Symbol create_symbol(Symbol_enum symbol, Sym_data_type type)
 **/
 int token_enum_to_symb_enum (Token_type token_enum)
 {
-    if(token_enum == TOKEN_STRING || token_enum == TOKEN_INTEGER 
-       || token_enum == TOKEN_DECIMAL|| token_enum == TOKEN_IDENTIFIER
-      ) return VALUE;
+    if(token_enum == TOKEN_STRING || 
+       token_enum == TOKEN_INTEGER ||
+       token_enum == TOKEN_DECIMAL)
+      {
+          return VALUE;
+      } 
+
+    if(token_enum == TOKEN_IDENTIFIER) return ID; 
 
     //indicates end of expression
     if(token_enum > TOKEN_STRING) return DOLLAR;
@@ -225,7 +257,8 @@ int reduce(Expr_parser * expr_parser)
     int err = NO_ERROR;
 
     /********* SINGLE OPERAND E-> id ******************/
-    if(expr_parser->stack_top_sym.symbol == VALUE)
+    if(expr_parser->stack_top_sym.symbol == VALUE ||
+       expr_parser->stack_top_sym.symbol == ID)
     { 
         //pop replaced symbol from stack 
         Symbol replaced = stack_pop(expr_parser->stack, &err).symbol;
@@ -348,6 +381,7 @@ int reduce(Expr_parser * expr_parser)
 //expression parser interface 
 int expression(Parser* parser)
 {
+
     /**
      *creation and initialisation of expr_parser
      *expr_parser struct stores data needed for expression parsing
@@ -356,13 +390,26 @@ int expression(Parser* parser)
     Expr_parser e;
     Expr_parser * expr_parser = &e; 
     init_expr_parser(expr_parser);
-    
+
+    //first 2 token are alredy readed 
+    //this var helps to determine if they were processed alredy
+    int token_cnt= 0;    
     
     //proceessing whole expression token by token
     while(1)
-    {        
+    {
+        token_cnt ++;
         //set current symbol atributes in expr_parser based on currently readed token
-        set_symbol_to_curr_token(parser->curr_token, expr_parser);
+        //need to check which token we are on because 2 were prereaded and passed in args 
+        if(token_cnt == 1)
+        {
+            set_symbol_to_curr_token(parser->previous_token, expr_parser);
+        }
+        else
+        {
+            set_symbol_to_curr_token(parser->curr_token, expr_parser);
+        }
+        
         DEBUG_PRINT("current readed sym %d \n",expr_parser->curr_sym.symbol);
         //get current stack top symbol
         int err = NO_ERROR;
@@ -388,19 +435,28 @@ int expression(Parser* parser)
                 return INTERNAL_ERROR;
             } 
 
-            if (expr_parser->curr_sym.symbol == VALUE)
-            {   
-                //TODO check if all current id is deffined 
+            if (expr_parser->curr_sym.symbol == VALUE ||
+                expr_parser->curr_sym.symbol == ID )
+                
+            {   //if it's id, check if it was defined 
+                if(expr_parser->curr_sym.symbol == ID)
+                {
+                   // check if inserted id is defined
+                   if(!is_defined(parser)) return UNDEFINE_REDEFINE_ERROR; 
+                }
 
                 //generate stack push instruction here
                 gen_pushs(parser->curr_token, !parser->is_in_def);
                 DEBUG_PRINT("pushing value to the stack \n");
             }            
 
-            //get next token
-            int err;
-            parser->curr_token = read_token(parser->scanner, &err);
-            if(err) return err;
+            //get next token but only if 2 prereded tokens were processed alredy
+            if(token_cnt >= 2)
+            {
+                int err;
+                parser->curr_token = read_token(parser->scanner, &err);
+                if(err) return err;
+            }
         }
 
         /***************** REDUCE *********************************/
