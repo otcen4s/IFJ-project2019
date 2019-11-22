@@ -126,18 +126,7 @@ int start_compiler(char* src_file_name)
     {
         return INTERNAL_ERROR;
     }
-
-    //reading first token 
-    int err;
-    parser->curr_token = read_token(parser->scanner, &err);
-    
-    //in case there is lexical errror at the very beginning of the src file
-    if(err) return err;
-
-    //start syntactic analysis here e.i. call function which implements <program> rule 
-
     return statement(parser);
-
 }
 
 
