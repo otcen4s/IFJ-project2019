@@ -500,7 +500,11 @@ int expression(Parser* parser)
 
             DEBUG_PRINT("VALID EXPRESSION \n");
             
-            //TODO move result into rhs here
+            //if there was any left hand value assign the result there 
+            if(parser->left_side != NULL)
+            {
+                gen_pops(parser->left_side->key, !parser->is_in_def);
+            }
             return NO_ERROR; 
         }     
     }
