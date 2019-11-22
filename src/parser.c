@@ -65,6 +65,7 @@ int init_parser(Parser* parser)
     parser->is_in_def = false;
     parser->is_in_if = false;
     parser->is_in_while = false;
+    parser->nested_cnt= 0;
 
     /* Predefine built-in functions into global table*/
     tSymbol_item* tmp;                      
@@ -90,7 +91,7 @@ void dispose_parser(Parser* parser)
     symtab_free(parser->global_table);
     symtab_free(parser->local_table);
 }
-
+/*
 void generate_variable_key(tString* var)
 {
     //clear
@@ -105,6 +106,7 @@ void generate_variable_key(tString* var)
     }
     counter_var++;
 }
+*/
 
 
 // this function  will be the interface of parser (e.i. will be called from outside) 
@@ -625,7 +627,7 @@ int expression_start(Parser *parser)
             GET_NEXT_TOKEN();
             if(parser->curr_token.type == TOKEN_IDENTIFIER)
             {
-                key = parser->curr_token.attribute.key;
+                key = parser->curr_token.attribute.string;
                 //call generator
             }
             else if(parser->curr_token.type == TOKEN_INTEGER)
@@ -780,7 +782,7 @@ int arg(Parser *parser)
     case TOKEN_INTEGER:
     case TOKEN_DECIMAL:
     case TOKEN_STRING:
-    case TOKEN_NONE:
+    case KEYWORD_NONE:
         if(!(parser->is_in_print))
         {
             parser->symbol_data_global->params_count_used++;

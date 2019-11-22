@@ -11,7 +11,7 @@
 #include <stdbool.h>
 #include "expr_parser.h"
 
-typedef struct
+typedef struct Parser
 {
     Scanner* scanner;
     Token curr_token;
@@ -25,7 +25,7 @@ typedef struct
     bool is_in_while;
     bool is_in_def;
     bool is_in_print;
-    unsigned nested_cnt = 0;
+    unsigned nested_cnt;
 } Parser;
 
 int start_compiler(char* src_file_name);

@@ -11,6 +11,8 @@
 
 //Symbol struct definition is in stack.h
 
+typedef struct Parser Parser;
+
 //operations of shift-reduce parser
 typedef enum{
 	S, //SHIFT
