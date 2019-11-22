@@ -32,6 +32,14 @@ void gen_else_end();
 void gen_while_start();
 void gen_while_end();
 
+void gen_inputs();
+void gen_inputi();
+void gen_inputf();
+
+void gen_lts();
+void gen_gts();
+void gen_eqs();
+
 const char *replace_space(char *string);
 
 #endif

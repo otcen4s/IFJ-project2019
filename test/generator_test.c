@@ -19,9 +19,19 @@ void test1(void)
 
     Token token;
     token.type = TOKEN_INTEGER;
-    token.attribute.integer = 10;
+    token.attribute.integer = 22;
 
     gen_pushs(token, true);
+
+    token.type = TOKEN_DECIMAL;
+    token.attribute.decimal = 22.0;
+
+    gen_pushs(token, true);
+
+    gen_eqs();
+
+    gen_instruct("POPS GF@$temp");
+    gen_instruct("WRITE GF@$temp");
 
     generate_code(sourceCode);
 }

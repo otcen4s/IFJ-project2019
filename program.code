@@ -160,5 +160,131 @@ RETURN
 LABEL $evalFalse
 MOVE GF@$temp bool@false
 RETURN
+LABEL $len
+PUSHFRAME
+DEFVAR LF@%retval
+STRLEN LF@%retval LF@%1
+POPFRAME
+RETURN
+LABEL $glt
+POPS GF@$op2
+POPS GF@$op1
+TYPE GF@$op1Type GF@$op1
+TYPE GF@$op2Type GF@$op2
+JUMPIFEQ $gltFinish GF@$op1Type GF@$op2Type
+JUMPIFEQ $gltOp1Int GF@$op1Type string@int
+JUMPIFEQ $gltOp1Float GF@$op1Type string@float
+JUMPIFEQ $gltOp1Bool GF@$op1Type string@bool
+EXIT int@4
+LABEL $gltOp1Int
+JUMPIFEQ $gltOp1IntOp2Float GF@$op2Type string@float
+JUMPIFEQ $gltOp1IntOp2Bool GF@$op2Type string@bool
+EXIT int@4
+LABEL $gltOp1IntOp2Float
+INT2FLOAT GF@$op1 GF@$op1
+JUMP $gltFinish
+LABEL $gltOp1IntOp2Bool
+MOVE GF@$temp GF@$op2
+MOVE GF@$op2 int@1
+JUMPIFEQ $gltFinish GF@$temp bool@true
+MOVE GF@$op2 int@0
+JUMP $gltFinish
+LABEL $gltOp1Float
+JUMPIFEQ $gltOp1FloatOp2Int GF@$op2Type string@int
+JUMPIFEQ $gltOp1FloatOp2Bool GF@$op2Type string@bool
+EXIT int@4
+LABEL $gltOp1FloatOp2Int
+INT2FLOAT GF@$op2 GF@$op2
+JUMP $gltFinish
+LABEL $gltOp1FloatOp2Bool
+MOVE GF@$temp GF@$op2
+MOVE GF@$op2 float@0x1p+0
+JUMPIFEQ $gltFinish GF@$temp bool@true
+MOVE GF@$op2 float@0x0p+0
+JUMP $gltFinish
+LABEL $gltOp1Bool
+JUMPIFEQ $gltOp1BoolOp2Int GF@$op2Type string@int
+JUMPIFEQ $gltOp1BoolOp2Float GF@$op2Type string@float
+EXIT int@4
+LABEL $gltOp1BoolOp2Int
+MOVE GF@$temp GF@$op2
+MOVE GF@$op2 bool@true
+JUMPIFEQ $gltFinish GF@$temp int@1
+MOVE GF@$op2 bool@false
+JUMP $gltFinish
+LABEL $gltOp1BoolOp2Float
+MOVE GF@$temp GF@$op2
+MOVE GF@$op2 bool@true
+JUMPIFEQ $gltFinish GF@$temp float@0x1p+0
+MOVE GF@$op2 bool@false
+JUMP $gltFinish
+LABEL $gltFinish
+PUSHS GF@$op1
+PUSHS GF@$op2
+RETURN
+LABEL $eq
+POPS GF@$op2
+POPS GF@$op1
+TYPE GF@$op1Type GF@$op1
+TYPE GF@$op2Type GF@$op2
+JUMPIFEQ $eqFinish GF@$op1Type GF@$op2Type
+JUMPIFEQ $eqFinish GF@$op1Type string@nil
+JUMPIFEQ $eqFinish GF@$op2Type string@nil
+JUMPIFEQ $eqNotEqual GF@$op1Type string@string
+JUMPIFEQ $eqNotEqual GF@$op2Type string@string
+JUMPIFEQ $eqOp1Int GF@$op1Type string@int
+JUMPIFEQ $eqOp1Float GF@$op1Type string@float
+JUMPIFEQ $eqOp1Bool GF@$op1Type string@bool
+LABEL $eqOp1Int
+JUMPIFEQ $eqOp1IntOp2Float GF@$op2Type string@float
+JUMPIFEQ $eqOp1IntOp2Bool GF@$op2Type string@bool
+LABEL $eqOp1IntOp2Float
+INT2FLOAT GF@$op1 GF@$op1
+JUMP $eqFinish
+LABEL $eqOp1IntOp2Bool
+MOVE GF@$temp GF@$op2
+MOVE GF@$op2 int@1
+JUMPIFEQ $eqFinish GF@$temp bool@true
+MOVE GF@$op2 int@0
+JUMP $eqFinish
+LABEL $eqOp1Float
+JUMPIFEQ $eqOp1FloatOp2Int GF@$op2Type string@int
+JUMPIFEQ $eqOp1FloatOp2Bool GF@$op2Type string@bool
+LABEL $eqOp1FloatOp2Int
+INT2FLOAT GF@$op2 GF@$op2
+JUMP $eqFinish
+LABEL $eqOp1FloatOp2Bool
+MOVE GF@$temp GF@$op2
+MOVE GF@$op2 float@0x1p+0
+JUMPIFEQ $eqFinish GF@$temp bool@true
+MOVE GF@$op2 float@0x0p+0
+JUMP $eqFinish
+LABEL $eqOp1Bool
+JUMPIFEQ $eqOp1BoolOp2Int GF@$op2Type string@int
+JUMPIFEQ $eqOp1BoolOp2Float GF@$op2Type string@float
+LABEL $eqOp1BoolOp2Int
+MOVE GF@$temp GF@$op1
+MOVE GF@$op1 int@1
+JUMPIFEQ $eqFinish GF@$temp bool@true
+MOVE GF@$op1 int@0
+JUMP $eqFinish
+LABEL $eqOp1BoolOp2Float
+MOVE GF@$temp GF@$op1
+MOVE GF@$op1 float@0x1p+0
+JUMPIFEQ $eqFinish GF@$temp bool@true
+MOVE GF@$op1 float@0x0p+0
+JUMP $eqFinish
+LABEL $eqNotEqual
+PUSHS bool@false
+RETURN
+LABEL $eqFinish
+PUSHS GF@$op1
+PUSHS GF@$op2
+EQS
+RETURN
 LABEL $$main
-PUSHS int@10
+PUSHS int@22
+PUSHS float@0x1.6p+4
+CALL $eq
+POPS GF@$temp
+WRITE GF@$temp

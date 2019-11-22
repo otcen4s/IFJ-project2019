@@ -251,6 +251,159 @@ int generator_begin() {
     ADDLINE("MOVE GF@$temp bool@false");
     ADDLINE("RETURN");
 
+    ADDLINE("LABEL $len");
+    ADDLINE("PUSHFRAME");
+    ADDLINE("DEFVAR LF@%retval");
+    ADDLINE("STRLEN LF@%retval LF@%1");
+    ADDLINE("POPFRAME");
+    ADDLINE("RETURN");
+
+    // lesser than, greater than functions
+    ADDLINE("LABEL $glt");
+    ADDLINE("POPS GF@$op2");
+    ADDLINE("POPS GF@$op1");
+    ADDLINE("TYPE GF@$op1Type GF@$op1");
+    ADDLINE("TYPE GF@$op2Type GF@$op2");
+
+    ADDLINE("JUMPIFEQ $gltFinish GF@$op1Type GF@$op2Type");
+    ADDLINE("JUMPIFEQ $gltOp1Int GF@$op1Type string@int");
+    ADDLINE("JUMPIFEQ $gltOp1Float GF@$op1Type string@float");
+    ADDLINE("JUMPIFEQ $gltOp1Bool GF@$op1Type string@bool");
+    ADDLINE("EXIT int@4");
+
+    ADDLINE("LABEL $gltOp1Int");
+    ADDLINE("JUMPIFEQ $gltOp1IntOp2Float GF@$op2Type string@float");
+    ADDLINE("JUMPIFEQ $gltOp1IntOp2Bool GF@$op2Type string@bool");
+    ADDLINE("EXIT int@4");
+
+    ADDLINE("LABEL $gltOp1IntOp2Float");
+    ADDLINE("INT2FLOAT GF@$op1 GF@$op1");
+    ADDLINE("JUMP $gltFinish");
+
+    ADDLINE("LABEL $gltOp1IntOp2Bool");
+    ADDLINE("MOVE GF@$temp GF@$op2");
+    ADDLINE("MOVE GF@$op2 int@1");
+    ADDLINE("JUMPIFEQ $gltFinish GF@$temp bool@true");
+    ADDLINE("MOVE GF@$op2 int@0");
+    ADDLINE("JUMP $gltFinish");
+
+    ADDLINE("LABEL $gltOp1Float");
+    ADDLINE("JUMPIFEQ $gltOp1FloatOp2Int GF@$op2Type string@int");
+    ADDLINE("JUMPIFEQ $gltOp1FloatOp2Bool GF@$op2Type string@bool");
+    ADDLINE("EXIT int@4");
+
+    ADDLINE("LABEL $gltOp1FloatOp2Int");
+    ADDLINE("INT2FLOAT GF@$op2 GF@$op2");
+    ADDLINE("JUMP $gltFinish");
+
+    ADDLINE("LABEL $gltOp1FloatOp2Bool");
+    ADDLINE("MOVE GF@$temp GF@$op2");
+    ADDLINE("MOVE GF@$op2 float@0x1p+0");
+    ADDLINE("JUMPIFEQ $gltFinish GF@$temp bool@true");
+    ADDLINE("MOVE GF@$op2 float@0x0p+0");
+    ADDLINE("JUMP $gltFinish");
+
+    ADDLINE("LABEL $gltOp1Bool");
+    ADDLINE("JUMPIFEQ $gltOp1BoolOp2Int GF@$op2Type string@int");
+    ADDLINE("JUMPIFEQ $gltOp1BoolOp2Float GF@$op2Type string@float");
+    ADDLINE("EXIT int@4");
+
+    ADDLINE("LABEL $gltOp1BoolOp2Int");
+    ADDLINE("MOVE GF@$temp GF@$op2");
+    ADDLINE("MOVE GF@$op2 bool@true");
+    ADDLINE("JUMPIFEQ $gltFinish GF@$temp int@1");
+    ADDLINE("MOVE GF@$op2 bool@false");
+    ADDLINE("JUMP $gltFinish");
+
+    ADDLINE("LABEL $gltOp1BoolOp2Float");
+    ADDLINE("MOVE GF@$temp GF@$op2");
+    ADDLINE("MOVE GF@$op2 bool@true");
+    ADDLINE("JUMPIFEQ $gltFinish GF@$temp float@0x1p+0");
+    ADDLINE("MOVE GF@$op2 bool@false");
+    ADDLINE("JUMP $gltFinish");
+
+    ADDLINE("LABEL $gltFinish");
+    ADDLINE("PUSHS GF@$op1");
+    ADDLINE("PUSHS GF@$op2");
+    ADDLINE("RETURN");
+
+    // equal function
+    ADDLINE("LABEL $eq");
+    ADDLINE("POPS GF@$op2");
+    ADDLINE("POPS GF@$op1");
+    ADDLINE("TYPE GF@$op1Type GF@$op1");
+    ADDLINE("TYPE GF@$op2Type GF@$op2");
+
+    ADDLINE("JUMPIFEQ $eqFinish GF@$op1Type GF@$op2Type");
+
+    ADDLINE("JUMPIFEQ $eqFinish GF@$op1Type string@nil");
+    ADDLINE("JUMPIFEQ $eqFinish GF@$op2Type string@nil");
+
+    ADDLINE("JUMPIFEQ $eqNotEqual GF@$op1Type string@string");
+    ADDLINE("JUMPIFEQ $eqNotEqual GF@$op2Type string@string");
+
+    ADDLINE("JUMPIFEQ $eqOp1Int GF@$op1Type string@int");
+    ADDLINE("JUMPIFEQ $eqOp1Float GF@$op1Type string@float");
+    ADDLINE("JUMPIFEQ $eqOp1Bool GF@$op1Type string@bool");
+
+    ADDLINE("LABEL $eqOp1Int");
+    ADDLINE("JUMPIFEQ $eqOp1IntOp2Float GF@$op2Type string@float");
+    ADDLINE("JUMPIFEQ $eqOp1IntOp2Bool GF@$op2Type string@bool");
+
+    ADDLINE("LABEL $eqOp1IntOp2Float");
+    ADDLINE("INT2FLOAT GF@$op1 GF@$op1");
+    ADDLINE("JUMP $eqFinish");
+
+    ADDLINE("LABEL $eqOp1IntOp2Bool");
+    ADDLINE("MOVE GF@$temp GF@$op2");
+    ADDLINE("MOVE GF@$op2 int@1");
+    ADDLINE("JUMPIFEQ $eqFinish GF@$temp bool@true");
+    ADDLINE("MOVE GF@$op2 int@0");
+    ADDLINE("JUMP $eqFinish");
+
+    ADDLINE("LABEL $eqOp1Float");
+    ADDLINE("JUMPIFEQ $eqOp1FloatOp2Int GF@$op2Type string@int");
+    ADDLINE("JUMPIFEQ $eqOp1FloatOp2Bool GF@$op2Type string@bool");
+
+    ADDLINE("LABEL $eqOp1FloatOp2Int");
+    ADDLINE("INT2FLOAT GF@$op2 GF@$op2");
+    ADDLINE("JUMP $eqFinish");
+
+    ADDLINE("LABEL $eqOp1FloatOp2Bool");
+    ADDLINE("MOVE GF@$temp GF@$op2");
+    ADDLINE("MOVE GF@$op2 float@0x1p+0");
+    ADDLINE("JUMPIFEQ $eqFinish GF@$temp bool@true");
+    ADDLINE("MOVE GF@$op2 float@0x0p+0");
+    ADDLINE("JUMP $eqFinish");
+
+    ADDLINE("LABEL $eqOp1Bool");
+    ADDLINE("JUMPIFEQ $eqOp1BoolOp2Int GF@$op2Type string@int");
+    ADDLINE("JUMPIFEQ $eqOp1BoolOp2Float GF@$op2Type string@float");
+
+    ADDLINE("LABEL $eqOp1BoolOp2Int");
+    ADDLINE("MOVE GF@$temp GF@$op1");
+    ADDLINE("MOVE GF@$op1 int@1");
+    ADDLINE("JUMPIFEQ $eqFinish GF@$temp bool@true");
+    ADDLINE("MOVE GF@$op1 int@0");
+    ADDLINE("JUMP $eqFinish");
+
+    ADDLINE("LABEL $eqOp1BoolOp2Float");
+    ADDLINE("MOVE GF@$temp GF@$op1");
+    ADDLINE("MOVE GF@$op1 float@0x1p+0");
+    ADDLINE("JUMPIFEQ $eqFinish GF@$temp bool@true");
+    ADDLINE("MOVE GF@$op1 float@0x0p+0");
+    ADDLINE("JUMP $eqFinish");
+
+    ADDLINE("LABEL $eqNotEqual");
+    ADDLINE("PUSHS bool@false");
+    ADDLINE("RETURN");
+
+    ADDLINE("LABEL $eqFinish");
+    ADDLINE("PUSHS GF@$op1");
+    ADDLINE("PUSHS GF@$op2");
+    ADDLINE("EQS");
+    ADDLINE("RETURN");
+
     ADDLINE("LABEL $$main");
 
     return NO_ERROR;
@@ -363,6 +516,23 @@ void gen_stack(const char *instruct) {
     ADDCODE("CALL $"); ADDLINE(instruct);
 }
 
+void gen_lts() {
+    ADDLINE("CALL $glt");
+
+    ADDLINE("LTS");
+}
+
+void gen_gts() {
+    ADDLINE("CALL $glt");
+
+    ADDLINE("GTS");
+}
+
+// TODO bool support is not required?
+void gen_eqs() {
+    gen_instruct("CALL $eq");
+}
+
 // generate instruction with no parameter
 void gen_instruct(const char *instruct) {
     ADDLINE(instruct);
@@ -406,6 +576,10 @@ void gen_while_end() {
 
     ADDCODE("LABEL $while"); ADDCODE(uidStr); ADDLINE("End");
 }
+
+// void gen_inputs() {
+    
+// }
 
 // TODO print must return None
 void gen_print(unsigned n, bool global, Token token, ...) {
