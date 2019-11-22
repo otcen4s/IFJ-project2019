@@ -446,7 +446,16 @@ int expression(Parser* parser)
                 }
 
                 //generate stack push instruction here
-                gen_pushs(parser->curr_token, !parser->is_in_def);
+                //we must check if we need to push current or previous token because it was pre readed
+                if(token_cnt == 1)
+                {
+                    gen_pushs(parser->previous_token, !parser->is_in_def);
+                }
+                else
+                {
+                    gen_pushs(parser->curr_token, !parser->is_in_def);
+                }
+                
                 DEBUG_PRINT("pushing value to the stack \n");
             }            
 
@@ -457,6 +466,7 @@ int expression(Parser* parser)
                 parser->curr_token = read_token(parser->scanner, &err);
                 if(err) return err;
             }
+            continue;
         }
 
         /***************** REDUCE *********************************/
@@ -470,6 +480,7 @@ int expression(Parser* parser)
 
             Symbol top= stack_top(expr_parser->stack, &err).symbol;
             DEBUG_PRINT("non term je  %d, %d \n" ,top.data_type, top.symbol ); 
+            continue;
         }
 
        /***************** ERROR ***********************************/
@@ -478,12 +489,17 @@ int expression(Parser* parser)
             dispose_expr_parser(expr_parser);
             DEBUG_PRINT("INVALID EXPRESSION \n");
             return SYNTAX_ERROR;
+            continue; 
         }
 
         /***************** ACCEPT **********************************/
         if(parser_action == A )
         {
+            //expression was empty
+            if(token_cnt== 1) return SYNTAX_ERROR; 
+
             DEBUG_PRINT("VALID EXPRESSION \n");
+            
             //TODO move result into rhs here
             return NO_ERROR; 
         }     
