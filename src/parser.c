@@ -135,9 +135,6 @@ int start_compiler(char* src_file_name)
     if(err) return err;
 
     //start syntactic analysis here e.i. call function which implements <program> rule 
-
-    //temporary
-    return NO_ERROR;    
 }
 
 
