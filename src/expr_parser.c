@@ -49,8 +49,6 @@ int parsing_table[16][16] =
 /**
  * Check if identifier from last token was defined
  **/
-
-
 bool is_defined(Parser* parser)
 {
     int err= NO_ERROR;
@@ -122,6 +120,7 @@ int init_expr_parser(Expr_parser * expr_parser)
     //push dollar to the stack to indicate stack end
     if(stack_push(expr_parser->stack, create_symbol(DOLLAR, SYM_UNDEF)))
     {
+        dispose_expr_parser(expr_parser);
         return INTERNAL_ERROR;
     } 
 
@@ -139,7 +138,6 @@ void dispose_expr_parser(Expr_parser * expr_p)
 /**
  * Sets expr_parser data based on last token
  **/
-
 int  set_symbol_to_curr_token(Token token, Expr_parser* expr_parser)
 {
     expr_parser->curr_sym.symbol = token_enum_to_symb_enum(token.type);
@@ -417,6 +415,7 @@ int expression(Parser* parser)
         DEBUG_PRINT("topmost terminal je %d \n", expr_parser->stack_top_sym.symbol, expr_parser->stack_top_sym.data_type);
         if(err)
         { 
+            dispose_expr_parser(expr_parser);
             return INTERNAL_ERROR;
         }
 
@@ -432,6 +431,7 @@ int expression(Parser* parser)
         {
             if(stack_push(expr_parser->stack, expr_parser->curr_sym))
             {
+                dispose_expr_parser(expr_parser);
                 return INTERNAL_ERROR;
             } 
 
@@ -442,7 +442,11 @@ int expression(Parser* parser)
                 if(expr_parser->curr_sym.symbol == ID)
                 {
                    // check if inserted id is defined
-                   if(!is_defined(parser)) return UNDEFINE_REDEFINE_ERROR; 
+                   if(!is_defined(parser))
+                   {
+                    dispose_expr_parser(expr_parser);
+                    return UNDEFINE_REDEFINE_ERROR; 
+                   }
                 }
 
                 //generate stack push instruction here
@@ -464,7 +468,11 @@ int expression(Parser* parser)
             {
                 int err;
                 parser->curr_token = read_token(parser->scanner, &err);
-                if(err) return err;
+                if(err)
+                {
+                    dispose_expr_parser(expr_parser);
+                    return err;
+                } 
             }
             continue;
         }
@@ -475,6 +483,7 @@ int expression(Parser* parser)
             int err;
             if((err= reduce(expr_parser)))
             {
+                dispose_expr_parser(expr_parser);
                 return err;
             }
 
@@ -505,6 +514,8 @@ int expression(Parser* parser)
             {
                 gen_pops(parser->left_side->key, !parser->is_in_def);
             }
+            
+            dispose_expr_parser(expr_parser); 
             return NO_ERROR; 
         }     
     }
