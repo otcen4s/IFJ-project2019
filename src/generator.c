@@ -216,38 +216,38 @@ int generator_begin() {
     ADDLINE("IDIVS");
     ADDLINE("RETURN");
 
-    // if function definition
-    ADDLINE("LABEL $if");
+    // evaluate function definition - used in if and while
+    ADDLINE("LABEL $eval");
     ADDLINE("POPS GF@$op1");
     ADDLINE("TYPE GF@$op1Type GF@$op1");
 
-    ADDLINE("JUMPIFEQ $ifInt GF@$op1Type string@int");
-    ADDLINE("JUMPIFEQ $ifFloat GF@$op1Type string@float");
-    ADDLINE("JUMPIFEQ $ifString GF@$op1Type string@string");
-    ADDLINE("JUMPIFEQ $ifFalse GF@$op1Type string@nil");
-    ADDLINE("JUMPIFEQ $ifBool GF@$op1Type string@bool");
+    ADDLINE("JUMPIFEQ $evalInt GF@$op1Type string@int");
+    ADDLINE("JUMPIFEQ $evalFloat GF@$op1Type string@float");
+    ADDLINE("JUMPIFEQ $evalString GF@$op1Type string@string");
+    ADDLINE("JUMPIFEQ $evalFalse GF@$op1Type string@nil");
+    ADDLINE("JUMPIFEQ $evalBool GF@$op1Type string@bool");
 
-    ADDLINE("LABEL $ifInt");
-    ADDLINE("JUMPIFEQ $ifFalse GF@$op1 int@0");
-    ADDLINE("JUMP $ifTrue");
+    ADDLINE("LABEL $evalInt");
+    ADDLINE("JUMPIFEQ $evalFalse GF@$op1 int@0");
+    ADDLINE("JUMP $evalTrue");
 
-    ADDLINE("LABEL $ifFloat");
-    ADDLINE("JUMPIFEQ $ifFalse GF@$op1 float@0x0p+0");
-    ADDLINE("JUMP $ifTrue");
+    ADDLINE("LABEL $evalFloat");
+    ADDLINE("JUMPIFEQ $evalFalse GF@$op1 float@0x0p+0");
+    ADDLINE("JUMP $evalTrue");
 
-    ADDLINE("LABEL $ifString");
-    ADDLINE("JUMPIFEQ $ifFalse GF@$op1 string@");
-    ADDLINE("JUMP $ifTrue");
+    ADDLINE("LABEL $evalString");
+    ADDLINE("JUMPIFEQ $evalFalse GF@$op1 string@");
+    ADDLINE("JUMP $evalTrue");
 
-    ADDLINE("LABEL $ifBool");
-    ADDLINE("JUMPIFEQ $ifFalse GF@$op1 bool@false");
-    ADDLINE("JUMP $ifTrue");
+    ADDLINE("LABEL $evalBool");
+    ADDLINE("JUMPIFEQ $evalFalse GF@$op1 bool@false");
+    ADDLINE("JUMP $evalTrue");
 
-    ADDLINE("LABEL $ifTrue");
+    ADDLINE("LABEL $evalTrue");
     ADDLINE("MOVE GF@$temp bool@true");
     ADDLINE("RETURN");
 
-    ADDLINE("LABEL $ifFalse");
+    ADDLINE("LABEL $evalFalse");
     ADDLINE("MOVE GF@$temp bool@false");
     ADDLINE("RETURN");
 
@@ -371,7 +371,7 @@ void gen_instruct(const char *instruct) {
 void gen_if_start() {
     sprintf(uidStr, "%d", uid++);
 
-    ADDLINE("CALL $if");
+    ADDLINE("CALL $eval");
 
     ADDCODE("JUMPIFEQ $if"); ADDCODE(uidStr); ADDLINE("Else GF@$temp bool@false");
 }
@@ -388,6 +388,23 @@ void gen_else_end() {
     ADDCODE("JUMP $if"); ADDCODE(uidStr); ADDLINE("End");
 
     ADDCODE("LABEL $if"); ADDCODE(uidStr); ADDLINE("End");
+}
+
+// TODO while requires you to push the evaluated value onto the stack in body every time (even when the value doesn't change)
+void gen_while_start() {
+    sprintf(uidStr, "%d", uid++);
+
+    ADDCODE("LABEL $while"); ADDCODE(uidStr); ADDLINE("Begin");
+
+    ADDLINE("CALL $eval");
+
+    ADDCODE("JUMPIFEQ $while"); ADDCODE(uidStr); ADDLINE("End GF@$temp bool@false");
+}
+
+void gen_while_end() {
+    ADDCODE("JUMP $while"); ADDCODE(uidStr); ADDLINE("Begin");
+
+    ADDCODE("LABEL $while"); ADDCODE(uidStr); ADDLINE("End");
 }
 
 // TODO print must return None

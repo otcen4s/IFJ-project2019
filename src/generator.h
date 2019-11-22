@@ -29,6 +29,9 @@ void gen_if_end();
 void gen_else_start();
 void gen_else_end();
 
+void gen_while_start();
+void gen_while_end();
+
 const char *replace_space(char *string);
 
 #endif
