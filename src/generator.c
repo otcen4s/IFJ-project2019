@@ -251,10 +251,131 @@ int generator_begin() {
     ADDLINE("MOVE GF@$temp bool@false");
     ADDLINE("RETURN");
 
+    // function substr
+    ADDLINE("LABEL $substr");
+    ADDLINE("PUSHFRAME");
+    ADDLINE("DEFVAR LF@%retval");
+    ADDLINE("DEFVAR LF@letter");
+    ADDLINE("DEFVAR LF@cond");
+    ADDLINE("DEFVAR LF@limit");
+    ADDLINE("DEFVAR LF@len");
+
+    ADDLINE("MOVE LF@%retval nil@nil");
+
+    ADDLINE("TYPE GF@$temp LF@%1");
+    ADDLINE("JUMPIFNEQ $substrFinish GF@$temp string@string");
+
+    ADDLINE("TYPE GF@$temp LF@%2");
+    ADDLINE("JUMPIFNEQ $substrFinish GF@$temp string@int");
+
+    ADDLINE("TYPE GF@$temp LF@%3");
+    ADDLINE("JUMPIFNEQ $substrFinish GF@$temp string@int");
+
+    ADDLINE("STRLEN LF@len LF@%1");
+    ADDLINE("GT LF@cond LF@%2 LF@len");
+    ADDLINE("JUMPIFEQ $ordNone LF@cond bool@true");
+
+    ADDLINE("LT LF@cond LF@%2 int@0");
+    ADDLINE("JUMPIFEQ $ordNone LF@cond bool@true");
+
+    ADDLINE("MOVE LF@%retval string@");
+    ADDLINE("ADD LF@limit LF@%2 LF@%3");
+    
+    ADDLINE("EQ LF@cond LF@%3 int@0");
+    ADDLINE("JUMPIFEQ $substrFinish LF@cond bool@true");
+
+    ADDLINE("LABEL $substrLoop");
+    ADDLINE("GETCHAR LF@letter LF@%1 LF@%2");
+    ADDLINE("CONCAT LF@%retval LF@%retval LF@letter");
+    ADDLINE("ADD LF@%2 LF@%2 int@1");
+
+    ADDLINE("GT LF@cond LF@len LF@%2");
+    ADDLINE("JUMPIFEQ $substrFinish LF@cond bool@false");
+
+    ADDLINE("GT LF@cond LF@limit LF@%2");
+    ADDLINE("JUMPIFEQ $substrLoop LF@cond bool@true");
+
+    ADDLINE("LABEL $substrFinish");
+    ADDLINE("POPFRAME");
+    ADDLINE("RETURN");
+
+    // function len
     ADDLINE("LABEL $len");
     ADDLINE("PUSHFRAME");
     ADDLINE("DEFVAR LF@%retval");
     ADDLINE("STRLEN LF@%retval LF@%1");
+    ADDLINE("POPFRAME");
+    ADDLINE("RETURN");
+
+    // function chr
+    ADDLINE("LABEL $chr");
+    ADDLINE("PUSHFRAME");
+    ADDLINE("DEFVAR LF@%retval");
+
+    ADDLINE("TYPE GF@$temp LF@%1");
+    ADDLINE("JUMPIFNEQ $error GF@$temp string@int");
+
+    ADDLINE("LT GF@$temp LF@%1 int@0");
+    ADDLINE("JUMPIFEQ $error GF@$temp bool@true");
+
+    ADDLINE("GT GF@$temp LF@%1 int@255");
+    ADDLINE("JUMPIFEQ $error GF@$temp bool@true");
+
+    ADDLINE("INT2CHAR LF@%retval LF@%1");
+    ADDLINE("POPFRAME");
+    ADDLINE("RETURN");
+
+    // function ord
+    ADDLINE("LABEL $ord");
+    ADDLINE("PUSHFRAME");
+    ADDLINE("DEFVAR LF@%retval");
+    ADDLINE("DEFVAR LF@cond");
+    ADDLINE("DEFVAR LF@len");
+    ADDLINE("DEFVAR LF@type");
+
+    ADDLINE("TYPE LF@type LF@%1");
+    ADDLINE("JUMPIFNEQ $ordNone LF@type string@string");
+
+    ADDLINE("TYPE LF@type LF@%2");
+    ADDLINE("JUMPIFNEQ $ordNone LF@type string@int");
+
+    ADDLINE("STRLEN LF@len LF@%1");
+    ADDLINE("GT LF@cond LF@%2 LF@len");
+    ADDLINE("JUMPIFEQ $ordNone LF@cond bool@true");
+
+    ADDLINE("LT LF@cond LF@%2 int@0");
+    ADDLINE("JUMPIFEQ $ordNone LF@cond bool@true");
+
+    ADDLINE("STRI2INT LF@%retval LF@%1 LF@%2");
+    ADDLINE("POPFRAME");
+    ADDLINE("RETURN");
+
+    ADDLINE("LABEL $ordNone");
+    ADDLINE("MOVE LF@%retval nil@nil");
+    ADDLINE("POPFRAME");
+    ADDLINE("RETURN");
+
+    // function inputs
+    ADDLINE("LABEL $inputs");
+    ADDLINE("PUSHFRAME");
+    ADDLINE("DEFVAR LF@%retval");
+    ADDLINE("READ LF@%retval string");
+    ADDLINE("POPFRAME");
+    ADDLINE("RETURN");
+
+    // function inputi
+    ADDLINE("LABEL $inputi");
+    ADDLINE("PUSHFRAME");
+    ADDLINE("DEFVAR LF@%retval");
+    ADDLINE("READ LF@%retval int");
+    ADDLINE("POPFRAME");
+    ADDLINE("RETURN");
+
+    // function inputf
+    ADDLINE("LABEL $inputf");
+    ADDLINE("PUSHFRAME");
+    ADDLINE("DEFVAR LF@%retval");
+    ADDLINE("READ LF@%retval float");
     ADDLINE("POPFRAME");
     ADDLINE("RETURN");
 

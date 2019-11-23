@@ -160,10 +160,96 @@ RETURN
 LABEL $evalFalse
 MOVE GF@$temp bool@false
 RETURN
+LABEL $substr
+PUSHFRAME
+DEFVAR LF@%retval
+DEFVAR LF@letter
+DEFVAR LF@cond
+DEFVAR LF@limit
+DEFVAR LF@len
+MOVE LF@%retval nil@nil
+TYPE GF@$temp LF@%1
+JUMPIFNEQ $substrFinish GF@$temp string@string
+TYPE GF@$temp LF@%2
+JUMPIFNEQ $substrFinish GF@$temp string@int
+TYPE GF@$temp LF@%3
+JUMPIFNEQ $substrFinish GF@$temp string@int
+STRLEN LF@len LF@%1
+GT LF@cond LF@%2 LF@len
+JUMPIFEQ $ordNone LF@cond bool@true
+LT LF@cond LF@%2 int@0
+JUMPIFEQ $ordNone LF@cond bool@true
+MOVE LF@%retval string@
+ADD LF@limit LF@%2 LF@%3
+EQ LF@cond LF@%3 int@0
+JUMPIFEQ $substrFinish LF@cond bool@true
+LABEL $substrLoop
+GETCHAR LF@letter LF@%1 LF@%2
+CONCAT LF@%retval LF@%retval LF@letter
+ADD LF@%2 LF@%2 int@1
+GT LF@cond LF@len LF@%2
+JUMPIFEQ $substrFinish LF@cond bool@false
+GT LF@cond LF@limit LF@%2
+JUMPIFEQ $substrLoop LF@cond bool@true
+LABEL $substrFinish
+POPFRAME
+RETURN
 LABEL $len
 PUSHFRAME
 DEFVAR LF@%retval
 STRLEN LF@%retval LF@%1
+POPFRAME
+RETURN
+LABEL $chr
+PUSHFRAME
+DEFVAR LF@%retval
+TYPE GF@$temp LF@%1
+JUMPIFNEQ $error GF@$temp string@int
+LT GF@$temp LF@%1 int@0
+JUMPIFEQ $error GF@$temp bool@true
+GT GF@$temp LF@%1 int@255
+JUMPIFEQ $error GF@$temp bool@true
+INT2CHAR LF@%retval LF@%1
+POPFRAME
+RETURN
+LABEL $ord
+PUSHFRAME
+DEFVAR LF@%retval
+DEFVAR LF@cond
+DEFVAR LF@len
+DEFVAR LF@type
+TYPE LF@type LF@%1
+JUMPIFNEQ $ordNone LF@type string@string
+TYPE LF@type LF@%2
+JUMPIFNEQ $ordNone LF@type string@int
+STRLEN LF@len LF@%1
+GT LF@cond LF@%2 LF@len
+JUMPIFEQ $ordNone LF@cond bool@true
+LT LF@cond LF@%2 int@0
+JUMPIFEQ $ordNone LF@cond bool@true
+STRI2INT LF@%retval LF@%1 LF@%2
+POPFRAME
+RETURN
+LABEL $ordNone
+MOVE LF@%retval nil@nil
+POPFRAME
+RETURN
+LABEL $inputs
+PUSHFRAME
+DEFVAR LF@%retval
+READ LF@%retval string
+POPFRAME
+RETURN
+LABEL $inputi
+PUSHFRAME
+DEFVAR LF@%retval
+READ LF@%retval int
+POPFRAME
+RETURN
+LABEL $inputf
+PUSHFRAME
+DEFVAR LF@%retval
+READ LF@%retval float
 POPFRAME
 RETURN
 LABEL $glt
@@ -283,8 +369,12 @@ PUSHS GF@$op2
 EQS
 RETURN
 LABEL $$main
-PUSHS int@22
-PUSHS float@0x1.6p+4
-CALL $eq
-POPS GF@$temp
-WRITE GF@$temp
+CREATEFRAME
+DEFVAR TF@%1
+MOVE TF@%1 string@auto
+DEFVAR TF@%2
+MOVE TF@%2 int@2
+DEFVAR TF@%3
+MOVE TF@%3 int@3
+CALL $substr
+WRITE TF@%retval

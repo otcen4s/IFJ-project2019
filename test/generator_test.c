@@ -17,21 +17,34 @@ void test1(void)
 
     TEST_ASSERT_EQUAL_INT32(NO_ERROR, generator_begin());
 
-    Token token;
-    token.type = TOKEN_INTEGER;
-    token.attribute.integer = 22;
+    // Token token;
+    // token.type = TOKEN_INTEGER;
+    // token.attribute.integer = 22;
 
-    gen_pushs(token, true);
+    // gen_pushs(token, true);
 
-    token.type = TOKEN_DECIMAL;
-    token.attribute.decimal = 22.0;
+    // token.type = TOKEN_DECIMAL;
+    // token.attribute.decimal = 22.0;
 
-    gen_pushs(token, true);
+    // gen_pushs(token, true);
 
-    gen_eqs();
+    // gen_eqs();
 
-    gen_instruct("POPS GF@$temp");
-    gen_instruct("WRITE GF@$temp");
+    // gen_instruct("POPS GF@$temp");
+    // gen_instruct("WRITE GF@$temp");
+
+    gen_instruct("CREATEFRAME");
+    gen_instruct("DEFVAR TF@%1");
+    gen_instruct("MOVE TF@%1 string@auto");
+    gen_instruct("DEFVAR TF@%2");
+    gen_instruct("MOVE TF@%2 int@2");
+    gen_instruct("DEFVAR TF@%3");
+    gen_instruct("MOVE TF@%3 int@3");
+
+    gen_instruct("CALL $substr");
+
+    //gen_instruct("TYPE TF@%retval TF@%retval");
+    gen_instruct("WRITE TF@%retval");
 
     generate_code(sourceCode);
 }
