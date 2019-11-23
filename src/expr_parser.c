@@ -33,7 +33,7 @@ int parsing_table[16][16] =
 	{ R, R, R, R, R, R, R, R, R, R, R, S, R, S, S, R }, // *
     { R, R, R, R, R, R, R, R, R, R, R, S, R, S, S, R }, // /
     { R, R, R, R, R, R, R, R, R, R, R, S, R, S, S, R }, // //
-    { S, S, S, S, S, F, F, F, F, F, F, S, R, S, S, R }, // >
+    { S, S, S, S, S, R, F, F, F, F, F, S, R, S, S, R }, // >
 	{ S, S, S, S, S, F, F, F, F, F, F, S, R, S, S, R }, // ==
     { S, S, S, S, S, F, F, F, F, F, F, S, R, S, S, R }, // !=
     { S, S, S, S, S, F, F, F, F, F, F, S, R, S, S, R }, // <=
@@ -327,21 +327,21 @@ int reduce(Expr_parser * expr_parser)
        break;
     
     case E_EQ_E:
-       //TODO generate stack compare here 
+       gen_eqs();
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
        break;
     
     case E_GTH_E:
-       //TODO generate stack compare here 
+        gen_gts();
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
        break;
     
     case E_LTH_E:
-       //TODO generate stack compare here 
+       gen_lts();
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
@@ -362,7 +362,6 @@ int reduce(Expr_parser * expr_parser)
        break;
 
     case PAR_E_PAR:
-       //TODO generate stack compare here 
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
