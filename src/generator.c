@@ -711,30 +711,40 @@ void gen_print(unsigned n, bool global, Token token, ...) {
     va_start(ap, token);
 
     for (unsigned i = 0; i < n; i++) {
-        str_copy(&line, "WRITE string@");
+        if (token.type == TOKEN_IDENTIFIER) {
 
-        if (token.type == TOKEN_INTEGER) {
-            sprintf(temp, "%d", token.attribute.integer);
-            str_append(&line, temp);
-        } else if (token.type ==  TOKEN_DECIMAL) {
-            sprintf(temp, "%a", token.attribute.decimal);
-            str_append(&line, temp);
-        } else if (token.type == KEYWORD_NONE) {
-            str_append(&line, "None");
-        } else if (token.type == TOKEN_STRING) {
-            str_append(&line, replace_space(token.attribute.string.str));
-        } else if (token.type == TOKEN_IDENTIFIER) {
-            str_concat(&line, "WRITE ", ISGLOBAL(global), token.attribute.string.str, NULL);
+        } else {
+            ADDCODE("WRITE string@");
+
+            if (token.type == TOKEN_INTEGER) {
+                sprintf(temp, "%d", token.attribute.integer);
+            } else if (token.type ==  TOKEN_DECIMAL) {
+                sprintf(temp, "%a", token.attribute.decimal);
+            } else if (token.type == KEYWORD_NONE) {
+                strcpy(temp, "None");
+            } else if (token.type == TOKEN_STRING) {
+                strcpy(temp, replace_space(token.attribute.string.str));
+            }
+
+            ADDCODE(temp);
+            if (i == n - 1) {
+                // last term, add new line
+                ADDLINE("\\010");
+            } else {
+                // add space
+                ADDLINE("\\032");
+            }
         }
 
-        ADDLINE(line.str);
         token = va_arg(ap, Token);
     }
 
     va_end(ap);
 
-    // add new line at the end
-    ADDLINE("WRITE string@\\010");
+    // return value is always None
+    ADDLINE("CREATEFRAME");
+    ADDLINE("DEFVAR TF@%retval");
+    ADDLINE("MOVE TF@%retval nil@nil");
 
 }
 

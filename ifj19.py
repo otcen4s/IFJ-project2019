@@ -65,4 +65,5 @@ def print(*args):
   return None
 
 # Zde bude nasledovat program jazyka IFJ19
-print(substr("auto", 2, 3))
+
+print('Dlzka nohavic je', 29)

@@ -33,18 +33,33 @@ void test1(void)
     // gen_instruct("POPS GF@$temp");
     // gen_instruct("WRITE GF@$temp");
 
-    gen_instruct("CREATEFRAME");
-    gen_instruct("DEFVAR TF@%1");
-    gen_instruct("MOVE TF@%1 string@auto");
-    gen_instruct("DEFVAR TF@%2");
-    gen_instruct("MOVE TF@%2 int@2");
-    gen_instruct("DEFVAR TF@%3");
-    gen_instruct("MOVE TF@%3 int@3");
+    // gen_instruct("CREATEFRAME");
+    // gen_instruct("DEFVAR TF@%1");
+    // gen_instruct("MOVE TF@%1 string@auto");
+    // gen_instruct("DEFVAR TF@%2");
+    // gen_instruct("MOVE TF@%2 int@2");
+    // gen_instruct("DEFVAR TF@%3");
+    // gen_instruct("MOVE TF@%3 int@3");
 
-    gen_instruct("CALL $substr");
+    // gen_instruct("CALL $substr");
 
-    //gen_instruct("TYPE TF@%retval TF@%retval");
-    gen_instruct("WRITE TF@%retval");
+    // //gen_instruct("TYPE TF@%retval TF@%retval");
+    // gen_instruct("WRITE TF@%retval");
+
+    Token token;
+    token.type = TOKEN_STRING;
+    str_init(&token.attribute.string);
+    str_copy(&token.attribute.string, "Dlzka nohavic je");
+
+    Token token2;
+    token2.type = TOKEN_INTEGER;
+    token2.attribute.integer = 15;
+
+    Token token3;
+    token3.type = TOKEN_DECIMAL;
+    token3.attribute.decimal = 20.35;
+
+    gen_print(3, true, token, token2, token3);
 
     generate_code(sourceCode);
 }
