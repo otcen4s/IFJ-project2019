@@ -116,7 +116,9 @@ void dispose_parser(Parser* parser)
 // this function  will be the interface of parser (e.i. will be called from outside) 
 int start_compiler(char* src_file_name)
 {
-    //create and initialise parser data structure 
+    //create and initialise parser data structure
+    int err;
+
     Parser p;
     Parser *parser = &p; 
     if(init_parser(parser))  return INTERNAL_ERROR;
@@ -124,13 +126,25 @@ int start_compiler(char* src_file_name)
     //initialisation of scanner 
     if(init_scanner(parser->scanner, src_file_name)) return INTERNAL_ERROR;
 
-    //initialisation of global and local table
-    if(symtab_init(parser->global_table)||
-       symtab_init(parser->local_table))
+    err = statement(parser);
+    CHECK_ERROR();
+
+    for(size_t i = 0; i < SYMTAB_SIZE; i++)
     {
-        return INTERNAL_ERROR;
+        struct tSymbol_item *current = table->item_array[i];
+        struct tSymbol_item *next = NULL;
+        
+        while(current != NULL)
+        {
+            next = current->next_symbol;
+
+            if((current->symbol_type == SYMBOL_FUNC) && (current->symbol_state != SYMBOL_DEFINED)) return UNDEFINE_REDEFINE_ERROR;
+    
+            current = next;
+        }
     }
-    return statement(parser);
+
+    return NO_ERROR;
 }
 
 
@@ -245,12 +259,15 @@ int statement(Parser *parser)
     {
         parser->is_in_if = true;
 
-        //STORE_NEXT_TOKEN();
-        //GET_NEXT_TOKEN();
         parser->if_expression = true;
         err = expression_start(parser);
         CHECK_ERROR();
         parser->if_expression = false;
+
+        if(!(parser->expr_parser_call))
+        {
+            GET_NEXT_TOKEN(); // TODO check if we need this token to get
+        }
 
         /* STATE: IF <expression_start>: */
         CHECK_TOKEN(TOKEN_COLON);
@@ -265,6 +282,9 @@ int statement(Parser *parser)
         
         err = statement_inside(parser);
         CHECK_ERROR();
+
+        if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
+        
 
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL */
         GET_CHECK_TOKEN(TOKEN_EOL); // expected end of line(EOL)
@@ -311,6 +331,10 @@ int statement(Parser *parser)
         CHECK_ERROR();
         parser->while_expression = false;
 
+        if(!(parser->expr_parser_call))
+        {
+            GET_NEXT_TOKEN(); // TODO check if we need this token to get
+        }
 
         /* STATE: WHILE <expression_start>: */
         CHECK_TOKEN(TOKEN_COLON);
@@ -958,7 +982,7 @@ int arg(Parser *parser)
 */
 int statement_inside(Parser *parser)
 {
-    parser->is_in_return = false;
+    parser->is_in_return = parser->is_in_print = parser->no_assign_expression = parser->expr_parser_call = false;
     int err;
 
     GET_NEXT_TOKEN();
@@ -970,6 +994,7 @@ int statement_inside(Parser *parser)
     }
 
     /* Return is valid only in definition of function */
+    /* Rule 13. <statement_inside> -> RETURN <expression_start> EOL <statement_inside> */
     else if(parser->curr_token.type == KEYWORD_RETURN)
     {
         if(!(parser->is_in_def))
@@ -996,8 +1021,25 @@ int statement_inside(Parser *parser)
         
     }
 
+    /* Rule 10. <statement_inside> -> IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE : EOL INDENT <statement_inside> <end> DEDENT <statement> */
     else if(parser->curr_token.type == KEYWORD_IF)
     {
+        parser->is_in_if;
+
+        parser->if_expression = true;
+        err = expression_start(parser);
+        CHECK_ERROR();
+        parser->if_expression = false;
+
+        if(!(parser->expr_parser_call))
+        {
+            GET_NEXT_TOKEN();
+        }
+
+        /* STATE: IF <expression_start>: */
+        CHECK_TOKEN(TOKEN_COLON);
+        CHECK_ERROR();
+
         parser->nested_cnt++;
     }
 
@@ -1006,8 +1048,8 @@ int statement_inside(Parser *parser)
         parser->nested_cnt++;
     }
 
-    /* Rule 6. <statement> -> ID = <expression_start> <end> <statement> */
-    /* In this rule is also implemented part of the 9th rule because of ID collission */
+    /* Rule 12. <statement> -> ID = <expression_start> <end> <statement> */
+    /* In this rule is also implemented part of the 16th rule because of ID collission */
     else if(parser->curr_token.type == TOKEN_IDENTIFIER)
     {
         GET_KEY(); // Identifier is a special key in global or local symtable
@@ -1025,7 +1067,7 @@ int statement_inside(Parser *parser)
         }
         else
         {
-            parser->symbol_data_global = symtab_lookup(parser->local_table, key.str, &err);
+            parser->symbol_data_global = symtab_lookup(parser->global_table, key.str, &err);
             CHECK_ERROR();
         }
         
@@ -1136,6 +1178,7 @@ int statement_inside(Parser *parser)
     {
         /* STATE: PASS <end> */
         GET_NEXT_TOKEN();
+
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
         else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
         else return SYNTAX_ERROR;
@@ -1175,6 +1218,9 @@ int statement_inside(Parser *parser)
         else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
         else return SYNTAX_ERROR;
     }
+
+    err = statement_inside();
+    CHECK_ERROR();
 
     return NO_ERROR;
 }
