@@ -47,9 +47,9 @@ void test1(void)
     // gen_instruct("WRITE TF@%retval");
 
     Token token;
-    token.type = TOKEN_STRING;
+    token.type = TOKEN_IDENTIFIER;
     str_init(&token.attribute.string);
-    str_copy(&token.attribute.string, "Dlzka nohavic je");
+    str_copy(&token.attribute.string, "dlzka");
 
     Token token2;
     token2.type = TOKEN_INTEGER;
@@ -59,7 +59,10 @@ void test1(void)
     token3.type = TOKEN_DECIMAL;
     token3.attribute.decimal = 20.35;
 
-    gen_print(3, true, token, token2, token3);
+    gen_instruct("DEFVAR GF@dlzka");
+    gen_instruct("MOVE GF@dlzka string@cau");
+
+    gen_print(1, true, token);
 
     generate_code(sourceCode);
 }

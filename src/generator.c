@@ -712,7 +712,7 @@ void gen_print(unsigned n, bool global, Token token, ...) {
 
     for (unsigned i = 0; i < n; i++) {
         if (token.type == TOKEN_IDENTIFIER) {
-
+            ADDCODE("WRITE "); ADDCODE(ISGLOBAL(global)); ADDLINE(token.attribute.string.str);
         } else {
             ADDCODE("WRITE string@");
 
