@@ -22,10 +22,15 @@ typedef struct
     tSymbol_item* symbol_data_local; 
     tSymbol_item* left_side; // for storing current left hand side identifier 
     bool is_in_if;
+    bool if_expression;
     bool is_in_while;
+    bool while_expression;
     bool is_in_def;
     bool is_in_print;
-    unsigned nested_cnt = 0;
+    bool no_assign_expression;
+    bool is_in_return;
+    bool expr_parser_call;
+    unsigned nested_cnt;
 } Parser;
 
 int start_compiler(char* src_file_name);
