@@ -121,7 +121,16 @@ int start_compiler(char* src_file_name)
     Parser *parser = &p; 
     if(init_parser(parser))  return INTERNAL_ERROR;
     
-    return NO_ERROR;    
+    //initialisation of scanner 
+    if(init_scanner(parser->scanner, src_file_name)) return INTERNAL_ERROR;
+
+    //initialisation of global and local table
+    if(symtab_init(parser->global_table)||
+       symtab_init(parser->local_table))
+    {
+        return INTERNAL_ERROR;
+    }
+    return statement(parser);
 }
 
 

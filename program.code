@@ -134,11 +134,244 @@ PUSHS GF@$op1
 PUSHS GF@$op2
 IDIVS
 RETURN
+LABEL $eval
+POPS GF@$op1
+TYPE GF@$op1Type GF@$op1
+JUMPIFEQ $evalInt GF@$op1Type string@int
+JUMPIFEQ $evalFloat GF@$op1Type string@float
+JUMPIFEQ $evalString GF@$op1Type string@string
+JUMPIFEQ $evalFalse GF@$op1Type string@nil
+JUMPIFEQ $evalBool GF@$op1Type string@bool
+LABEL $evalInt
+JUMPIFEQ $evalFalse GF@$op1 int@0
+JUMP $evalTrue
+LABEL $evalFloat
+JUMPIFEQ $evalFalse GF@$op1 float@0x0p+0
+JUMP $evalTrue
+LABEL $evalString
+JUMPIFEQ $evalFalse GF@$op1 string@
+JUMP $evalTrue
+LABEL $evalBool
+JUMPIFEQ $evalFalse GF@$op1 bool@false
+JUMP $evalTrue
+LABEL $evalTrue
+MOVE GF@$temp bool@true
+RETURN
+LABEL $evalFalse
+MOVE GF@$temp bool@false
+RETURN
+LABEL $substr
+PUSHFRAME
+DEFVAR LF@%retval
+DEFVAR LF@letter
+DEFVAR LF@cond
+DEFVAR LF@limit
+DEFVAR LF@len
+MOVE LF@%retval nil@nil
+TYPE GF@$temp LF@%1
+JUMPIFNEQ $substrFinish GF@$temp string@string
+TYPE GF@$temp LF@%2
+JUMPIFNEQ $substrFinish GF@$temp string@int
+TYPE GF@$temp LF@%3
+JUMPIFNEQ $substrFinish GF@$temp string@int
+STRLEN LF@len LF@%1
+GT LF@cond LF@%2 LF@len
+JUMPIFEQ $ordNone LF@cond bool@true
+LT LF@cond LF@%2 int@0
+JUMPIFEQ $ordNone LF@cond bool@true
+MOVE LF@%retval string@
+ADD LF@limit LF@%2 LF@%3
+EQ LF@cond LF@%3 int@0
+JUMPIFEQ $substrFinish LF@cond bool@true
+LABEL $substrLoop
+GETCHAR LF@letter LF@%1 LF@%2
+CONCAT LF@%retval LF@%retval LF@letter
+ADD LF@%2 LF@%2 int@1
+GT LF@cond LF@len LF@%2
+JUMPIFEQ $substrFinish LF@cond bool@false
+GT LF@cond LF@limit LF@%2
+JUMPIFEQ $substrLoop LF@cond bool@true
+LABEL $substrFinish
+POPFRAME
+RETURN
+LABEL $len
+PUSHFRAME
+DEFVAR LF@%retval
+STRLEN LF@%retval LF@%1
+POPFRAME
+RETURN
+LABEL $chr
+PUSHFRAME
+DEFVAR LF@%retval
+TYPE GF@$temp LF@%1
+JUMPIFNEQ $error GF@$temp string@int
+LT GF@$temp LF@%1 int@0
+JUMPIFEQ $error GF@$temp bool@true
+GT GF@$temp LF@%1 int@255
+JUMPIFEQ $error GF@$temp bool@true
+INT2CHAR LF@%retval LF@%1
+POPFRAME
+RETURN
+LABEL $ord
+PUSHFRAME
+DEFVAR LF@%retval
+DEFVAR LF@cond
+DEFVAR LF@len
+DEFVAR LF@type
+TYPE LF@type LF@%1
+JUMPIFNEQ $ordNone LF@type string@string
+TYPE LF@type LF@%2
+JUMPIFNEQ $ordNone LF@type string@int
+STRLEN LF@len LF@%1
+GT LF@cond LF@%2 LF@len
+JUMPIFEQ $ordNone LF@cond bool@true
+LT LF@cond LF@%2 int@0
+JUMPIFEQ $ordNone LF@cond bool@true
+STRI2INT LF@%retval LF@%1 LF@%2
+POPFRAME
+RETURN
+LABEL $ordNone
+MOVE LF@%retval nil@nil
+POPFRAME
+RETURN
+LABEL $inputs
+PUSHFRAME
+DEFVAR LF@%retval
+READ LF@%retval string
+POPFRAME
+RETURN
+LABEL $inputi
+PUSHFRAME
+DEFVAR LF@%retval
+READ LF@%retval int
+POPFRAME
+RETURN
+LABEL $inputf
+PUSHFRAME
+DEFVAR LF@%retval
+READ LF@%retval float
+POPFRAME
+RETURN
+LABEL $glt
+POPS GF@$op2
+POPS GF@$op1
+TYPE GF@$op1Type GF@$op1
+TYPE GF@$op2Type GF@$op2
+JUMPIFEQ $gltFinish GF@$op1Type GF@$op2Type
+JUMPIFEQ $gltOp1Int GF@$op1Type string@int
+JUMPIFEQ $gltOp1Float GF@$op1Type string@float
+JUMPIFEQ $gltOp1Bool GF@$op1Type string@bool
+EXIT int@4
+LABEL $gltOp1Int
+JUMPIFEQ $gltOp1IntOp2Float GF@$op2Type string@float
+JUMPIFEQ $gltOp1IntOp2Bool GF@$op2Type string@bool
+EXIT int@4
+LABEL $gltOp1IntOp2Float
+INT2FLOAT GF@$op1 GF@$op1
+JUMP $gltFinish
+LABEL $gltOp1IntOp2Bool
+MOVE GF@$temp GF@$op2
+MOVE GF@$op2 int@1
+JUMPIFEQ $gltFinish GF@$temp bool@true
+MOVE GF@$op2 int@0
+JUMP $gltFinish
+LABEL $gltOp1Float
+JUMPIFEQ $gltOp1FloatOp2Int GF@$op2Type string@int
+JUMPIFEQ $gltOp1FloatOp2Bool GF@$op2Type string@bool
+EXIT int@4
+LABEL $gltOp1FloatOp2Int
+INT2FLOAT GF@$op2 GF@$op2
+JUMP $gltFinish
+LABEL $gltOp1FloatOp2Bool
+MOVE GF@$temp GF@$op2
+MOVE GF@$op2 float@0x1p+0
+JUMPIFEQ $gltFinish GF@$temp bool@true
+MOVE GF@$op2 float@0x0p+0
+JUMP $gltFinish
+LABEL $gltOp1Bool
+JUMPIFEQ $gltOp1BoolOp2Int GF@$op2Type string@int
+JUMPIFEQ $gltOp1BoolOp2Float GF@$op2Type string@float
+EXIT int@4
+LABEL $gltOp1BoolOp2Int
+MOVE GF@$temp GF@$op2
+MOVE GF@$op2 bool@true
+JUMPIFEQ $gltFinish GF@$temp int@1
+MOVE GF@$op2 bool@false
+JUMP $gltFinish
+LABEL $gltOp1BoolOp2Float
+MOVE GF@$temp GF@$op2
+MOVE GF@$op2 bool@true
+JUMPIFEQ $gltFinish GF@$temp float@0x1p+0
+MOVE GF@$op2 bool@false
+JUMP $gltFinish
+LABEL $gltFinish
+PUSHS GF@$op1
+PUSHS GF@$op2
+RETURN
+LABEL $eq
+POPS GF@$op2
+POPS GF@$op1
+TYPE GF@$op1Type GF@$op1
+TYPE GF@$op2Type GF@$op2
+JUMPIFEQ $eqFinish GF@$op1Type GF@$op2Type
+JUMPIFEQ $eqFinish GF@$op1Type string@nil
+JUMPIFEQ $eqFinish GF@$op2Type string@nil
+JUMPIFEQ $eqNotEqual GF@$op1Type string@string
+JUMPIFEQ $eqNotEqual GF@$op2Type string@string
+JUMPIFEQ $eqOp1Int GF@$op1Type string@int
+JUMPIFEQ $eqOp1Float GF@$op1Type string@float
+JUMPIFEQ $eqOp1Bool GF@$op1Type string@bool
+LABEL $eqOp1Int
+JUMPIFEQ $eqOp1IntOp2Float GF@$op2Type string@float
+JUMPIFEQ $eqOp1IntOp2Bool GF@$op2Type string@bool
+LABEL $eqOp1IntOp2Float
+INT2FLOAT GF@$op1 GF@$op1
+JUMP $eqFinish
+LABEL $eqOp1IntOp2Bool
+MOVE GF@$temp GF@$op2
+MOVE GF@$op2 int@1
+JUMPIFEQ $eqFinish GF@$temp bool@true
+MOVE GF@$op2 int@0
+JUMP $eqFinish
+LABEL $eqOp1Float
+JUMPIFEQ $eqOp1FloatOp2Int GF@$op2Type string@int
+JUMPIFEQ $eqOp1FloatOp2Bool GF@$op2Type string@bool
+LABEL $eqOp1FloatOp2Int
+INT2FLOAT GF@$op2 GF@$op2
+JUMP $eqFinish
+LABEL $eqOp1FloatOp2Bool
+MOVE GF@$temp GF@$op2
+MOVE GF@$op2 float@0x1p+0
+JUMPIFEQ $eqFinish GF@$temp bool@true
+MOVE GF@$op2 float@0x0p+0
+JUMP $eqFinish
+LABEL $eqOp1Bool
+JUMPIFEQ $eqOp1BoolOp2Int GF@$op2Type string@int
+JUMPIFEQ $eqOp1BoolOp2Float GF@$op2Type string@float
+LABEL $eqOp1BoolOp2Int
+MOVE GF@$temp GF@$op1
+MOVE GF@$op1 int@1
+JUMPIFEQ $eqFinish GF@$temp bool@true
+MOVE GF@$op1 int@0
+JUMP $eqFinish
+LABEL $eqOp1BoolOp2Float
+MOVE GF@$temp GF@$op1
+MOVE GF@$op1 float@0x1p+0
+JUMPIFEQ $eqFinish GF@$temp bool@true
+MOVE GF@$op1 float@0x0p+0
+JUMP $eqFinish
+LABEL $eqNotEqual
+PUSHS bool@false
+RETURN
+LABEL $eqFinish
+PUSHS GF@$op1
+PUSHS GF@$op2
+EQS
+RETURN
 LABEL $$main
-PUSHS int@10
-PUSHS int@10
-ADDS
-defvar GF@jej
-POPS GF@jej
-WRITE GF@jej
-WRITE string@\010
+DEFVAR GF@dlzka
+MOVE GF@dlzka string@cau
+WRITE GF@dlzka
+CREATEFRAME
+DEFVAR TF@%retval
+MOVE TF@%retval nil@nil

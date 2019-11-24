@@ -12,13 +12,15 @@ str_append(&code, line); \
 #define ISGLOBAL(global) \
 global ? "GF@" : "LF@" \
 
+#define STRLEN 128
+
 tString code;
 tString line;
 tString helper;
 
 int error;
-
-#define STRLEN 128
+int uid = 0;
+char uidStr[STRLEN];
 
 int generator_begin() {
     if ((error = str_init(&code))) {
@@ -214,6 +216,315 @@ int generator_begin() {
     ADDLINE("IDIVS");
     ADDLINE("RETURN");
 
+    // evaluate function definition - used in if and while
+    ADDLINE("LABEL $eval");
+    ADDLINE("POPS GF@$op1");
+    ADDLINE("TYPE GF@$op1Type GF@$op1");
+
+    ADDLINE("JUMPIFEQ $evalInt GF@$op1Type string@int");
+    ADDLINE("JUMPIFEQ $evalFloat GF@$op1Type string@float");
+    ADDLINE("JUMPIFEQ $evalString GF@$op1Type string@string");
+    ADDLINE("JUMPIFEQ $evalFalse GF@$op1Type string@nil");
+    ADDLINE("JUMPIFEQ $evalBool GF@$op1Type string@bool");
+
+    ADDLINE("LABEL $evalInt");
+    ADDLINE("JUMPIFEQ $evalFalse GF@$op1 int@0");
+    ADDLINE("JUMP $evalTrue");
+
+    ADDLINE("LABEL $evalFloat");
+    ADDLINE("JUMPIFEQ $evalFalse GF@$op1 float@0x0p+0");
+    ADDLINE("JUMP $evalTrue");
+
+    ADDLINE("LABEL $evalString");
+    ADDLINE("JUMPIFEQ $evalFalse GF@$op1 string@");
+    ADDLINE("JUMP $evalTrue");
+
+    ADDLINE("LABEL $evalBool");
+    ADDLINE("JUMPIFEQ $evalFalse GF@$op1 bool@false");
+    ADDLINE("JUMP $evalTrue");
+
+    ADDLINE("LABEL $evalTrue");
+    ADDLINE("MOVE GF@$temp bool@true");
+    ADDLINE("RETURN");
+
+    ADDLINE("LABEL $evalFalse");
+    ADDLINE("MOVE GF@$temp bool@false");
+    ADDLINE("RETURN");
+
+    // function substr
+    ADDLINE("LABEL $substr");
+    ADDLINE("PUSHFRAME");
+    ADDLINE("DEFVAR LF@%retval");
+    ADDLINE("DEFVAR LF@letter");
+    ADDLINE("DEFVAR LF@cond");
+    ADDLINE("DEFVAR LF@limit");
+    ADDLINE("DEFVAR LF@len");
+
+    ADDLINE("MOVE LF@%retval nil@nil");
+
+    ADDLINE("TYPE GF@$temp LF@%1");
+    ADDLINE("JUMPIFNEQ $substrFinish GF@$temp string@string");
+
+    ADDLINE("TYPE GF@$temp LF@%2");
+    ADDLINE("JUMPIFNEQ $substrFinish GF@$temp string@int");
+
+    ADDLINE("TYPE GF@$temp LF@%3");
+    ADDLINE("JUMPIFNEQ $substrFinish GF@$temp string@int");
+
+    ADDLINE("STRLEN LF@len LF@%1");
+    ADDLINE("GT LF@cond LF@%2 LF@len");
+    ADDLINE("JUMPIFEQ $ordNone LF@cond bool@true");
+
+    ADDLINE("LT LF@cond LF@%2 int@0");
+    ADDLINE("JUMPIFEQ $ordNone LF@cond bool@true");
+
+    ADDLINE("MOVE LF@%retval string@");
+    ADDLINE("ADD LF@limit LF@%2 LF@%3");
+    
+    ADDLINE("EQ LF@cond LF@%3 int@0");
+    ADDLINE("JUMPIFEQ $substrFinish LF@cond bool@true");
+
+    ADDLINE("LABEL $substrLoop");
+    ADDLINE("GETCHAR LF@letter LF@%1 LF@%2");
+    ADDLINE("CONCAT LF@%retval LF@%retval LF@letter");
+    ADDLINE("ADD LF@%2 LF@%2 int@1");
+
+    ADDLINE("GT LF@cond LF@len LF@%2");
+    ADDLINE("JUMPIFEQ $substrFinish LF@cond bool@false");
+
+    ADDLINE("GT LF@cond LF@limit LF@%2");
+    ADDLINE("JUMPIFEQ $substrLoop LF@cond bool@true");
+
+    ADDLINE("LABEL $substrFinish");
+    ADDLINE("POPFRAME");
+    ADDLINE("RETURN");
+
+    // function len
+    ADDLINE("LABEL $len");
+    ADDLINE("PUSHFRAME");
+    ADDLINE("DEFVAR LF@%retval");
+    ADDLINE("STRLEN LF@%retval LF@%1");
+    ADDLINE("POPFRAME");
+    ADDLINE("RETURN");
+
+    // function chr
+    ADDLINE("LABEL $chr");
+    ADDLINE("PUSHFRAME");
+    ADDLINE("DEFVAR LF@%retval");
+
+    ADDLINE("TYPE GF@$temp LF@%1");
+    ADDLINE("JUMPIFNEQ $error GF@$temp string@int");
+
+    ADDLINE("LT GF@$temp LF@%1 int@0");
+    ADDLINE("JUMPIFEQ $error GF@$temp bool@true");
+
+    ADDLINE("GT GF@$temp LF@%1 int@255");
+    ADDLINE("JUMPIFEQ $error GF@$temp bool@true");
+
+    ADDLINE("INT2CHAR LF@%retval LF@%1");
+    ADDLINE("POPFRAME");
+    ADDLINE("RETURN");
+
+    // function ord
+    ADDLINE("LABEL $ord");
+    ADDLINE("PUSHFRAME");
+    ADDLINE("DEFVAR LF@%retval");
+    ADDLINE("DEFVAR LF@cond");
+    ADDLINE("DEFVAR LF@len");
+    ADDLINE("DEFVAR LF@type");
+
+    ADDLINE("TYPE LF@type LF@%1");
+    ADDLINE("JUMPIFNEQ $ordNone LF@type string@string");
+
+    ADDLINE("TYPE LF@type LF@%2");
+    ADDLINE("JUMPIFNEQ $ordNone LF@type string@int");
+
+    ADDLINE("STRLEN LF@len LF@%1");
+    ADDLINE("GT LF@cond LF@%2 LF@len");
+    ADDLINE("JUMPIFEQ $ordNone LF@cond bool@true");
+
+    ADDLINE("LT LF@cond LF@%2 int@0");
+    ADDLINE("JUMPIFEQ $ordNone LF@cond bool@true");
+
+    ADDLINE("STRI2INT LF@%retval LF@%1 LF@%2");
+    ADDLINE("POPFRAME");
+    ADDLINE("RETURN");
+
+    ADDLINE("LABEL $ordNone");
+    ADDLINE("MOVE LF@%retval nil@nil");
+    ADDLINE("POPFRAME");
+    ADDLINE("RETURN");
+
+    // function inputs
+    ADDLINE("LABEL $inputs");
+    ADDLINE("PUSHFRAME");
+    ADDLINE("DEFVAR LF@%retval");
+    ADDLINE("READ LF@%retval string");
+    ADDLINE("POPFRAME");
+    ADDLINE("RETURN");
+
+    // function inputi
+    ADDLINE("LABEL $inputi");
+    ADDLINE("PUSHFRAME");
+    ADDLINE("DEFVAR LF@%retval");
+    ADDLINE("READ LF@%retval int");
+    ADDLINE("POPFRAME");
+    ADDLINE("RETURN");
+
+    // function inputf
+    ADDLINE("LABEL $inputf");
+    ADDLINE("PUSHFRAME");
+    ADDLINE("DEFVAR LF@%retval");
+    ADDLINE("READ LF@%retval float");
+    ADDLINE("POPFRAME");
+    ADDLINE("RETURN");
+
+    // lesser than, greater than functions
+    ADDLINE("LABEL $glt");
+    ADDLINE("POPS GF@$op2");
+    ADDLINE("POPS GF@$op1");
+    ADDLINE("TYPE GF@$op1Type GF@$op1");
+    ADDLINE("TYPE GF@$op2Type GF@$op2");
+
+    ADDLINE("JUMPIFEQ $gltFinish GF@$op1Type GF@$op2Type");
+    ADDLINE("JUMPIFEQ $gltOp1Int GF@$op1Type string@int");
+    ADDLINE("JUMPIFEQ $gltOp1Float GF@$op1Type string@float");
+    ADDLINE("JUMPIFEQ $gltOp1Bool GF@$op1Type string@bool");
+    ADDLINE("EXIT int@4");
+
+    ADDLINE("LABEL $gltOp1Int");
+    ADDLINE("JUMPIFEQ $gltOp1IntOp2Float GF@$op2Type string@float");
+    ADDLINE("JUMPIFEQ $gltOp1IntOp2Bool GF@$op2Type string@bool");
+    ADDLINE("EXIT int@4");
+
+    ADDLINE("LABEL $gltOp1IntOp2Float");
+    ADDLINE("INT2FLOAT GF@$op1 GF@$op1");
+    ADDLINE("JUMP $gltFinish");
+
+    ADDLINE("LABEL $gltOp1IntOp2Bool");
+    ADDLINE("MOVE GF@$temp GF@$op2");
+    ADDLINE("MOVE GF@$op2 int@1");
+    ADDLINE("JUMPIFEQ $gltFinish GF@$temp bool@true");
+    ADDLINE("MOVE GF@$op2 int@0");
+    ADDLINE("JUMP $gltFinish");
+
+    ADDLINE("LABEL $gltOp1Float");
+    ADDLINE("JUMPIFEQ $gltOp1FloatOp2Int GF@$op2Type string@int");
+    ADDLINE("JUMPIFEQ $gltOp1FloatOp2Bool GF@$op2Type string@bool");
+    ADDLINE("EXIT int@4");
+
+    ADDLINE("LABEL $gltOp1FloatOp2Int");
+    ADDLINE("INT2FLOAT GF@$op2 GF@$op2");
+    ADDLINE("JUMP $gltFinish");
+
+    ADDLINE("LABEL $gltOp1FloatOp2Bool");
+    ADDLINE("MOVE GF@$temp GF@$op2");
+    ADDLINE("MOVE GF@$op2 float@0x1p+0");
+    ADDLINE("JUMPIFEQ $gltFinish GF@$temp bool@true");
+    ADDLINE("MOVE GF@$op2 float@0x0p+0");
+    ADDLINE("JUMP $gltFinish");
+
+    ADDLINE("LABEL $gltOp1Bool");
+    ADDLINE("JUMPIFEQ $gltOp1BoolOp2Int GF@$op2Type string@int");
+    ADDLINE("JUMPIFEQ $gltOp1BoolOp2Float GF@$op2Type string@float");
+    ADDLINE("EXIT int@4");
+
+    ADDLINE("LABEL $gltOp1BoolOp2Int");
+    ADDLINE("MOVE GF@$temp GF@$op2");
+    ADDLINE("MOVE GF@$op2 bool@true");
+    ADDLINE("JUMPIFEQ $gltFinish GF@$temp int@1");
+    ADDLINE("MOVE GF@$op2 bool@false");
+    ADDLINE("JUMP $gltFinish");
+
+    ADDLINE("LABEL $gltOp1BoolOp2Float");
+    ADDLINE("MOVE GF@$temp GF@$op2");
+    ADDLINE("MOVE GF@$op2 bool@true");
+    ADDLINE("JUMPIFEQ $gltFinish GF@$temp float@0x1p+0");
+    ADDLINE("MOVE GF@$op2 bool@false");
+    ADDLINE("JUMP $gltFinish");
+
+    ADDLINE("LABEL $gltFinish");
+    ADDLINE("PUSHS GF@$op1");
+    ADDLINE("PUSHS GF@$op2");
+    ADDLINE("RETURN");
+
+    // equal function
+    ADDLINE("LABEL $eq");
+    ADDLINE("POPS GF@$op2");
+    ADDLINE("POPS GF@$op1");
+    ADDLINE("TYPE GF@$op1Type GF@$op1");
+    ADDLINE("TYPE GF@$op2Type GF@$op2");
+
+    ADDLINE("JUMPIFEQ $eqFinish GF@$op1Type GF@$op2Type");
+
+    ADDLINE("JUMPIFEQ $eqFinish GF@$op1Type string@nil");
+    ADDLINE("JUMPIFEQ $eqFinish GF@$op2Type string@nil");
+
+    ADDLINE("JUMPIFEQ $eqNotEqual GF@$op1Type string@string");
+    ADDLINE("JUMPIFEQ $eqNotEqual GF@$op2Type string@string");
+
+    ADDLINE("JUMPIFEQ $eqOp1Int GF@$op1Type string@int");
+    ADDLINE("JUMPIFEQ $eqOp1Float GF@$op1Type string@float");
+    ADDLINE("JUMPIFEQ $eqOp1Bool GF@$op1Type string@bool");
+
+    ADDLINE("LABEL $eqOp1Int");
+    ADDLINE("JUMPIFEQ $eqOp1IntOp2Float GF@$op2Type string@float");
+    ADDLINE("JUMPIFEQ $eqOp1IntOp2Bool GF@$op2Type string@bool");
+
+    ADDLINE("LABEL $eqOp1IntOp2Float");
+    ADDLINE("INT2FLOAT GF@$op1 GF@$op1");
+    ADDLINE("JUMP $eqFinish");
+
+    ADDLINE("LABEL $eqOp1IntOp2Bool");
+    ADDLINE("MOVE GF@$temp GF@$op2");
+    ADDLINE("MOVE GF@$op2 int@1");
+    ADDLINE("JUMPIFEQ $eqFinish GF@$temp bool@true");
+    ADDLINE("MOVE GF@$op2 int@0");
+    ADDLINE("JUMP $eqFinish");
+
+    ADDLINE("LABEL $eqOp1Float");
+    ADDLINE("JUMPIFEQ $eqOp1FloatOp2Int GF@$op2Type string@int");
+    ADDLINE("JUMPIFEQ $eqOp1FloatOp2Bool GF@$op2Type string@bool");
+
+    ADDLINE("LABEL $eqOp1FloatOp2Int");
+    ADDLINE("INT2FLOAT GF@$op2 GF@$op2");
+    ADDLINE("JUMP $eqFinish");
+
+    ADDLINE("LABEL $eqOp1FloatOp2Bool");
+    ADDLINE("MOVE GF@$temp GF@$op2");
+    ADDLINE("MOVE GF@$op2 float@0x1p+0");
+    ADDLINE("JUMPIFEQ $eqFinish GF@$temp bool@true");
+    ADDLINE("MOVE GF@$op2 float@0x0p+0");
+    ADDLINE("JUMP $eqFinish");
+
+    ADDLINE("LABEL $eqOp1Bool");
+    ADDLINE("JUMPIFEQ $eqOp1BoolOp2Int GF@$op2Type string@int");
+    ADDLINE("JUMPIFEQ $eqOp1BoolOp2Float GF@$op2Type string@float");
+
+    ADDLINE("LABEL $eqOp1BoolOp2Int");
+    ADDLINE("MOVE GF@$temp GF@$op1");
+    ADDLINE("MOVE GF@$op1 int@1");
+    ADDLINE("JUMPIFEQ $eqFinish GF@$temp bool@true");
+    ADDLINE("MOVE GF@$op1 int@0");
+    ADDLINE("JUMP $eqFinish");
+
+    ADDLINE("LABEL $eqOp1BoolOp2Float");
+    ADDLINE("MOVE GF@$temp GF@$op1");
+    ADDLINE("MOVE GF@$op1 float@0x1p+0");
+    ADDLINE("JUMPIFEQ $eqFinish GF@$temp bool@true");
+    ADDLINE("MOVE GF@$op1 float@0x0p+0");
+    ADDLINE("JUMP $eqFinish");
+
+    ADDLINE("LABEL $eqNotEqual");
+    ADDLINE("PUSHS bool@false");
+    ADDLINE("RETURN");
+
+    ADDLINE("LABEL $eqFinish");
+    ADDLINE("PUSHS GF@$op1");
+    ADDLINE("PUSHS GF@$op2");
+    ADDLINE("EQS");
+    ADDLINE("RETURN");
+
     ADDLINE("LABEL $$main");
 
     return NO_ERROR;
@@ -326,10 +637,70 @@ void gen_stack(const char *instruct) {
     ADDCODE("CALL $"); ADDLINE(instruct);
 }
 
+void gen_lts() {
+    ADDLINE("CALL $glt");
+
+    ADDLINE("LTS");
+}
+
+void gen_gts() {
+    ADDLINE("CALL $glt");
+
+    ADDLINE("GTS");
+}
+
+// TODO bool support is not required?
+void gen_eqs() {
+    gen_instruct("CALL $eq");
+}
+
 // generate instruction with no parameter
 void gen_instruct(const char *instruct) {
     ADDLINE(instruct);
 }
+
+void gen_if_start() {
+    sprintf(uidStr, "%d", uid++);
+
+    ADDLINE("CALL $eval");
+
+    ADDCODE("JUMPIFEQ $if"); ADDCODE(uidStr); ADDLINE("Else GF@$temp bool@false");
+}
+
+void gen_if_end() {
+    ADDCODE("JUMP $if"); ADDCODE(uidStr); ADDLINE("End");
+}
+
+void gen_else_start() {
+    ADDCODE("LABEL $if"); ADDCODE(uidStr); ADDLINE("Else");
+}
+
+void gen_else_end() {
+    ADDCODE("JUMP $if"); ADDCODE(uidStr); ADDLINE("End");
+
+    ADDCODE("LABEL $if"); ADDCODE(uidStr); ADDLINE("End");
+}
+
+// TODO while requires you to push the evaluated value onto the stack in body every time (even when the value doesn't change)
+void gen_while_start() {
+    sprintf(uidStr, "%d", uid++);
+
+    ADDCODE("LABEL $while"); ADDCODE(uidStr); ADDLINE("Begin");
+
+    ADDLINE("CALL $eval");
+
+    ADDCODE("JUMPIFEQ $while"); ADDCODE(uidStr); ADDLINE("End GF@$temp bool@false");
+}
+
+void gen_while_end() {
+    ADDCODE("JUMP $while"); ADDCODE(uidStr); ADDLINE("Begin");
+
+    ADDCODE("LABEL $while"); ADDCODE(uidStr); ADDLINE("End");
+}
+
+// void gen_inputs() {
+    
+// }
 
 // TODO print must return None
 void gen_print(unsigned n, bool global, Token token, ...) {
@@ -340,30 +711,40 @@ void gen_print(unsigned n, bool global, Token token, ...) {
     va_start(ap, token);
 
     for (unsigned i = 0; i < n; i++) {
-        str_copy(&line, "WRITE string@");
+        if (token.type == TOKEN_IDENTIFIER) {
+            ADDCODE("WRITE "); ADDCODE(ISGLOBAL(global)); ADDLINE(token.attribute.string.str);
+        } else {
+            ADDCODE("WRITE string@");
 
-        if (token.type == TOKEN_INTEGER) {
-            sprintf(temp, "%d", token.attribute.integer);
-            str_append(&line, temp);
-        } else if (token.type ==  TOKEN_DECIMAL) {
-            sprintf(temp, "%a", token.attribute.decimal);
-            str_append(&line, temp);
-        } else if (token.type == KEYWORD_NONE) {
-            str_append(&line, "None");
-        } else if (token.type == TOKEN_STRING) {
-            str_append(&line, replace_space(token.attribute.string.str));
-        } else if (token.type == TOKEN_IDENTIFIER) {
-            str_concat(&line, "WRITE ", ISGLOBAL(global), token.attribute.string.str, NULL);
+            if (token.type == TOKEN_INTEGER) {
+                sprintf(temp, "%d", token.attribute.integer);
+            } else if (token.type ==  TOKEN_DECIMAL) {
+                sprintf(temp, "%a", token.attribute.decimal);
+            } else if (token.type == KEYWORD_NONE) {
+                strcpy(temp, "None");
+            } else if (token.type == TOKEN_STRING) {
+                strcpy(temp, replace_space(token.attribute.string.str));
+            }
+
+            ADDCODE(temp);
+            if (i == n - 1) {
+                // last term, add new line
+                ADDLINE("\\010");
+            } else {
+                // add space
+                ADDLINE("\\032");
+            }
         }
 
-        ADDLINE(line.str);
         token = va_arg(ap, Token);
     }
 
     va_end(ap);
 
-    // add new line at the end
-    ADDLINE("WRITE string@\\010");
+    // return value is always None
+    ADDLINE("CREATEFRAME");
+    ADDLINE("DEFVAR TF@%retval");
+    ADDLINE("MOVE TF@%retval nil@nil");
 
 }
 

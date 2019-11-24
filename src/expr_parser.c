@@ -33,7 +33,7 @@ int parsing_table[16][16] =
 	{ R, R, R, R, R, R, R, R, R, R, R, S, R, S, S, R }, // *
     { R, R, R, R, R, R, R, R, R, R, R, S, R, S, S, R }, // /
     { R, R, R, R, R, R, R, R, R, R, R, S, R, S, S, R }, // //
-    { S, S, S, S, S, F, F, F, F, F, F, S, R, S, S, R }, // >
+    { S, S, S, S, S, R, F, F, F, F, F, S, R, S, S, R }, // >
 	{ S, S, S, S, S, F, F, F, F, F, F, S, R, S, S, R }, // ==
     { S, S, S, S, S, F, F, F, F, F, F, S, R, S, S, R }, // !=
     { S, S, S, S, S, F, F, F, F, F, F, S, R, S, S, R }, // <=
@@ -49,8 +49,6 @@ int parsing_table[16][16] =
 /**
  * Check if identifier from last token was defined
  **/
-
-
 bool is_defined(Parser* parser)
 {
     int err= NO_ERROR;
@@ -122,6 +120,7 @@ int init_expr_parser(Expr_parser * expr_parser)
     //push dollar to the stack to indicate stack end
     if(stack_push(expr_parser->stack, create_symbol(DOLLAR, SYM_UNDEF)))
     {
+        dispose_expr_parser(expr_parser);
         return INTERNAL_ERROR;
     } 
 
@@ -139,7 +138,6 @@ void dispose_expr_parser(Expr_parser * expr_p)
 /**
  * Sets expr_parser data based on last token
  **/
-
 int  set_symbol_to_curr_token(Token token, Expr_parser* expr_parser)
 {
     expr_parser->curr_sym.symbol = token_enum_to_symb_enum(token.type);
@@ -329,21 +327,21 @@ int reduce(Expr_parser * expr_parser)
        break;
     
     case E_EQ_E:
-       //TODO generate stack compare here 
+       gen_eqs();
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
        break;
     
     case E_GTH_E:
-       //TODO generate stack compare here 
+        gen_gts();
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
        break;
     
     case E_LTH_E:
-       //TODO generate stack compare here 
+       gen_lts();
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
@@ -364,7 +362,6 @@ int reduce(Expr_parser * expr_parser)
        break;
 
     case PAR_E_PAR:
-       //TODO generate stack compare here 
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
@@ -417,6 +414,7 @@ int expression(Parser* parser)
         DEBUG_PRINT("topmost terminal je %d \n", expr_parser->stack_top_sym.symbol, expr_parser->stack_top_sym.data_type);
         if(err)
         { 
+            dispose_expr_parser(expr_parser);
             return INTERNAL_ERROR;
         }
 
@@ -432,6 +430,7 @@ int expression(Parser* parser)
         {
             if(stack_push(expr_parser->stack, expr_parser->curr_sym))
             {
+                dispose_expr_parser(expr_parser);
                 return INTERNAL_ERROR;
             } 
 
@@ -442,11 +441,24 @@ int expression(Parser* parser)
                 if(expr_parser->curr_sym.symbol == ID)
                 {
                    // check if inserted id is defined
-                   if(!is_defined(parser)) return UNDEFINE_REDEFINE_ERROR; 
+                   if(!is_defined(parser))
+                   {
+                    dispose_expr_parser(expr_parser);
+                    return UNDEFINE_REDEFINE_ERROR; 
+                   }
                 }
 
                 //generate stack push instruction here
-                gen_pushs(parser->curr_token, !parser->is_in_def);
+                //we must check if we need to push current or previous token because it was pre readed
+                if(token_cnt == 1)
+                {
+                    gen_pushs(parser->previous_token, !parser->is_in_def);
+                }
+                else
+                {
+                    gen_pushs(parser->curr_token, !parser->is_in_def);
+                }
+                
                 DEBUG_PRINT("pushing value to the stack \n");
             }            
 
@@ -455,8 +467,13 @@ int expression(Parser* parser)
             {
                 int err;
                 parser->curr_token = read_token(parser->scanner, &err);
-                if(err) return err;
+                if(err)
+                {
+                    dispose_expr_parser(expr_parser);
+                    return err;
+                } 
             }
+            continue;
         }
 
         /***************** REDUCE *********************************/
@@ -465,11 +482,13 @@ int expression(Parser* parser)
             int err;
             if((err= reduce(expr_parser)))
             {
+                dispose_expr_parser(expr_parser);
                 return err;
             }
 
             Symbol top= stack_top(expr_parser->stack, &err).symbol;
             DEBUG_PRINT("non term je  %d, %d \n" ,top.data_type, top.symbol ); 
+            continue;
         }
 
        /***************** ERROR ***********************************/
@@ -478,13 +497,24 @@ int expression(Parser* parser)
             dispose_expr_parser(expr_parser);
             DEBUG_PRINT("INVALID EXPRESSION \n");
             return SYNTAX_ERROR;
+            continue; 
         }
 
         /***************** ACCEPT **********************************/
         if(parser_action == A )
         {
+            //expression was empty
+            if(token_cnt== 1) return SYNTAX_ERROR; 
+
             DEBUG_PRINT("VALID EXPRESSION \n");
-            //TODO move result into rhs here
+            
+            //if there was any left hand value assign the result there 
+            if(parser->left_side != NULL)
+            {
+                gen_pops(parser->left_side->key, !parser->is_in_def);
+            }
+            
+            dispose_expr_parser(expr_parser); 
             return NO_ERROR; 
         }     
     }
