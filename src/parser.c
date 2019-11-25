@@ -1230,15 +1230,6 @@ int statement_inside(Parser *parser)
 
             else return SYNTAX_ERROR;
         }
-
-        /* STATE: ID = <expression_start> <end> */
-        if(!(parser->expr_parser_call))
-        {
-            GET_NEXT_TOKEN(); // TODO check if we need this token to get
-        }
-        if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
-        else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
-        else return SYNTAX_ERROR;
     }
 
     /* Rule 14. <statement_inside> -> PASS EOL <statement_inside> */
