@@ -131,7 +131,7 @@ int start_compiler(char* src_file_name)
 
     for(size_t i = 0; i < SYMTAB_SIZE; i++)
     {
-        struct tSymbol_item *current = table->item_array[i];
+        struct tSymbol_item *current = parser->global_table->item_array[i];
         struct tSymbol_item *next = NULL;
         
         while(current != NULL)
@@ -1039,7 +1039,7 @@ int statement_inside(Parser *parser)
     else if(parser->curr_token.type == KEYWORD_IF)
     {
         parser->nested_cnt++;
-        parser->is_in_if;
+        parser->is_in_if = true;
 
         parser->if_expression = true;
         err = expression_start(parser);
@@ -1316,7 +1316,7 @@ int statement_inside(Parser *parser)
         else return SYNTAX_ERROR;
     }
 
-    err = statement_inside();
+    err = statement_inside(parser);
     CHECK_ERROR();
 
     return NO_ERROR;
