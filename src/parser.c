@@ -1132,7 +1132,7 @@ int statement_inside(Parser *parser)
         
         GET_NEXT_TOKEN();
 
-        if(parser->previous_token.type == TOKEN_ASSIGN) /* STATE: ID = */
+        if(parser->curr_token.type == TOKEN_ASSIGN) /* STATE: ID = */
         {   
             if(parser->is_in_def)
             {
@@ -1213,7 +1213,7 @@ int statement_inside(Parser *parser)
                     }
                 }
             }
-            
+
             else if((parser->curr_token.type == TOKEN_EOL) || (parser->curr_token.type == TOKEN_EOF))            
             {
                 if(parser->symbol_data_global == NULL)
