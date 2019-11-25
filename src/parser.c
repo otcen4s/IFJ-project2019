@@ -1103,16 +1103,21 @@ int statement_inside(Parser *parser)
         err = statement_inside(parser);
         CHECK_ERROR();
 
+         /* STATE: WHILE <expression_start>: EOL INDENT <statement_inside> <end> */
+        if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
+         /* STATE: WHILE <expression_start>: EOL INDENT <statement_inside> <end>  DEDENT */
+        CHECK_TOKEN(TOKEN_DEDENT); 
+
         /* STATE: WHILE <expression_start>: EOL INDENT <statement_inside> <end> */
         //GET_NEXT_TOKEN(); // expected EOF or EOL and anything else is syntax_error
-        if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
-        else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
-        else return SYNTAX_ERROR;
+        //if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
+        //else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
+        //else return SYNTAX_ERROR;
 
          /* STATE: WHILE <expression_start>: EOL INDENT <statement_inside> <end>  DEDENT */
-        GET_CHECK_TOKEN(TOKEN_DEDENT);
-        parser->nested_cnt--; 
-        return NO_ERROR;
+        //GET_CHECK_TOKEN(TOKEN_DEDENT);
+        //parser->nested_cnt--; 
+        //return NO_ERROR;
     }
 
     /* Rule 12. <statement> -> ID = <expression_start> <end> <statement> */
