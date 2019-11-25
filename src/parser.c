@@ -591,7 +591,8 @@ int expression_start(Parser *parser)
     {
         /* STATE: ID = ID */
         case TOKEN_IDENTIFIER:
-            GET_KEY(); 
+        
+            str_copy(&(parser->key),parser->previous_token.attribute.string.str);
             
             GET_NEXT_TOKEN();
             /* STATE: ID = ID ( */
