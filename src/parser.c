@@ -279,7 +279,6 @@ int statement(Parser *parser)
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: */
         GET_CHECK_TOKEN(TOKEN_COLON); // expected ':'
         
-
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL */
         GET_CHECK_TOKEN(TOKEN_EOL); // expected end of line(EOL)
 
@@ -1032,15 +1031,12 @@ int statement_inside(Parser *parser)
         err = statement_inside(parser);
         CHECK_ERROR();
 
-        if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
+        //if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
+        //else if(parser->curr_token.type == TOKEN_DEDENT) err = NO_ERROR;
+
+        if(parser->curr_token.type == TOKEN_EOF) return SYNTAX_ERROR;
         else if(parser->curr_token.type == TOKEN_DEDENT) err = NO_ERROR;
 
-
-        /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL */
-        //GET_CHECK_TOKEN(TOKEN_EOL); // expected end of line(EOL)
-
-        /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT */
-        //GET_CHECK_TOKEN(TOKEN_DEDENT); 
 
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE */
         GET_CHECK_TOKEN(KEYWORD_ELSE); // else statement always have tp be after if 
@@ -1060,15 +1056,21 @@ int statement_inside(Parser *parser)
         CHECK_ERROR();
 
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> */
-        //GET_NEXT_TOKEN(); // expected EOF or EOL and anything else is syntax_error
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
-        else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
-        else return SYNTAX_ERROR;
+        /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> DEDENT */
+        CHECK_TOKEN(TOKEN_DEDENT);
+        CHECK_ERROR();
+
+        /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> */
+        //GET_NEXT_TOKEN(); // expected EOF or EOL and anything else is syntax_error
+        //if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
+        //else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
+        //else return SYNTAX_ERROR;
 
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> DEDENT */
-        GET_CHECK_TOKEN(TOKEN_DEDENT); 
-        parser->nested_cnt--;
-        return NO_ERROR;
+        //GET_CHECK_TOKEN(TOKEN_DEDENT); 
+        //parser->nested_cnt--;
+        //return NO_ERROR;
     }
 
     /* Rule 11. <statement_inside> -> WHILE <expression_start>: EOL INDENT <statement_inside> EOL DEDENT <statement> */
