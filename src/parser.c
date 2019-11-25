@@ -99,22 +99,6 @@ void dispose_parser(Parser* parser)
     symtab_free(parser->local_table);
 }
 
-/*void generate_variable_key(tString* var)
-{
-    //clear
-    var->str[0] = '\0';
-    var->len = 0;
-    str_insert_char(var, '$');
-
-    for(int i = counter_var; i != 0;)
-    {
-        str_insert_char(var, (char)(i % 10 + '0'));
-        i = i / 10;
-    }
-    counter_var++;
-}*/
-
-
 // this function  will be the interface of parser (e.i. will be called from outside) 
 int start_compiler(char* src_file_name)
 {
@@ -285,15 +269,8 @@ int statement(Parser *parser)
         err = statement_inside(parser);
         CHECK_ERROR();
 
-        if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
+        if(parser->curr_token.type == TOKEN_EOF) return SYNTAX_ERROR;
         else if(parser->curr_token.type == TOKEN_DEDENT) err = NO_ERROR;
-
-
-        /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL */
-        //GET_CHECK_TOKEN(TOKEN_EOL); // expected end of line(EOL)
-
-        /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT */
-        //GET_CHECK_TOKEN(TOKEN_DEDENT); 
 
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE */
         GET_CHECK_TOKEN(KEYWORD_ELSE); // else statement always have tp be after if 
@@ -313,13 +290,10 @@ int statement(Parser *parser)
         CHECK_ERROR();
 
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> */
-        //GET_NEXT_TOKEN(); // expected EOF or EOL and anything else is syntax_error
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
-        else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
-        else return SYNTAX_ERROR;
-
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> DEDENT */
-        GET_CHECK_TOKEN(TOKEN_DEDENT); 
+        CHECK_TOKEN(TOKEN_DEDENT);
+        CHECK_ERROR();
     }
 
     /* Rule 5. <statement> -> WHILE <expression_start>: EOL INDENT <statement_inside> <end> DEDENT <statement> */
@@ -352,13 +326,9 @@ int statement(Parser *parser)
         CHECK_ERROR();
 
         /* STATE: WHILE <expression_start>: EOL INDENT <statement_inside> <end> */
-        //GET_NEXT_TOKEN(); // expected EOF or EOL and anything else is syntax_error
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
-        else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
-        else return SYNTAX_ERROR;
-
          /* STATE: WHILE <expression_start>: EOL INDENT <statement_inside> <end>  DEDENT */
-        GET_CHECK_TOKEN(TOKEN_DEDENT); 
+        CHECK_TOKEN(TOKEN_DEDENT); 
     }
 
     /* Rule 6. <statement> -> ID = <expression_start> <end> <statement> */
