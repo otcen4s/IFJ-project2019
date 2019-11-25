@@ -870,6 +870,11 @@ int expression_start(Parser *parser)
         
         default:
             GET_NEXT_TOKEN();
+
+            if(parser->is_in_return)
+            {
+                if(parser->curr_token.type == TOKEN_EOL) return NO_ERROR;
+            }
             
             parser->expr_parser_call = true;
             err = expression(parser);
