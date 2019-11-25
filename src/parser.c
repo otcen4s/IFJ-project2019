@@ -21,7 +21,7 @@
                             else err = NO_ERROR;                                        \
                         }while(0)
 
-#define GET_KEY() tString key = parser->curr_token.attribute.string
+#define GET_KEY() str_copy(&(parser->key),parser->curr_token.attribute.string.str)
 
 #define ADD_BUILT_IN_FUNC(id,type)                                                          \
                                 do{                                                         \
@@ -47,13 +47,15 @@ int next_params (Parser *parser);
 int expression_start (Parser *parser);
 int arg (Parser *parser);
 
+
 /****************** FUNCTION DEFINITIONS ************************/
 
 int init_parser(Parser* parser)
 {
     if(((parser->scanner = malloc(sizeof(Scanner))) == NULL) || 
     (symtab_init(&(parser->global_table))) || 
-    (symtab_init(&(parser->local_table)))) 
+    (symtab_init(&(parser->local_table)))||
+    (str_init(&(parser->key)))) 
     return INTERNAL_ERROR;
 
     int err;
@@ -97,22 +99,6 @@ void dispose_parser(Parser* parser)
     symtab_free(parser->local_table);
 }
 
-/*void generate_variable_key(tString* var)
-{
-    //clear
-    var->str[0] = '\0';
-    var->len = 0;
-    str_insert_char(var, '$');
-
-    for(int i = counter_var; i != 0;)
-    {
-        str_insert_char(var, (char)(i % 10 + '0'));
-        i = i / 10;
-    }
-    counter_var++;
-}*/
-
-
 // this function  will be the interface of parser (e.i. will be called from outside) 
 int start_compiler(char* src_file_name)
 {
@@ -138,7 +124,7 @@ int start_compiler(char* src_file_name)
         {
             next = current->next_symbol;
 
-            if((current->symbol_type == SYMBOL_FUNC) && (current->symbol_state != SYMBOL_DEFINED)) return UNDEFINE_REDEFINE_ERROR;
+           if((current->symbol_type == SYMBOL_FUNC) && (current->symbol_state == SYMBOL_USED)) return UNDEFINE_REDEFINE_ERROR;
     
             current = next;
         }
@@ -196,7 +182,7 @@ int statement(Parser *parser)
        
         GET_KEY(); // Identifier is a special key in global or local symtable
 
-        parser->symbol_data_global = symtab_lookup(parser->global_table, key.str, &err);
+        parser->symbol_data_global = symtab_lookup(parser->global_table, parser->key.str, &err);
         CHECK_ERROR();
 
         if((parser->symbol_data_global != NULL)                     && 
@@ -206,7 +192,7 @@ int statement(Parser *parser)
             used_function = true;
         }
         
-        parser->symbol_data_global = symtab_add(parser->global_table, key.str, &err); // add ID of function into global table
+        parser->symbol_data_global = symtab_add(parser->global_table, parser->key.str, &err); // add ID of function into global table
         CHECK_ERROR(); // check for internal error of used function
         parser->symbol_data_global->symbol_type = SYMBOL_FUNC; // specifying it's function
         parser->symbol_data_global->symbol_state = SYMBOL_DEFINED; // -||- defined
@@ -241,17 +227,22 @@ int statement(Parser *parser)
         err = statement_inside(parser);
         CHECK_ERROR();
 
+        if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
+        /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> DEDENT */
+        CHECK_TOKEN(TOKEN_DEDENT);
+        CHECK_ERROR();
+
         /* Expected state -> STATE: DEF ID ( <params> ): EOL INDENT <statement_inside> <end> */
-        GET_NEXT_TOKEN();
+        //GET_NEXT_TOKEN();
 
         /* Rule <end> is implemented simply as an if condition which makes it easier */
         /* In this state two tokens are valid -> EOF/EOL others cause syntax_error */
-        if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
-        else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
-        else return SYNTAX_ERROR;
+        //if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
+        //else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
+        //else return SYNTAX_ERROR;
 
         /* Expected state -> STATE: DEF ID ( <params> ): EOL INDENT <statement_inside> <end> DEDENT */
-        GET_CHECK_TOKEN(TOKEN_DEDENT); // python dedentation expected
+        //GET_CHECK_TOKEN(TOKEN_DEDENT); // python dedentation expected
     }
 
     /* Rule 4. <statement> -> IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE : EOL INDENT <statement_inside> <end> DEDENT <statement> */
@@ -280,18 +271,12 @@ int statement(Parser *parser)
         /* STATE: IF <expression_start>: EOL INDENT */
         GET_CHECK_TOKEN(TOKEN_INDENT); // python dedentation expected
         
+
         err = statement_inside(parser);
         CHECK_ERROR();
 
-        if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
+        if(parser->curr_token.type == TOKEN_EOF) return SYNTAX_ERROR;
         else if(parser->curr_token.type == TOKEN_DEDENT) err = NO_ERROR;
-
-
-        /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL */
-        //GET_CHECK_TOKEN(TOKEN_EOL); // expected end of line(EOL)
-
-        /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT */
-        //GET_CHECK_TOKEN(TOKEN_DEDENT); 
 
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE */
         GET_CHECK_TOKEN(KEYWORD_ELSE); // else statement always have tp be after if 
@@ -299,7 +284,6 @@ int statement(Parser *parser)
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: */
         GET_CHECK_TOKEN(TOKEN_COLON); // expected ':'
         
-
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL */
         GET_CHECK_TOKEN(TOKEN_EOL); // expected end of line(EOL)
 
@@ -311,13 +295,10 @@ int statement(Parser *parser)
         CHECK_ERROR();
 
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> */
-        //GET_NEXT_TOKEN(); // expected EOF or EOL and anything else is syntax_error
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
-        else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
-        else return SYNTAX_ERROR;
-
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> DEDENT */
-        GET_CHECK_TOKEN(TOKEN_DEDENT); 
+        CHECK_TOKEN(TOKEN_DEDENT);
+        CHECK_ERROR();
     }
 
     /* Rule 5. <statement> -> WHILE <expression_start>: EOL INDENT <statement_inside> <end> DEDENT <statement> */
@@ -350,13 +331,9 @@ int statement(Parser *parser)
         CHECK_ERROR();
 
         /* STATE: WHILE <expression_start>: EOL INDENT <statement_inside> <end> */
-        //GET_NEXT_TOKEN(); // expected EOF or EOL and anything else is syntax_error
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
-        else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
-        else return SYNTAX_ERROR;
-
          /* STATE: WHILE <expression_start>: EOL INDENT <statement_inside> <end>  DEDENT */
-        GET_CHECK_TOKEN(TOKEN_DEDENT); 
+        CHECK_TOKEN(TOKEN_DEDENT); 
     }
 
     /* Rule 6. <statement> -> ID = <expression_start> <end> <statement> */
@@ -365,16 +342,16 @@ int statement(Parser *parser)
     {
         GET_KEY(); // Identifier is a special key in global or local symtable
         
-        parser->symbol_data_global = symtab_lookup(parser->global_table, key.str, &err);
+        parser->symbol_data_global = symtab_lookup(parser->global_table, parser->key.str, &err);
         CHECK_ERROR();
 
         GET_NEXT_TOKEN();
 
-        if(parser->previous_token.type == TOKEN_ASSIGN) /* STATE: ID = */
+        if(parser->curr_token.type == TOKEN_ASSIGN) /* STATE: ID = */
         {   
             if(parser->symbol_data_global == NULL)
             {
-                parser->symbol_data_global = symtab_add(parser->global_table, key.str, &err); // add ID of variable into global table
+                parser->symbol_data_global = symtab_add(parser->global_table, parser->key.str, &err); // add ID of variable into global table
                 CHECK_ERROR(); // check for internal error of used function
                 parser->symbol_data_global->symbol_type = SYMBOL_VAR; // specifying for variable
                 parser->symbol_data_global->symbol_state = SYMBOL_DEFINED; 
@@ -403,14 +380,14 @@ int statement(Parser *parser)
 
             if(parser->curr_token.type == TOKEN_LEFT_BRACKET) // indicates it's an function call (not built_in function)
             {
-                parser->symbol_data_global = symtab_lookup(parser->global_table, key.str, &err);
+                parser->symbol_data_global = symtab_lookup(parser->global_table, parser->key.str, &err);
                 CHECK_ERROR();
                 
                 if(parser->is_in_def) //if we are in definition of function
                 {
                     if((parser->symbol_data_global == NULL)) // if no ID with that key was found we can create one
                     {
-                        parser->symbol_data_global = symtab_add(parser->global_table, key.str, &err);
+                        parser->symbol_data_global = symtab_add(parser->global_table, parser->key.str, &err);
                         CHECK_ERROR();
                         parser->symbol_data_global->symbol_state = SYMBOL_USED;
                         parser->symbol_data_global->symbol_type = SYMBOL_FUNC;
@@ -456,6 +433,7 @@ int statement(Parser *parser)
     {
         /* STATE: PASS <end> */
         GET_NEXT_TOKEN();
+        
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
         else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
         else return SYNTAX_ERROR;
@@ -521,7 +499,7 @@ int params(Parser *parser)
     /* STATE: DEF ID ( ID */
     GET_KEY(); // get the ID of variable (it's a key in symtable)
 
-    parser->symbol_data_local = symtab_add(parser->local_table, key.str, &err); // insert parameters here into local symtable ... also overwriting parser->symbol_data
+    parser->symbol_data_local = symtab_add(parser->local_table, parser->key.str, &err); // insert parameters here into local symtable ... also overwriting parser->symbol_data
     CHECK_ERROR();
     //parser->symbol_data->params = &key; //parameter added
     parser->symbol_data_local->symbol_type = SYMBOL_PARAM;
@@ -556,14 +534,14 @@ int next_params(Parser *parser)
     /* STATE: DEF ID (<params> , <params> ... */
     GET_KEY(); // get the ID of variable (it's a key in symtable)
 
-    parser->symbol_data_local = symtab_lookup(parser->local_table, key.str, &err);
+    parser->symbol_data_local = symtab_lookup(parser->local_table, parser->key.str, &err);
     CHECK_ERROR(); //internal error
     if((parser->symbol_data_local != NULL) && (parser->symbol_data_local->symbol_type == SYMBOL_PARAM)) // parameter with same ID was found in our local table which indicates syntax error
     {
         return SYNTAX_ERROR; // this causes error -> def foo(a,a): ...
     }
 
-    parser->symbol_data_local = symtab_add(parser->local_table, key.str, &err); // insert parameters into local symtable ... also overwriting parser->symbol_data
+    parser->symbol_data_local = symtab_add(parser->local_table, parser->key.str, &err); // insert parameters into local symtable ... also overwriting parser->symbol_data
     CHECK_ERROR(); //internal error
     //parser->symbol_data->params = &key; //parameter added
     parser->symbol_data_local->symbol_type = SYMBOL_PARAM; // symbol type set as parameter
@@ -597,7 +575,6 @@ int next_params(Parser *parser)
 int expression_start(Parser *parser)
 {
     int err;
-    tString key;
 
     /* STATE: <value> */
     if(parser->no_assign_expression)
@@ -614,7 +591,7 @@ int expression_start(Parser *parser)
     {
         /* STATE: ID = ID */
         case TOKEN_IDENTIFIER:
-            key = parser->curr_token.attribute.string;  
+            GET_KEY(); 
             
             GET_NEXT_TOKEN();
             /* STATE: ID = ID ( */
@@ -625,14 +602,14 @@ int expression_start(Parser *parser)
                     return SYNTAX_ERROR;
                 }
 
-                parser->symbol_data_global = symtab_lookup(parser->global_table, key.str, &err);
+                parser->symbol_data_global = symtab_lookup(parser->global_table, parser->key.str, &err);
                 CHECK_ERROR();
                 
                 if(parser->is_in_def) //if we are in definition of function
                 {
                     if((parser->symbol_data_global == NULL)) // if no ID with that key was found we can create one
                     {
-                        parser->symbol_data_global = symtab_add(parser->global_table, key.str, &err);
+                        parser->symbol_data_global = symtab_add(parser->global_table, parser->key.str, &err);
                         CHECK_ERROR();
                         parser->symbol_data_global->symbol_state = SYMBOL_USED;
                         parser->symbol_data_global->symbol_type = SYMBOL_FUNC;
@@ -725,12 +702,12 @@ int expression_start(Parser *parser)
             GET_NEXT_TOKEN();
             if(parser->curr_token.type == TOKEN_IDENTIFIER)
             {
-                key = parser->curr_token.attribute.string;
+                GET_KEY();
                 //call generator
             }
             else if(parser->curr_token.type == TOKEN_STRING)
             {
-                key = parser->curr_token.attribute.string;
+                GET_KEY();
                 // call generator
             }
             else
@@ -756,12 +733,12 @@ int expression_start(Parser *parser)
             GET_NEXT_TOKEN();
             if(parser->curr_token.type == TOKEN_IDENTIFIER)
             {
-                key = parser->curr_token.attribute.string;
+                GET_KEY();
                 //call generator
             }
             else if(parser->curr_token.type == TOKEN_STRING)
             {
-                key = parser->curr_token.attribute.string;
+                GET_KEY();
                 // call generator
             }
             else
@@ -775,7 +752,7 @@ int expression_start(Parser *parser)
             GET_NEXT_TOKEN();
             if(parser->curr_token.type == TOKEN_IDENTIFIER)
             {
-                key = parser->curr_token.attribute.string;
+               GET_KEY();
                 //call generator
             }
             else if(parser->curr_token.type == TOKEN_INTEGER)
@@ -793,7 +770,7 @@ int expression_start(Parser *parser)
             GET_NEXT_TOKEN();
             if(parser->curr_token.type == TOKEN_IDENTIFIER)
             {
-                key = parser->curr_token.attribute.string;
+                GET_KEY();
                 //call generator
             }
             else if(parser->curr_token.type == TOKEN_INTEGER)
@@ -822,12 +799,12 @@ int expression_start(Parser *parser)
             GET_NEXT_TOKEN();
             if(parser->curr_token.type == TOKEN_IDENTIFIER)
             {
-                key = parser->curr_token.attribute.string;
+                GET_KEY();
                 //call generator
             }
             else if(parser->curr_token.type == TOKEN_STRING)
             {
-                key = parser->curr_token.attribute.string;
+               GET_KEY();
                 // call generator
             }
             else
@@ -840,12 +817,12 @@ int expression_start(Parser *parser)
             GET_NEXT_TOKEN();
             if(parser->curr_token.type == TOKEN_IDENTIFIER)
             {
-                key = parser->curr_token.attribute.string;
+                GET_KEY();
                 //call generator
             }
             else if(parser->curr_token.type == TOKEN_INTEGER)
             {
-                key = parser->curr_token.attribute.string;
+               GET_KEY();
                 // call generator
             }
             else
@@ -871,12 +848,12 @@ int expression_start(Parser *parser)
             GET_NEXT_TOKEN();
             if(parser->curr_token.type == TOKEN_IDENTIFIER)
             {
-                key = parser->curr_token.attribute.string;
+                GET_KEY();
                 //call generator
             }
             else if(parser->curr_token.type == TOKEN_INTEGER)
             {
-                key = parser->curr_token.attribute.string;
+                GET_KEY();
                 // call generator
             }
             else
@@ -910,7 +887,6 @@ int expression_start(Parser *parser)
 int arg(Parser *parser)
 {
     int err;
-    tString key;
 
     GET_NEXT_TOKEN();
 
@@ -921,9 +897,9 @@ int arg(Parser *parser)
     switch(parser->curr_token.type)
     {
     case TOKEN_IDENTIFIER:
-        key = parser->curr_token.attribute.string; // save string of ID into key
+        GET_KEY(); // save string of ID into key
         
-        parser->symbol_data_local = symtab_lookup(parser->global_table, key.str, &err);
+        parser->symbol_data_local = symtab_lookup(parser->global_table, parser->key.str, &err);
         CHECK_ERROR();
 
         if((parser->symbol_data_local == NULL) || (parser->symbol_data_local->symbol_type == SYMBOL_FUNC) || (parser->symbol_data_local->symbol_state != SYMBOL_DEFINED))
@@ -987,7 +963,12 @@ int statement_inside(Parser *parser)
 
     GET_NEXT_TOKEN();
 
-    if(parser->curr_token.type == TOKEN_EOL)
+    if(parser->curr_token.type == TOKEN_DEDENT)
+    {
+        return NO_ERROR;
+    }
+
+    else if(parser->curr_token.type == TOKEN_EOL)
     {
         err = statement_inside(parser);
         CHECK_ERROR();
@@ -1056,15 +1037,12 @@ int statement_inside(Parser *parser)
         err = statement_inside(parser);
         CHECK_ERROR();
 
-        if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
+        //if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
+        //else if(parser->curr_token.type == TOKEN_DEDENT) err = NO_ERROR;
+
+        if(parser->curr_token.type == TOKEN_EOF) return SYNTAX_ERROR;
         else if(parser->curr_token.type == TOKEN_DEDENT) err = NO_ERROR;
 
-
-        /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL */
-        //GET_CHECK_TOKEN(TOKEN_EOL); // expected end of line(EOL)
-
-        /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT */
-        //GET_CHECK_TOKEN(TOKEN_DEDENT); 
 
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE */
         GET_CHECK_TOKEN(KEYWORD_ELSE); // else statement always have tp be after if 
@@ -1084,15 +1062,21 @@ int statement_inside(Parser *parser)
         CHECK_ERROR();
 
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> */
-        //GET_NEXT_TOKEN(); // expected EOF or EOL and anything else is syntax_error
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
-        else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
-        else return SYNTAX_ERROR;
+        /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> DEDENT */
+        CHECK_TOKEN(TOKEN_DEDENT);
+        CHECK_ERROR();
+
+        /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> */
+        //GET_NEXT_TOKEN(); // expected EOF or EOL and anything else is syntax_error
+        //if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
+        //else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
+        //else return SYNTAX_ERROR;
 
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> DEDENT */
-        GET_CHECK_TOKEN(TOKEN_DEDENT); 
-        parser->nested_cnt--;
-        return NO_ERROR;
+        //GET_CHECK_TOKEN(TOKEN_DEDENT); 
+        //parser->nested_cnt--;
+        //return NO_ERROR;
     }
 
     /* Rule 11. <statement_inside> -> WHILE <expression_start>: EOL INDENT <statement_inside> EOL DEDENT <statement> */
@@ -1125,16 +1109,21 @@ int statement_inside(Parser *parser)
         err = statement_inside(parser);
         CHECK_ERROR();
 
+         /* STATE: WHILE <expression_start>: EOL INDENT <statement_inside> <end> */
+        if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
+         /* STATE: WHILE <expression_start>: EOL INDENT <statement_inside> <end>  DEDENT */
+        CHECK_TOKEN(TOKEN_DEDENT); 
+
         /* STATE: WHILE <expression_start>: EOL INDENT <statement_inside> <end> */
         //GET_NEXT_TOKEN(); // expected EOF or EOL and anything else is syntax_error
-        if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
-        else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
-        else return SYNTAX_ERROR;
+        //if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
+        //else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
+        //else return SYNTAX_ERROR;
 
          /* STATE: WHILE <expression_start>: EOL INDENT <statement_inside> <end>  DEDENT */
-        GET_CHECK_TOKEN(TOKEN_DEDENT);
-        parser->nested_cnt--; 
-        return NO_ERROR;
+        //GET_CHECK_TOKEN(TOKEN_DEDENT);
+        //parser->nested_cnt--; 
+        //return NO_ERROR;
     }
 
     /* Rule 12. <statement> -> ID = <expression_start> <end> <statement> */
@@ -1145,58 +1134,58 @@ int statement_inside(Parser *parser)
 
         if(parser->is_in_def)
         {
-            parser->symbol_data_local = symtab_lookup(parser->local_table, key.str, &err);
+            parser->symbol_data_local = symtab_lookup(parser->local_table, parser->key.str, &err);
             CHECK_ERROR();
 
             if(parser->symbol_data_local == NULL)
             {
-                parser->symbol_data_local = symtab_lookup(parser->global_table, key.str, &err);
+                parser->symbol_data_global = symtab_lookup(parser->global_table, parser->key.str, &err);
                 CHECK_ERROR();
             }
         }
         else
         {
-            parser->symbol_data_global = symtab_lookup(parser->global_table, key.str, &err);
+            parser->symbol_data_global = symtab_lookup(parser->global_table, parser->key.str, &err);
             CHECK_ERROR();
         }
         
-
-        parser->previous_token = parser->curr_token; // storing ID in case of no assign 
-
         GET_NEXT_TOKEN();
 
-        if(parser->previous_token.type == TOKEN_ASSIGN) /* STATE: ID = */
+        if(parser->curr_token.type == TOKEN_ASSIGN) /* STATE: ID = */
         {   
-            if((parser->symbol_data_global == NULL) || (parser->symbol_data_local == NULL))
+            if(parser->is_in_def)
             {
-                if(parser->is_in_def)
+                if(parser->symbol_data_local == NULL)
                 {
-                    parser->symbol_data_local = symtab_add(parser->local_table, key.str, &err); // add ID of variable into local table
+                    parser->symbol_data_local = symtab_add(parser->local_table, parser->key.str, &err); // add ID of variable into local table
                     CHECK_ERROR(); // check for internal error of used function
                     parser->symbol_data_local->symbol_type = SYMBOL_VAR; // specifying for variable
                     parser->symbol_data_local->symbol_type = SYMBOL_DEFINED; 
                 }
-                else
+                parser->left_side = parser->symbol_data_local;
+            }
+            else
+            {
+                if(parser->symbol_data_global == NULL)
                 {
-                    parser->symbol_data_global = symtab_add(parser->global_table, key.str, &err); // add ID of variable into global table
+                    parser->symbol_data_global = symtab_add(parser->global_table, parser->key.str, &err); // add ID of variable into global table
                     CHECK_ERROR(); // check for internal error of used function
                     parser->symbol_data_global->symbol_type = SYMBOL_VAR; // specifying for variable
                     parser->symbol_data_global->symbol_type = SYMBOL_DEFINED; 
                 }
-                
-                
-            }
-            if(parser->is_in_def)
-            {
-                parser->left_side = parser->symbol_data_local;
-            }
-            else
-            {    
-                parser->left_side = parser->symbol_data_global; // this is for expression parser the left side ID to store value
+                parser->left_side = parser->symbol_data_global;
             }
 
             err = expression_start(parser);
             CHECK_ERROR();
+
+            if(!(parser->expr_parser_call))
+            {
+                GET_NEXT_TOKEN(); // TODO check if we need this token to get
+            }
+            if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
+            else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
+            else return SYNTAX_ERROR;
         }
 
         /* STATE: ID */
@@ -1208,14 +1197,14 @@ int statement_inside(Parser *parser)
 
             if(parser->curr_token.type == TOKEN_LEFT_BRACKET) // indicates it's an function call (not built_in function)
             {
-                parser->symbol_data_global = symtab_lookup(parser->global_table, key.str, &err);
+                parser->symbol_data_global = symtab_lookup(parser->global_table, parser->key.str, &err);
                 CHECK_ERROR();
                 
                 if(parser->is_in_def) //if we are in definition of function
                 {
                     if((parser->symbol_data_global == NULL)) // if no ID with that key was found we can create one
                     {
-                        parser->symbol_data_global = symtab_add(parser->global_table, key.str, &err);
+                        parser->symbol_data_global = symtab_add(parser->global_table, parser->key.str, &err);
                         CHECK_ERROR();
                         parser->symbol_data_global->symbol_state = SYMBOL_USED;
                         parser->symbol_data_global->symbol_type = SYMBOL_FUNC;
@@ -1244,22 +1233,16 @@ int statement_inside(Parser *parser)
                 }
             }
 
-            else
+            else if((parser->curr_token.type == TOKEN_EOL) || (parser->curr_token.type == TOKEN_EOF))            
             {
-                parser->expr_parser_call = true;
-                err = expression(parser); // calling function from expr_parser 
-                CHECK_ERROR();
+                if(parser->symbol_data_global == NULL)
+                {
+                    return UNDEFINE_REDEFINE_ERROR;
+                }
             }
-        }
 
-        /* STATE: ID = <expression_start> <end> */
-        if(!(parser->expr_parser_call))
-        {
-            GET_NEXT_TOKEN(); // TODO check if we need this token to get
+            else return SYNTAX_ERROR;
         }
-        if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
-        else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
-        else return SYNTAX_ERROR;
     }
 
     /* Rule 14. <statement_inside> -> PASS EOL <statement_inside> */
