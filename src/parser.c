@@ -368,8 +368,6 @@ int statement(Parser *parser)
         parser->symbol_data_global = symtab_lookup(parser->global_table, key.str, &err);
         CHECK_ERROR();
 
-        parser->previous_token = parser->curr_token; // storing ID in case of no assign 
-
         GET_NEXT_TOKEN();
 
         if(parser->previous_token.type == TOKEN_ASSIGN) /* STATE: ID = */
@@ -385,6 +383,15 @@ int statement(Parser *parser)
             
             err = expression_start(parser);
             CHECK_ERROR();
+
+            /* STATE: ID = <expression_start> <end> */
+            if(!(parser->expr_parser_call))
+            {
+                GET_NEXT_TOKEN(); // TODO check if we need this token to get
+            }
+            if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
+            else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
+            else return SYNTAX_ERROR;
         }
 
         /* STATE: ID */
@@ -432,22 +439,16 @@ int statement(Parser *parser)
                 }
             }
 
-            else
-            {   
-                parser->expr_parser_call = true;
-                err = expression(parser); // calling function from expr_parser 
-                CHECK_ERROR();
+            else if((parser->curr_token.type == TOKEN_EOL) || (parser->curr_token.type == TOKEN_EOF))            
+            {
+                if(parser->symbol_data_global == NULL)
+                {
+                    return UNDEFINE_REDEFINE_ERROR;
+                }
             }
-        }
 
-        /* STATE: ID = <expression_start> <end> */
-        if(!(parser->expr_parser_call))
-        {
-            GET_NEXT_TOKEN(); // TODO check if we need this token to get
+            else return SYNTAX_ERROR;
         }
-        if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
-        else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
-        else return SYNTAX_ERROR;
     }
 
     /* Rule 7. <statement> -> PASS <end> <statement> */
@@ -992,15 +993,6 @@ int statement_inside(Parser *parser)
         CHECK_ERROR();
     }
 
-    /*else if(parser->curr_token.type == TOKEN_DEDENT)
-    {
-        if(parser->nested_cnt == 0)
-        {
-            return NO_ERROR;
-        }
-        else parser->nested_cnt--;
-    }*/
-
     /* Function definition in <statement_inside> is not valid */
     else if((parser->curr_token.type == KEYWORD_DEF) && (parser->is_in_def || parser->is_in_if || parser->is_in_while))
     {
@@ -1019,7 +1011,7 @@ int statement_inside(Parser *parser)
         else
         {   
             parser->is_in_return = true;
-            parser->left_side = parser->symbol_data_global;
+            //parser->left_side = parser->symbol_data_global;
             /* STATE: <statement_inside> RETURN <expression_start> */
             err = expression_start(parser);
             CHECK_ERROR();
