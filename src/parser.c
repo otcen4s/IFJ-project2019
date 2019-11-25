@@ -1120,7 +1120,7 @@ int statement_inside(Parser *parser)
 
             if(parser->symbol_data_local == NULL)
             {
-                parser->symbol_data_local = symtab_lookup(parser->global_table, parser->key.str, &err);
+                parser->symbol_data_global = symtab_lookup(parser->global_table, parser->key.str, &err);
                 CHECK_ERROR();
             }
         }
@@ -1130,43 +1130,43 @@ int statement_inside(Parser *parser)
             CHECK_ERROR();
         }
         
-
-        parser->previous_token = parser->curr_token; // storing ID in case of no assign 
-
         GET_NEXT_TOKEN();
 
         if(parser->previous_token.type == TOKEN_ASSIGN) /* STATE: ID = */
         {   
-            if((parser->symbol_data_global == NULL) || (parser->symbol_data_local == NULL))
+            if(parser->is_in_def)
             {
-                if(parser->is_in_def)
+                if(parser->symbol_data_local == NULL)
                 {
                     parser->symbol_data_local = symtab_add(parser->local_table, parser->key.str, &err); // add ID of variable into local table
                     CHECK_ERROR(); // check for internal error of used function
                     parser->symbol_data_local->symbol_type = SYMBOL_VAR; // specifying for variable
                     parser->symbol_data_local->symbol_type = SYMBOL_DEFINED; 
                 }
-                else
+                parser->left_side = parser->symbol_data_local;
+            }
+            else
+            {
+                if(parser->symbol_data_global == NULL)
                 {
                     parser->symbol_data_global = symtab_add(parser->global_table, parser->key.str, &err); // add ID of variable into global table
                     CHECK_ERROR(); // check for internal error of used function
                     parser->symbol_data_global->symbol_type = SYMBOL_VAR; // specifying for variable
                     parser->symbol_data_global->symbol_type = SYMBOL_DEFINED; 
                 }
-                
-                
-            }
-            if(parser->is_in_def)
-            {
-                parser->left_side = parser->symbol_data_local;
-            }
-            else
-            {    
-                parser->left_side = parser->symbol_data_global; // this is for expression parser the left side ID to store value
+                parser->left_side = parser->symbol_data_global;
             }
 
             err = expression_start(parser);
             CHECK_ERROR();
+
+            if(!(parser->expr_parser_call))
+            {
+                GET_NEXT_TOKEN(); // TODO check if we need this token to get
+            }
+            if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
+            else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
+            else return SYNTAX_ERROR;
         }
 
         /* STATE: ID */
@@ -1213,13 +1213,16 @@ int statement_inside(Parser *parser)
                     }
                 }
             }
-
-            else
+            
+            else if((parser->curr_token.type == TOKEN_EOL) || (parser->curr_token.type == TOKEN_EOF))            
             {
-                parser->expr_parser_call = true;
-                err = expression(parser); // calling function from expr_parser 
-                CHECK_ERROR();
+                if(parser->symbol_data_global == NULL)
+                {
+                    return UNDEFINE_REDEFINE_ERROR;
+                }
             }
+
+            else return SYNTAX_ERROR;
         }
 
         /* STATE: ID = <expression_start> <end> */
