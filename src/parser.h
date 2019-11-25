@@ -31,6 +31,7 @@ typedef struct Parser
     bool is_in_return;
     bool expr_parser_call;
     unsigned nested_cnt;
+    tString key; 
 } Parser;
 
 int start_compiler(char* src_file_name);
