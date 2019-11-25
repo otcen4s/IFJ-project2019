@@ -42,7 +42,7 @@ void expr_test1(void)
     TEST_ASSERT_EQUAL_INT(NO_ERROR, expression(pars));
 
     //print result
-    gen_defvar("test_res");
+    gen_defvar("test_res", true);
     gen_pops("test_res", true);
 
     Token print_var;

@@ -541,6 +541,14 @@ void generator_end() {
 
 }
 
+void gen_defvar(char *varName, bool global) {
+    ADDCODE("DEFVAR "); ADDCODE(ISGLOBAL(global)); ADDLINE(varName);
+}
+
+// void gen_var_assign(char *varName, bool global, Token token) {
+//     ADDCODE("MOVE "); ADDCODE(ISGLOBAL(global)); ADDLINE(varName);
+// }
+
 void gen_var(char *varName, bool global) {
     str_concat(&line, ISGLOBAL(global), varName, NULL);
 
@@ -620,11 +628,8 @@ void gen_pushs(Token token, bool global) {
     
 }
 
-void gen_pops(char *var, bool global) {
-    str_concat(&line, "POPS ", ISGLOBAL(global), var, NULL);
-
-    ADDLINE(line.str);
-
+void gen_pops(char *varName, bool global) {
+    ADDCODE("POPS"); ADDCODE(ISGLOBAL(global)); ADDLINE(varName);
 }
 
 void gen_stack(const char *instruct) {
@@ -654,7 +659,7 @@ void gen_eqs() {
     gen_instruct("CALL $eq");
 }
 
-// generate instruction with no parameter
+// generate instruction with no parameters
 void gen_instruct(const char *instruct) {
     ADDLINE(instruct);
 }
@@ -681,12 +686,13 @@ void gen_else_end() {
     ADDCODE("LABEL $if"); ADDCODE(uidStr); ADDLINE("End");
 }
 
-// TODO while requires you to push the evaluated value onto the stack in body every time (even when the value doesn't change)
 void gen_while_start() {
     sprintf(uidStr, "%d", uid++);
 
     ADDCODE("LABEL $while"); ADDCODE(uidStr); ADDLINE("Begin");
+}
 
+void gen_while_eval() {
     ADDLINE("CALL $eval");
 
     ADDCODE("JUMPIFEQ $while"); ADDCODE(uidStr); ADDLINE("End GF@$temp bool@false");
@@ -698,11 +704,17 @@ void gen_while_end() {
     ADDCODE("LABEL $while"); ADDCODE(uidStr); ADDLINE("End");
 }
 
-// void gen_inputs() {
-    
-// }
+void gen_func_start(char *funcName) {
+    ADDCODE("LABEL %"); ADDLINE(funcName);
+    ADDLINE("PUSHFRAME");
+}
 
-// TODO print must return None
+void gen_func_return() {
+    ADDCODE("POPS LF@%retval");
+    ADDLINE("POPFRAME");
+    ADDLINE("RETURN");
+}
+
 void gen_print(unsigned n, bool global, Token token, ...) {
 
     va_list ap;
@@ -750,12 +762,13 @@ void gen_print(unsigned n, bool global, Token token, ...) {
 
 // TODO we must convert every ASCII chars from 000-032 035 and 092, not just spaces !
 const char *replace_space (char *string) {
-
     str_copy(&helper, "");
 
     for (size_t j = 0; j < strlen(string); j++) {
         if (string[j] == ' ') {
             str_append(&helper, "\\032");
+        } else if (string[j] == '\n') {
+            str_append(&helper, "\\010");
         } else {
             char temp[2];
             temp[0] = string[j];
@@ -765,13 +778,6 @@ const char *replace_space (char *string) {
     }
 
     return helper.str;
-}
-
-// TODO remove?
-void gen_defvar(char *var) {
-    str_concat(&line, "defvar GF@", var, NULL);
-
-    ADDLINE(line.str);
 }
 
 void generate_code(FILE *destFile) {

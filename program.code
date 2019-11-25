@@ -369,9 +369,7 @@ PUSHS GF@$op2
 EQS
 RETURN
 LABEL $$main
-DEFVAR GF@dlzka
-MOVE GF@dlzka string@cau
-WRITE GF@dlzka
+WRITE string@Cau\010ko\010
 CREATEFRAME
 DEFVAR TF@%retval
 MOVE TF@%retval nil@nil
