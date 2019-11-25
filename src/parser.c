@@ -869,13 +869,14 @@ int expression_start(Parser *parser)
             break;
         
         default:
-            GET_NEXT_TOKEN();
 
             if(parser->is_in_return)
             {
-                if(parser->previous_token.type == TOKEN_EOL) return NO_ERROR;
+                if((parser->previous_token.type == TOKEN_EOL) || (parser->previous_token.type == TOKEN_EOF)) return NO_ERROR;
             }
-            
+
+            GET_NEXT_TOKEN();
+
             parser->expr_parser_call = true;
             err = expression(parser);
             CHECK_ERROR();
