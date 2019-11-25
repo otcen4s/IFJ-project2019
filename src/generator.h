@@ -12,12 +12,11 @@ int generator_begin();
 void generator_end();
 
 void gen_print(unsigned n, bool global, Token token, ...);
-void gen_var(char *varName, bool global);
+void gen_defvar(char *varName, bool global);
 void gen_instruct(const char *instruct);
 
 void gen_double_symb(char *instruct, Type type, char *var, Value symb1, Value symb2, bool global);
 void gen_single_symb(char *instruct, Type type, char *var, Value symb, bool global);
-void gen_defvar();
 void generate_code(FILE *destFile);
 
 void gen_pushs(Token token, bool global);
@@ -30,6 +29,7 @@ void gen_else_start();
 void gen_else_end();
 
 void gen_while_start();
+void gen_while_eval();
 void gen_while_end();
 
 void gen_inputs();

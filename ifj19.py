@@ -66,4 +66,4 @@ def print(*args):
 
 # Zde bude nasledovat program jazyka IFJ19
 
-print('Dlzka nohavic je', 29)
+print('Cau. Volam sa', 'samuel', '.', 'Mam', 19, 'rokov#\n[]')

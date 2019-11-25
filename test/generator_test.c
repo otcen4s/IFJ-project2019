@@ -46,21 +46,26 @@ void test1(void)
     // //gen_instruct("TYPE TF@%retval TF@%retval");
     // gen_instruct("WRITE TF@%retval");
 
+    // Token token;
+    // token.type = TOKEN_IDENTIFIER;
+    // str_init(&token.attribute.string);
+    // str_copy(&token.attribute.string, "dlzka");
+
+    // Token token2;
+    // token2.type = TOKEN_INTEGER;
+    // token2.attribute.integer = 15;
+
+    // Token token3;
+    // token3.type = TOKEN_DECIMAL;
+    // token3.attribute.decimal = 20.35;
+
+    // gen_instruct("DEFVAR GF@dlzka");
+    // gen_instruct("MOVE GF@dlzka string@cau");
+
     Token token;
-    token.type = TOKEN_IDENTIFIER;
     str_init(&token.attribute.string);
-    str_copy(&token.attribute.string, "dlzka");
-
-    Token token2;
-    token2.type = TOKEN_INTEGER;
-    token2.attribute.integer = 15;
-
-    Token token3;
-    token3.type = TOKEN_DECIMAL;
-    token3.attribute.decimal = 20.35;
-
-    gen_instruct("DEFVAR GF@dlzka");
-    gen_instruct("MOVE GF@dlzka string@cau");
+    str_copy(&token.attribute.string, "Cau\nko");
+    token.type = TOKEN_STRING;
 
     gen_print(1, true, token);
 
