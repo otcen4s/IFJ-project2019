@@ -124,7 +124,7 @@ int start_compiler(char* src_file_name)
         {
             next = current->next_symbol;
 
-            if((current->symbol_type == SYMBOL_FUNC) && (current->symbol_state != SYMBOL_DEFINED)) return UNDEFINE_REDEFINE_ERROR;
+           if((current->symbol_type == SYMBOL_FUNC) && (current->symbol_state == SYMBOL_USED)) return UNDEFINE_REDEFINE_ERROR;
     
             current = next;
         }
