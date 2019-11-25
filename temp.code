@@ -1,9 +1,0 @@
-CREATEFRAME
-DEFVAR TF@%1
-DEFVAR TF@%2
-MOVE TF@%1 string@autobus
-MOVE TF@%2 float@
-CALL $ord
-
-TYPE TF@%retval TF@%retval
-WRITE TF@%retval

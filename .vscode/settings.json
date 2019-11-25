@@ -1,3 +1,5 @@
 {
-    "C_Cpp.errorSquiggles": "Disabled"
+    "C_Cpp.errorSquiggles": "Disabled",
+    "editor.fontSize": 18,
+    "python.pythonPath": "/bin/python3"
 }
