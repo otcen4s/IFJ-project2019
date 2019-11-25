@@ -266,6 +266,7 @@ int statement(Parser *parser)
         /* STATE: IF <expression_start>: EOL INDENT */
         GET_CHECK_TOKEN(TOKEN_INDENT); // python dedentation expected
         
+
         err = statement_inside(parser);
         CHECK_ERROR();
 
@@ -957,7 +958,12 @@ int statement_inside(Parser *parser)
 
     GET_NEXT_TOKEN();
 
-    if(parser->curr_token.type == TOKEN_EOL)
+    if(parser->curr_token.type == TOKEN_DEDENT)
+    {
+        return NO_ERROR;
+    }
+
+    else if(parser->curr_token.type == TOKEN_EOL)
     {
         err = statement_inside(parser);
         CHECK_ERROR();
