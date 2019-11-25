@@ -393,7 +393,7 @@ Token read_token(Scanner *scanner, int *err)
                 break;
 
             case STATE_COMMENT_SINGLE_LINE:
-                if(scanner->curr_char == '\n' || scanner->curr_char  == EOF)
+                if(scanner->curr_char  == EOF)
                 {
                     ungetc(scanner->curr_char, scanner->src_file);
                     scanner->state = STATE_START;

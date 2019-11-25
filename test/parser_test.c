@@ -18,8 +18,7 @@ void print_one_param(void)
 void print_multiple_params(void)
 {
     TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/print_multi_param2"));
-    /*TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/print_multi_param"));
-    */
+    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/print_multi_param"));
     
     // multi params with variables
 }
@@ -41,6 +40,11 @@ void test_inputi(void)
     //TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/inputi_invalid1.txt"));
 }
 
+void test_if(void)
+{
+    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/if_valid_1"));
+}
+
 
 int main(void) 
 {
@@ -50,5 +54,6 @@ int main(void)
     RUN_TEST(print_multiple_params);
     RUN_TEST(id_eq_expr);
     RUN_TEST(test_inputi);
+    RUN_TEST(test_if);
     return UNITY_END();
 }
