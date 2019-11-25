@@ -197,6 +197,7 @@ int statement(Parser *parser)
         parser->symbol_data_global->symbol_type = SYMBOL_FUNC; // specifying it's function
         parser->symbol_data_global->symbol_state = SYMBOL_DEFINED; // -||- defined
         parser->symbol_data_global->params_count_defined = 0;
+        parser->symbol_data_global->params_count_used = 0;
 
         /* STATE: DEF ID ( */
         GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET); // check if token type is left bracket
@@ -935,7 +936,7 @@ int arg(Parser *parser)
         break;
 
     default:
-        return UNDEFINE_REDEFINE_ERROR; // TODO CHECK ERROR VALUE
+        return SYNTAX_ERROR;
         break;
     }
 

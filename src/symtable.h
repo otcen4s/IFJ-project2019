@@ -33,26 +33,11 @@ typedef enum
     SYMBOL_DEFINED
 } Symbol_state;
 
-/*typedef enum
-{
-    SYMBOL_GLOBAL,
-    SYMBOL_LOCAL,
-    SYMBOL_BUILT_IN
-}Symbol_validity;
-*/
-
-/*typedef union 
-{
-    int int_val;
-    double double_val;
-    tString string_val;
-} Symbol_value;*/
-
 /**
  * This table is the inner one that stores all the data
  * and pointers to next symbol items
  */
-//TODO ADD MORE ITEMS
+
 typedef struct tSymbol_item
 {
     char *key;
@@ -62,10 +47,6 @@ typedef struct tSymbol_item
     Symbol_state symbol_state;
     int params_count_defined;
     int params_count_used;
-    //Symbol_value symbol_value;
-    //Symbol_validity symbol_validity;
-    //tFunc_params *function_params;
-    
 }tSymbol_item;
 
 /**
