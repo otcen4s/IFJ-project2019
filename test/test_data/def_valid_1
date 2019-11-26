@@ -1,2 +1,6 @@
-def cicka(a, b):
-    return sdsd
+def func():
+    a=2+3
+    if a==5:
+        return 6
+    else:
+        pass

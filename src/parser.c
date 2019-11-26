@@ -148,7 +148,6 @@ int start_compiler(char* src_file_name)
     }
     destroy_scanner(parser->scanner);
     dispose_parser(parser);
-
     return NO_ERROR;
 }
 
