@@ -31,5 +31,6 @@ Token create_integer_token(tString string, int *error);
 void check_keyword(tString* string, Token* token);
 Token read_token(Scanner *scanner, int *err);
 int init_scanner(Scanner *s, const char* file_name);
+void destroy_scanner (Scanner *s);
 
 #endif

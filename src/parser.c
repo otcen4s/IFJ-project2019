@@ -65,7 +65,8 @@ int init_parser(Parser* parser)
     (str_init(&(parser->prev_key))))
     return INTERNAL_ERROR;
 
-    int err;
+    int err= NO_ERROR;
+    parser->left_side=NULL;
     parser->curr_token.type = -1;
     parser->symbol_data_local = NULL;
     parser->symbol_data_global = NULL; 
@@ -102,6 +103,8 @@ int init_parser(Parser* parser)
 void dispose_parser(Parser* parser)
 {
     free(parser->scanner);
+    str_destroy(&(parser->key));
+    str_destroy(&(parser->prev_key));
     symtab_free(parser->global_table);
     symtab_free(parser->local_table);
 }
@@ -120,7 +123,14 @@ int start_compiler(char* src_file_name)
     if(init_scanner(parser->scanner, src_file_name)) return INTERNAL_ERROR;
 
     err = statement(parser);
-    CHECK_ERROR();
+
+    //check error but also memory need to be freed here
+    if(err)
+    {
+        destroy_scanner(parser->scanner);
+        dispose_parser(parser);
+        return err;
+    }
 
     for(size_t i = 0; i < SYMTAB_SIZE; i++)
     {
@@ -136,6 +146,8 @@ int start_compiler(char* src_file_name)
             current = next;
         }
     }
+    destroy_scanner(parser->scanner);
+    dispose_parser(parser);
 
     return NO_ERROR;
 }
