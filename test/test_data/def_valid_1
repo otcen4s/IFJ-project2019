@@ -1,2 +1,7 @@
-a=a()
+def foo():
+    a = foo1(5,5)
 
+
+def foo1(b,x):
+    x = 5
+    return x
