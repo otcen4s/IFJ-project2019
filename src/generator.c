@@ -20,6 +20,7 @@ tString helper;
 
 int error;
 int uid = 0;
+int paramCounter = 0;
 char uidStr[STRLEN];
 
 int generator_begin() {
@@ -715,50 +716,98 @@ void gen_func_return() {
     ADDLINE("RETURN");
 }
 
-void gen_print(unsigned n, bool global, Token token, ...) {
+void gen_func_call_start() {
+    ADDLINE("CREATEFRAME");
+}
 
-    va_list ap;
+void gen_func_call_add_param(Token token) {
+    ADDCODE("DEFVAR TF@%"); ADDLINE(++paramCounter);
+    ADDCODE("MOVE TF@%"); ADDLINE(paramCounter);
+}
+
+void gen_func_call_end(char *funcName, char *varName, bool global) {
+    ADDCODE("CALL $"); ADDLINE(funcName);
+    
+    if (varName) {
+        ADDCODE("MOVE "); ADDCODE(ISGLOBAL(global)); ADDCODE(varName); ADDLINE(" TF@%retval");
+    }
+}
+
+void gen_print(bool global, Token token) {
     char temp[STRLEN];
 
-    va_start(ap, token);
-
-    for (unsigned i = 0; i < n; i++) {
-        if (token.type == TOKEN_IDENTIFIER) {
-            ADDCODE("WRITE "); ADDCODE(ISGLOBAL(global)); ADDLINE(token.attribute.string.str);
-        } else {
-            ADDCODE("WRITE string@");
-
-            if (token.type == TOKEN_INTEGER) {
-                sprintf(temp, "%d", token.attribute.integer);
-            } else if (token.type ==  TOKEN_DECIMAL) {
-                sprintf(temp, "%a", token.attribute.decimal);
-            } else if (token.type == KEYWORD_NONE) {
-                strcpy(temp, "None");
-            } else if (token.type == TOKEN_STRING) {
-                strcpy(temp, replace_space(token.attribute.string.str));
-            }
-
-            ADDCODE(temp);
-            if (i == n - 1) {
-                // last term, add new line
-                ADDLINE("\\010");
-            } else {
-                // add space
-                ADDLINE("\\032");
-            }
+    if (token.type == TOKEN_IDENTIFIER) {
+        ADDCODE("WRITE "); ADDCODE(ISGLOBAL(global)); ADDLINE(token.attribute.string.str);
+    } else {
+        ADDCODE("WRITE string@");
+        if (token.type == TOKEN_INTEGER) {
+            sprintf(temp, "%d", token.attribute.integer);
+        } else if (token.type ==  TOKEN_DECIMAL) {
+            sprintf(temp, "%a", token.attribute.decimal);
+        } else if (token.type == KEYWORD_NONE) {
+            strcpy(temp, "None");
+        } else if (token.type == TOKEN_STRING) {
+            strcpy(temp, replace_space(token.attribute.string.str));
         }
 
-        token = va_arg(ap, Token);
+        ADDCODE(temp);
+        ADDLINE("\\032");
     }
-
-    va_end(ap);
 
     // return value is always None
     ADDLINE("CREATEFRAME");
     ADDLINE("DEFVAR TF@%retval");
     ADDLINE("MOVE TF@%retval nil@nil");
-
 }
+
+void gen_print_end() {
+    ADDLINE("\\010");
+}
+
+// void gen_print(unsigned n, bool global, Token token, ...) {
+
+//     va_list ap;
+//     char temp[STRLEN];
+
+//     va_start(ap, token);
+
+//     for (unsigned i = 0; i < n; i++) {
+//         if (token.type == TOKEN_IDENTIFIER) {
+//             ADDCODE("WRITE "); ADDCODE(ISGLOBAL(global)); ADDLINE(token.attribute.string.str);
+//         } else {
+//             ADDCODE("WRITE string@");
+
+//             if (token.type == TOKEN_INTEGER) {
+//                 sprintf(temp, "%d", token.attribute.integer);
+//             } else if (token.type ==  TOKEN_DECIMAL) {
+//                 sprintf(temp, "%a", token.attribute.decimal);
+//             } else if (token.type == KEYWORD_NONE) {
+//                 strcpy(temp, "None");
+//             } else if (token.type == TOKEN_STRING) {
+//                 strcpy(temp, replace_space(token.attribute.string.str));
+//             }
+
+//             ADDCODE(temp);
+//             if (i == n - 1) {
+//                 // last term, add new line
+//                 ADDLINE("\\010");
+//             } else {
+//                 // add space
+//                 ADDLINE("\\032");
+//             }
+//         }
+
+//         token = va_arg(ap, Token);
+//     }
+
+//     va_end(ap);
+
+//     // return value is always None
+//     ADDLINE("CREATEFRAME");
+//     ADDLINE("DEFVAR TF@%retval");
+//     ADDLINE("MOVE TF@%retval nil@nil");
+
+// }
 
 // TODO we must convert every ASCII chars from 000-032 035 and 092, not just spaces !
 const char *replace_space (char *string) {

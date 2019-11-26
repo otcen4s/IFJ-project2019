@@ -11,7 +11,8 @@
 int generator_begin();
 void generator_end();
 
-void gen_print(unsigned n, bool global, Token token, ...);
+void gen_print(bool global, Token token);
+void gen_print_end();
 void gen_defvar(char *varName, bool global);
 void gen_instruct(const char *instruct);
 
