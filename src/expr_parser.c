@@ -58,16 +58,24 @@ bool is_defined(Parser* parser)
         if(symtab_lookup(parser->local_table,id_name, &err)==NULL &&
             symtab_lookup(parser->global_table,id_name, &err)==NULL)
         {
-            return UNDEFINE_REDEFINE_ERROR;
+            return false;
+        }
+        else
+        {
+            return true;
         }
     }
     else
     {
         if(symtab_lookup(parser->global_table,id_name, &err)== NULL)
         {
-            return UNDEFINE_REDEFINE_ERROR;
+            return false;
         }
-    }                                      
+        else
+        {
+            return true; 
+        }
+    }                                          
 }
 
 /**
