@@ -152,7 +152,7 @@ int start_compiler(char* src_file_name)
         {
             next = current->next_symbol;
 
-           if((current->symbol_type == SYMBOL_FUNC) && (current->symbol_state == SYMBOL_USED)) return UNDEFINE_REDEFINE_ERROR;
+            if((current->symbol_type == SYMBOL_FUNC) && (current->symbol_state == SYMBOL_USED)) return UNDEFINE_REDEFINE_ERROR;
     
             current = next;
         }
@@ -450,7 +450,7 @@ int statement(Parser *parser)
                 err = expression_start(parser);
                 CHECK_ERROR();
 
-                if(parser->curr_token.type == TOKEN_EOF) return TOKEN_EOF;
+                if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
                 else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
                 else return SYNTAX_ERROR;
             }
@@ -522,7 +522,6 @@ int statement(Parser *parser)
     /* Rule 9. <statement> -> <value> <end> <statement> */
     else
     {
-
         COPY_CURRENT_TOKEN();
 
         parser->no_assign_expression = true;
@@ -1326,7 +1325,7 @@ int statement_inside(Parser *parser)
                 err = expression_start(parser);
                 CHECK_ERROR();
 
-                if(parser->curr_token.type == TOKEN_EOF) return TOKEN_EOF;
+                if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
                 else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
                 else return SYNTAX_ERROR;
             }
