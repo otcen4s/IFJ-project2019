@@ -1,0 +1,8 @@
+a= 4
+ab='string'
+x = 236.23
+jej = 'dalsi string je'
+print(a, 'string', 2.5, x, jej, a, x)
+z= 3 + 2
+print(a, 'voalm sa johno', 2.5, x, a, x, z)
+print('cauko',)
