@@ -3,15 +3,26 @@
 /************** MACROS **********/
 #define CHECK_ERROR() if(err) return err
 
-#define STORE_NEXT_TOKEN()                                                              \
-                        do{                                                             \
-                             parser->previous_token = read_token(parser->scanner, &err); \
-                            if(parser->previous_token.type== TOKEN_STRING || parser->previous_token.type== TOKEN_IDENTIFIER)\
-                            {                                                           \
-                                str_copy(&(parser->prev_key), parser->previous_token.attribute.string.str);\
-                                parser->previous_token.attribute.string= parser->prev_key;  \
-                            }                                                           \
-                            CHECK_ERROR();                                              \
+#define COPY_CURRENT_TOKEN()                                                                                                        \
+                            do{                                                                                                     \
+                                parser->previous_token = parser->curr_token;                                                        \
+                                if(parser->previous_token.type == TOKEN_STRING || parser->previous_token.type == TOKEN_IDENTIFIER)  \
+                                {                                                                                                   \
+                                    str_copy(&(parser->prev_key), parser->previous_token.attribute.string.str);                     \
+                                    parser->previous_token.attribute.string= parser->prev_key;                                      \
+                                }                                                                                                   \
+                                CHECK_ERROR();                                                                                      \
+                            }while(0)
+
+#define STORE_NEXT_TOKEN()                                                                                                      \
+                        do{                                                                                                     \
+                            parser->previous_token = read_token(parser->scanner, &err);                                         \
+                            if(parser->previous_token.type == TOKEN_STRING || parser->previous_token.type == TOKEN_IDENTIFIER)  \
+                            {                                                                                                   \
+                                str_copy(&(parser->prev_key), parser->previous_token.attribute.string.str);                     \
+                                parser->previous_token.attribute.string= parser->prev_key;                                      \
+                            }                                                                                                   \
+                            CHECK_ERROR();                                                                                      \
                         }while(0)
 
 
@@ -352,6 +363,8 @@ int statement(Parser *parser)
         parser->symbol_data_global = symtab_lookup(parser->global_table, parser->key.str, &err);
         CHECK_ERROR();
 
+        COPY_CURRENT_TOKEN(); 
+
         GET_NEXT_TOKEN();
 
         if(parser->curr_token.type == TOKEN_ASSIGN) /* STATE: ID = */
@@ -509,6 +522,9 @@ int statement(Parser *parser)
     /* Rule 9. <statement> -> <value> <end> <statement> */
     else
     {
+
+        COPY_CURRENT_TOKEN();
+
         parser->no_assign_expression = true;
 
         err = expression_start(parser);
@@ -625,26 +641,22 @@ int expression_start(Parser *parser)
 {
     int err;
 
-    /* STATE: <value> */
-    if(parser->no_assign_expression)
+    if(!(parser->no_assign_expression))
     {
-        parser->previous_token = parser->curr_token;
+        STORE_NEXT_TOKEN();
     }
-    /* STATE: ID = <value> */
-    else
-    {
-    STORE_NEXT_TOKEN();                                
-    }
+    
 
     switch(parser->previous_token.type)
     {
         /* STATE: ID = ID */
         case TOKEN_IDENTIFIER:
-            //get key but with previous token
-            str_copy(&(parser->key),parser->previous_token.attribute.string.str);
             
-            
-            GET_NEXT_TOKEN();
+            if(!(parser->no_assign_expression))
+            {
+                GET_NEXT_TOKEN();
+            }
+
             /* STATE: ID = ID ( */
             if(parser->curr_token.type == TOKEN_LEFT_BRACKET) // indicates it's an function call (not built_in function)
             {
@@ -715,7 +727,10 @@ int expression_start(Parser *parser)
         case KEYWORD_NONE:
         case TOKEN_DECIMAL: 
         case TOKEN_INTEGER:
-            GET_NEXT_TOKEN();
+            if(!(parser->no_assign_expression))
+            {
+                GET_NEXT_TOKEN();
+            }
 
             parser->expr_parser_call = true;
             err = expression(parser);
@@ -919,8 +934,11 @@ int expression_start(Parser *parser)
             break;
         
         default:
-            GET_NEXT_TOKEN();
-            
+            if(!(parser->no_assign_expression))
+            {
+                GET_NEXT_TOKEN();
+            }
+
             parser->expr_parser_call = true;
             err = expression(parser);
             CHECK_ERROR();
@@ -1194,6 +1212,8 @@ int statement_inside(Parser *parser)
             parser->symbol_data_global = symtab_lookup(parser->global_table, parser->key.str, &err);
             CHECK_ERROR();
         }
+
+        COPY_CURRENT_TOKEN();
         
         GET_NEXT_TOKEN();
 
@@ -1378,6 +1398,8 @@ int statement_inside(Parser *parser)
     /* Rule 16. <statement_inside> -> <value> <end> <statement> */
     else
     {
+        COPY_CURRENT_TOKEN();
+
         parser->no_assign_expression = true;
 
         err = expression_start(parser);
