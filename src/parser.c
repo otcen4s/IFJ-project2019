@@ -631,6 +631,13 @@ int expression_start(Parser *parser)
     if(!(parser->no_assign_expression))
     {
         STORE_NEXT_TOKEN();
+
+        if((parser->is_in_return) && ((parser->previous_token.type == TOKEN_EOL) || (parser->previous_token.type == TOKEN_EOF)))
+        {
+            parser->expr_parser_call = true;
+            parser->curr_token = parser->previous_token;
+            return NO_ERROR;
+        }
     }
     
 
@@ -905,11 +912,16 @@ int expression_start(Parser *parser)
             if(parser->curr_token.type == TOKEN_IDENTIFIER)
             {
                 GET_KEY();
+                
                 //call generator
             }
             else if(parser->curr_token.type == TOKEN_INTEGER)
             {
-                GET_KEY();
+                //GET_KEY();
+
+                //gen_instruct("CREATEFRAME");
+                //gen_instruct("DEFVAR TF@%1");
+                //gen_instruct("MOVE TF@%1")
                 // call generator
             }
             else
@@ -967,7 +979,12 @@ int arg(Parser *parser)
         if(!(parser->is_in_print)) // counting arguments number into global 
         {
             parser->symbol_data_global->params_count_used++;
-        } 
+        }
+        else // TODO ZATIAL DOCASNE
+        {
+            gen_print(1, true, parser->curr_token);
+        }
+         
 
         // calling generator 
 
@@ -981,6 +998,11 @@ int arg(Parser *parser)
         {
             parser->symbol_data_global->params_count_used++;
         }
+        else // TODO DOCASNE
+        {
+            gen_print(1, true, parser->curr_token);
+        }
+        
         // calling code generator
         break;
 

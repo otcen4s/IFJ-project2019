@@ -1,18 +1,2 @@
 def foo1(b,x):
-    x = 5
-<<<<<<< HEAD
-    if x == 5:
-        if x == 5:
-            if x == 5:
-                'kokot'
-            else:
-                x = 3
-        else:
-            pass
-    else:
-        pass
-
-    return
-=======
-    return x
->>>>>>> b85f8f521f7e7181eb7358916ee5b27ab05e80e9
+    return 
