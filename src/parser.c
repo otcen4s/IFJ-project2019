@@ -121,7 +121,7 @@ void dispose_parser(Parser* parser)
 }
 
 // this function  will be the interface of parser (e.i. will be called from outside) 
-int start_compiler(char* src_file_name)
+int start_compiler(char* src_file_name, char* out_file_name)
 {
     //create and initialise parser data structure
     int err;
@@ -157,6 +157,19 @@ int start_compiler(char* src_file_name)
             current = next;
         }
     }
+
+    // set output file
+    FILE *output_file;
+    if(strcmp(out_file_name, "stdout") == 0)
+    {
+        output_file= stdout;
+    }
+    else
+    {
+        if(fopen(out_file_name, "w")== NULL) return INTERNAL_ERROR;
+    }
+    //generate_code(output_file);
+  
     destroy_scanner(parser->scanner);
     dispose_parser(parser);
     return NO_ERROR;
