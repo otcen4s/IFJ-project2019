@@ -396,7 +396,9 @@ int statement(Parser *parser)
                 parser->symbol_data_global = symtab_add(parser->global_table, parser->key.str, &err); // add ID of variable into global table
                 CHECK_ERROR(); // check for internal error of used function
                 parser->symbol_data_global->symbol_type = SYMBOL_VAR; // specifying for variable
-                parser->symbol_data_global->symbol_state = SYMBOL_DEFINED; 
+                parser->symbol_data_global->symbol_state = SYMBOL_DEFINED;
+
+                gen_defvar(parser->key.str, true); // CODE GENERATOR
             }
             parser->left_side = parser->symbol_data_global; // this is for expression parser the left side ID to store value
             
