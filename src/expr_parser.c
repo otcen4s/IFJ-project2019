@@ -18,7 +18,7 @@ int init_expr_parser(Expr_parser * expr_parser);
 void dispose_expr_parser(Expr_parser * expr_p);
 int reduce(Expr_parser * expr_parser);
 int get_reduction_rule(Expr_parser* expr_parser);
-bool is_defined(Parser* parser); 
+bool is_defined(Parser* parser, int token_cnt); 
 
 /**
  * Parsing table to determine next parser action based on
@@ -49,10 +49,20 @@ int parsing_table[16][16] =
 /**
  * Check if identifier from last token was defined
  **/
-bool is_defined(Parser* parser)
+bool is_defined(Parser* parser, int token_cnt)
 {
     int err= NO_ERROR;
-    char* id_name = parser->curr_token.attribute.string.str;
+    char* id_name;
+    //set id name from proper token (because 2 tokens were pre readed)
+    if(token_cnt== 1)
+    {
+        id_name = parser->previous_token.attribute.string.str;
+    }
+    else
+    {
+        id_name = parser->curr_token.attribute.string.str;
+    }
+
     if(parser->is_in_def)
     {
         if(symtab_lookup(parser->local_table,id_name, &err)==NULL &&
@@ -449,7 +459,7 @@ int expression(Parser* parser)
                 if(expr_parser->curr_sym.symbol == ID)
                 {
                    // check if inserted id is defined
-                   if(!is_defined(parser))
+                   if(!is_defined(parser, token_cnt))
                    {
                     dispose_expr_parser(expr_parser);
                     return UNDEFINE_REDEFINE_ERROR; 
