@@ -43,8 +43,13 @@ void test_inputi(void)
 void test_if(void)
 {
     TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/if_valid_1"));
+    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/if_valid_2"));
 }
 
+void test_def(void)
+{
+    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/def_valid_1"));
+}
 
 int main(void) 
 {
@@ -55,5 +60,6 @@ int main(void)
     RUN_TEST(id_eq_expr);
     RUN_TEST(test_inputi);
     RUN_TEST(test_if);
+    RUN_TEST(test_def);
     return UNITY_END();
 }

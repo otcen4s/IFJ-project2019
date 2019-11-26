@@ -67,7 +67,7 @@ Token create_integer_token(tString string, int *error) {
     *error = NO_ERROR;
     
     Token token;
-    token.type = 0; 
+    token.type = 0;
     char *endptr;
     long  value = strtol(string.str, &endptr, 10);
 
@@ -85,7 +85,7 @@ Token create_integer_token(tString string, int *error) {
 Token create_decimal_token(tString string) 
 {
     
-    Token token;
+    Token token; 
     double value = atof(string.str);
     token.type = TOKEN_DECIMAL;
     token.attribute.decimal = value;
@@ -125,7 +125,7 @@ Token read_token(Scanner *scanner, int *err)
        scanner->curr_char=getc(scanner->src_file);
        Token token;
        token.type=0; //initialisation
-
+       token.attribute.string.str= NULL; 
         switch (scanner->state)
         {
         
