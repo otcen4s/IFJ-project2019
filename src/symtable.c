@@ -125,6 +125,11 @@ tSymbol_item* symtab_add(tSymbol *table, const char *key, int* err)
 
         strcpy(new_symbol->key, key);
         new_symbol->next_symbol = NULL;
+        new_symbol->symbol_state = -1;
+        new_symbol->symbol_type = -1;
+        new_symbol->data_type = -1;
+        new_symbol->params_count_defined = 0;
+        new_symbol->params_count_used = 0;
 
         
         table->size++;
@@ -159,6 +164,11 @@ tSymbol_item* symtab_add(tSymbol *table, const char *key, int* err)
 
         strcpy(new_symbol->key, key);
         new_symbol->next_symbol = NULL;
+        new_symbol->symbol_state = -1;
+        new_symbol->symbol_type = -1;
+        new_symbol->data_type = -1;
+        new_symbol->params_count_defined = 0;
+        new_symbol->params_count_used = 0;
 
 
         // now we iterate at the end of the linked list and "connect" pointers
