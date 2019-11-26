@@ -12,53 +12,53 @@ void tearDown(void)
 
 void print_one_param(void)
 {
-    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/print_one_param.txt"));
+    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/print_one_param.txt", "stdout"));
 }
 
 void print_multiple_params(void)
 {
-    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/print_multi_param2"));
-    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/print_multi_param"));
+    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/print_multi_param2", "stdout"));
+    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/print_multi_param", "stdout"));
     
     // multi params with variables
-    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/print_multi_param_extreme"));
+    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/print_multi_param_extreme", "stdout"));
 }
 
 void print_errors(void)
 {
     //TEST_ASSERT_EQUAL_INT(SYNTAX_ERROR, start_compiler("test/test_data/print_error"));
-    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/print_error2"));
+    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/print_error2", "stdout"));
 }
 
 void id_eq_expr(void)
 {
-    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/id_eq_expr_valid.txt"));
-    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/id_eq_expr_valid2.txt"));
-    TEST_ASSERT_EQUAL_INT(SYNTAX_ERROR, start_compiler("test/test_data/id_eq_expr_invalid1.txt"));
-    TEST_ASSERT_EQUAL_INT(SYNTAX_ERROR, start_compiler("test/test_data/id_eq_expr_invalid2.txt"));
-    TEST_ASSERT_EQUAL_INT(SYNTAX_ERROR, start_compiler("test/test_data/id_eq_expr_invalid3.txt"));
+    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/id_eq_expr_valid.txt", "stdout"));
+    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/id_eq_expr_valid2.txt", "stdout"));
+    TEST_ASSERT_EQUAL_INT(SYNTAX_ERROR, start_compiler("test/test_data/id_eq_expr_invalid1.txt", "stdout"));
+    TEST_ASSERT_EQUAL_INT(SYNTAX_ERROR, start_compiler("test/test_data/id_eq_expr_invalid2.txt", "stdout"));
+    TEST_ASSERT_EQUAL_INT(SYNTAX_ERROR, start_compiler("test/test_data/id_eq_expr_invalid3.txt", "stdout"));
     
     // multi params with variables
 }
 
 void test_inputi(void)
 {
-    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/inputi_valid1.txt"));
+    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/inputi_valid1.txt", "stdout"));
     //TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/inputi_invalid1.txt"));
 }
 
 void test_if(void)
-{   TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/if_valid_2"));
-    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/if_valid_1"));
+{   TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/if_valid_2", "stdout"));
+    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/if_valid_1", "stdout"));
 }
 
 void test_def(void)
 {
-    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/def_valid_1"));
+    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/def_valid_1", "stdout"));
 }
 void test_function(void)
 {
-    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/function"));
+    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/function", "stdout"));
 }
 
 int main(void) 
