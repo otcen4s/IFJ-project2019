@@ -23,6 +23,12 @@ int str_realloc(tString *s, unsigned new_arr_size){
     
     s->arr_size = new_arr_size + REALLOC_CONST;
 
+    //realocated memory is uninitialised so we must set it to 0
+    for(unsigned i=s->len; i < s->arr_size; i++)
+    {
+        s->str[i]= '\0';
+    }
+
     return NO_ERROR;
 }
 

@@ -5,9 +5,15 @@
 
 #define STORE_NEXT_TOKEN()                                                              \
                         do{                                                             \
-                            parser->previous_token = read_token(parser->scanner, &err); \
+                             parser->previous_token = read_token(parser->scanner, &err); \
+                            if(parser->previous_token.type== TOKEN_STRING || parser->previous_token.type== TOKEN_IDENTIFIER)\
+                            {                                                           \
+                                str_copy(&(parser->prev_key), parser->previous_token.attribute.string.str);\
+                                parser->previous_token.attribute.string= parser->prev_key;  \
+                            }                                                           \
                             CHECK_ERROR();                                              \
                         }while(0)
+
 
 #define GET_NEXT_TOKEN()                                                            \
                         do{                                                         \
@@ -55,10 +61,12 @@ int init_parser(Parser* parser)
     if(((parser->scanner = malloc(sizeof(Scanner))) == NULL) || 
     (symtab_init(&(parser->global_table))) || 
     (symtab_init(&(parser->local_table)))||
-    (str_init(&(parser->key)))) 
+    (str_init(&(parser->key))) || 
+    (str_init(&(parser->prev_key))))
     return INTERNAL_ERROR;
 
-    int err;
+    int err= NO_ERROR;
+    parser->left_side=NULL;
     parser->curr_token.type = -1;
     parser->symbol_data_local = NULL;
     parser->symbol_data_global = NULL; 
@@ -95,6 +103,8 @@ int init_parser(Parser* parser)
 void dispose_parser(Parser* parser)
 {
     free(parser->scanner);
+    str_destroy(&(parser->key));
+    str_destroy(&(parser->prev_key));
     symtab_free(parser->global_table);
     symtab_free(parser->local_table);
 }
@@ -113,7 +123,14 @@ int start_compiler(char* src_file_name)
     if(init_scanner(parser->scanner, src_file_name)) return INTERNAL_ERROR;
 
     err = statement(parser);
-    CHECK_ERROR();
+
+    //check error but also memory need to be freed here
+    if(err)
+    {
+        destroy_scanner(parser->scanner);
+        dispose_parser(parser);
+        return err;
+    }
 
     for(size_t i = 0; i < SYMTAB_SIZE; i++)
     {
@@ -129,6 +146,8 @@ int start_compiler(char* src_file_name)
             current = next;
         }
     }
+    destroy_scanner(parser->scanner);
+    dispose_parser(parser);
 
     return NO_ERROR;
 }
@@ -228,10 +247,24 @@ int statement(Parser *parser)
         err = statement_inside(parser);
         CHECK_ERROR();
 
+<<<<<<< HEAD
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> DEDENT */
         CHECK_TOKEN(TOKEN_DEDENT);
         CHECK_ERROR();
+=======
+        /* Expected state -> STATE: DEF ID ( <params> ): EOL INDENT <statement_inside> <end> */
+        GET_NEXT_TOKEN();
+
+        /* Rule <end> is implemented simply as an if condition which makes it easier */
+        /* In this state two tokens are valid -> EOF/EOL others cause syntax_error */
+        if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
+        else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
+        else return SYNTAX_ERROR;
+
+        /* Expected state -> STATE: DEF ID ( <params> ): EOL INDENT <statement_inside> <end> DEDENT */
+        GET_CHECK_TOKEN(TOKEN_DEDENT); // python dedentation expected
+>>>>>>> d5a337f2863ae3ed25192dfc058126cb390980fb
     }
 
     /* Rule 4. <statement> -> IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE : EOL INDENT <statement_inside> <end> DEDENT <statement> */
@@ -422,7 +455,6 @@ int statement(Parser *parser)
     {
         /* STATE: PASS <end> */
         GET_NEXT_TOKEN();
-        
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
         else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
         else return SYNTAX_ERROR;
@@ -573,15 +605,16 @@ int expression_start(Parser *parser)
     /* STATE: ID = <value> */
     else
     {
-        STORE_NEXT_TOKEN(); // same as GET_NEXT_TOKEN() but this stores token for later use
+    STORE_NEXT_TOKEN();                                
     }
 
     switch(parser->previous_token.type)
     {
         /* STATE: ID = ID */
         case TOKEN_IDENTIFIER:
-        
+            //get key but with previous token
             str_copy(&(parser->key),parser->previous_token.attribute.string.str);
+            
             
             GET_NEXT_TOKEN();
             /* STATE: ID = ID ( */
@@ -858,14 +891,8 @@ int expression_start(Parser *parser)
             break;
         
         default:
-
-            if(parser->is_in_return)
-            {
-                if((parser->previous_token.type == TOKEN_EOL) || (parser->previous_token.type == TOKEN_EOF)) return NO_ERROR;
-            }
-
             GET_NEXT_TOKEN();
-
+            
             parser->expr_parser_call = true;
             err = expression(parser);
             CHECK_ERROR();
@@ -1105,21 +1132,16 @@ int statement_inside(Parser *parser)
         err = statement_inside(parser);
         CHECK_ERROR();
 
-         /* STATE: WHILE <expression_start>: EOL INDENT <statement_inside> <end> */
-        if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
-         /* STATE: WHILE <expression_start>: EOL INDENT <statement_inside> <end>  DEDENT */
-        CHECK_TOKEN(TOKEN_DEDENT); 
-
         /* STATE: WHILE <expression_start>: EOL INDENT <statement_inside> <end> */
         //GET_NEXT_TOKEN(); // expected EOF or EOL and anything else is syntax_error
-        //if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
-        //else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
-        //else return SYNTAX_ERROR;
+        if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
+        else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
+        else return SYNTAX_ERROR;
 
          /* STATE: WHILE <expression_start>: EOL INDENT <statement_inside> <end>  DEDENT */
-        //GET_CHECK_TOKEN(TOKEN_DEDENT);
-        //parser->nested_cnt--; 
-        //return NO_ERROR;
+        GET_CHECK_TOKEN(TOKEN_DEDENT);
+        parser->nested_cnt--; 
+        return NO_ERROR;
     }
 
     /* Rule 12. <statement> -> ID = <expression_start> <end> <statement> */

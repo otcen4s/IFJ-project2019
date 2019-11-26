@@ -21,6 +21,13 @@ void print_multiple_params(void)
     TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/print_multi_param"));
     
     // multi params with variables
+    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/print_multi_param_extreme"));
+}
+
+void print_errors(void)
+{
+    //TEST_ASSERT_EQUAL_INT(SYNTAX_ERROR, start_compiler("test/test_data/print_error"));
+    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/print_error2"));
 }
 
 void id_eq_expr(void)
@@ -41,10 +48,18 @@ void test_inputi(void)
 }
 
 void test_if(void)
-{
+{   TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/if_valid_2"));
     TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/if_valid_1"));
 }
 
+void test_def(void)
+{
+    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/def_valid_1"));
+}
+void test_function(void)
+{
+    TEST_ASSERT_EQUAL_INT(NO_ERROR, start_compiler("test/test_data/function"));
+}
 
 int main(void) 
 {
@@ -52,8 +67,13 @@ int main(void)
     
     RUN_TEST(print_one_param);
     RUN_TEST(print_multiple_params);
+    RUN_TEST(print_errors);
+    
     RUN_TEST(id_eq_expr);
     RUN_TEST(test_inputi);
     RUN_TEST(test_if);
+    RUN_TEST(test_def);
+    RUN_TEST(test_function);
+
     return UNITY_END();
 }
