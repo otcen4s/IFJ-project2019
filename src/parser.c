@@ -247,24 +247,10 @@ int statement(Parser *parser)
         err = statement_inside(parser);
         CHECK_ERROR();
 
-<<<<<<< HEAD
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> DEDENT */
         CHECK_TOKEN(TOKEN_DEDENT);
         CHECK_ERROR();
-=======
-        /* Expected state -> STATE: DEF ID ( <params> ): EOL INDENT <statement_inside> <end> */
-        GET_NEXT_TOKEN();
-
-        /* Rule <end> is implemented simply as an if condition which makes it easier */
-        /* In this state two tokens are valid -> EOF/EOL others cause syntax_error */
-        if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
-        else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
-        else return SYNTAX_ERROR;
-
-        /* Expected state -> STATE: DEF ID ( <params> ): EOL INDENT <statement_inside> <end> DEDENT */
-        GET_CHECK_TOKEN(TOKEN_DEDENT); // python dedentation expected
->>>>>>> d5a337f2863ae3ed25192dfc058126cb390980fb
     }
 
     /* Rule 4. <statement> -> IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE : EOL INDENT <statement_inside> <end> DEDENT <statement> */
