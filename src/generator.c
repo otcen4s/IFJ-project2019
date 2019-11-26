@@ -629,7 +629,7 @@ void gen_pushs(Token token, bool global) {
 }
 
 void gen_pops(char *varName, bool global) {
-    ADDCODE("POPS"); ADDCODE(ISGLOBAL(global)); ADDLINE(varName);
+    ADDCODE("POPS "); ADDCODE(ISGLOBAL(global)); ADDLINE(varName);
 }
 
 void gen_stack(const char *instruct) {
