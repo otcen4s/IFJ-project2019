@@ -179,6 +179,7 @@ int start_compiler(char* src_file_name)
 int statement(Parser *parser)
 {
     symtab_clear(parser->local_table);
+    parser->left_side = NULL;
     parser->is_in_def = parser->is_in_if = parser->is_in_while = parser->is_in_print = parser->no_assign_expression = parser->expr_parser_call = false;
     int err;
 
@@ -445,7 +446,7 @@ int statement(Parser *parser)
 
                 parser->no_assign_expression = true;
 
-                parser->left_side = parser->symbol_data_global;
+                //parser->left_side = parser->symbol_data_global;
                 
                 err = expression_start(parser);
                 CHECK_ERROR();
@@ -726,10 +727,8 @@ int expression_start(Parser *parser)
         case KEYWORD_NONE:
         case TOKEN_DECIMAL: 
         case TOKEN_INTEGER:
-            if(!(parser->no_assign_expression))
-            {
-                GET_NEXT_TOKEN();
-            }
+        
+            GET_NEXT_TOKEN();
 
             parser->expr_parser_call = true;
             err = expression(parser);
@@ -933,11 +932,9 @@ int expression_start(Parser *parser)
             break;
         
         default:
-            if(!(parser->no_assign_expression))
-            {
-                GET_NEXT_TOKEN();
-            }
 
+            GET_NEXT_TOKEN();
+            
             parser->expr_parser_call = true;
             err = expression(parser);
             CHECK_ERROR();
