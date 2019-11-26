@@ -418,6 +418,7 @@ Token read_token(Scanner *scanner, int *err)
                 break;
             
             case STATE_EQUAL:
+                ungetc(scanner->curr_char, scanner->src_file);
                 token.type = TOKEN_EQUAL;
                 return token;
                 break;

@@ -423,6 +423,27 @@ int statement(Parser *parser)
                 }
             }
 
+            else
+            {
+                if(parser->symbol_data_global == NULL)
+                {
+                    return UNDEFINE_REDEFINE_ERROR;
+                }
+
+                parser->no_assign_expression = true;
+
+                parser->left_side = parser->symbol_data_global;
+                
+                err = expression_start(parser);
+                CHECK_ERROR();
+
+                if(parser->curr_token.type == TOKEN_EOF) return TOKEN_EOF;
+                else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
+                else return SYNTAX_ERROR;
+            }
+            
+
+            /*
             else if(parser->curr_token.type == TOKEN_EQUAL)
             {
                 if(parser->symbol_data_global == NULL)
@@ -436,7 +457,7 @@ int statement(Parser *parser)
                 CHECK_ERROR();
 
                 /* STATE: ID == <expression_start> <end> */
-                if(!(parser->expr_parser_call))
+               /* if(!(parser->expr_parser_call))
                 {
                     GET_NEXT_TOKEN(); // TODO check if we need this token to get
                 }
@@ -453,7 +474,7 @@ int statement(Parser *parser)
                 }
             }
 
-            else return SYNTAX_ERROR;
+            else return SYNTAX_ERROR;*/
         }
     }
 
@@ -1258,7 +1279,39 @@ int statement_inside(Parser *parser)
                 }
             }
 
-            else if(parser->curr_token.type == TOKEN_EQUAL)
+            else
+            {
+                if(parser->is_in_def)
+                {
+                    if(parser->symbol_data_local == NULL)
+                    {
+                        if(parser->symbol_data_global == NULL)
+                        {
+                            return UNDEFINE_REDEFINE_ERROR;
+                        }
+                    }
+                }
+                else
+                {
+                    if(parser->symbol_data_global == NULL)
+                    {
+                        return UNDEFINE_REDEFINE_ERROR;
+                    }
+                }
+                
+                parser->no_assign_expression = true;
+
+                parser->left_side = parser->symbol_data_global;
+                
+                err = expression_start(parser);
+                CHECK_ERROR();
+
+                if(parser->curr_token.type == TOKEN_EOF) return TOKEN_EOF;
+                else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
+                else return SYNTAX_ERROR;
+            }
+
+            /*else if(parser->curr_token.type == TOKEN_EQUAL)
             {
                 if(parser->symbol_data_global == NULL)
                 {
@@ -1271,7 +1324,7 @@ int statement_inside(Parser *parser)
                 CHECK_ERROR();
 
                 /* STATE: ID == <expression_start> <end> */
-                if(!(parser->expr_parser_call))
+              /*  if(!(parser->expr_parser_call))
                 {
                     GET_NEXT_TOKEN(); // TODO check if we need this token to get
                 }
@@ -1289,7 +1342,7 @@ int statement_inside(Parser *parser)
                 }
             }
 
-            else return SYNTAX_ERROR;
+            else return SYNTAX_ERROR;*/
         }
     }
 
