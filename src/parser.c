@@ -220,14 +220,19 @@ int statement(Parser *parser)
         (parser->symbol_data_global->symbol_state == SYMBOL_USED))
         {
             used_function = true;
+            parser->symbol_data_global->symbol_state = SYMBOL_DEFINED; // -||- defined
+            parser->symbol_data_global->params_count_defined = 0;
         }
         
-        parser->symbol_data_global = symtab_add(parser->global_table, parser->key.str, &err); // add ID of function into global table
-        CHECK_ERROR(); // check for internal error of used function
-        parser->symbol_data_global->symbol_type = SYMBOL_FUNC; // specifying it's function
-        parser->symbol_data_global->symbol_state = SYMBOL_DEFINED; // -||- defined
-        parser->symbol_data_global->params_count_defined = 0;
-        parser->symbol_data_global->params_count_used = 0;
+        else
+        {
+            parser->symbol_data_global = symtab_add(parser->global_table, parser->key.str, &err); // add ID of function into global table
+            CHECK_ERROR(); // check for internal error of used function
+            parser->symbol_data_global->symbol_type = SYMBOL_FUNC; // specifying it's function
+            parser->symbol_data_global->symbol_state = SYMBOL_DEFINED; // -||- defined
+            parser->symbol_data_global->params_count_defined = 0;
+            parser->symbol_data_global->params_count_used = 0;
+        }
 
         /* STATE: DEF ID ( */
         GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET); // check if token type is left bracket
@@ -396,9 +401,6 @@ int statement(Parser *parser)
         /* Part of expression_start rule is implemented here for this uniq state */
         else 
         {
-            // previous_token = ID
-            // current_token = anything else
-
             if(parser->curr_token.type == TOKEN_LEFT_BRACKET) // indicates it's an function call (not built_in function)
             {
                 parser->symbol_data_global = symtab_lookup(parser->global_table, parser->key.str, &err);
@@ -455,40 +457,6 @@ int statement(Parser *parser)
                 else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
                 else return SYNTAX_ERROR;
             }
-            
-
-            /*
-            else if(parser->curr_token.type == TOKEN_EQUAL)
-            {
-                if(parser->symbol_data_global == NULL)
-                {
-                    return UNDEFINE_REDEFINE_ERROR;
-                }
-
-                parser->left_side = parser->symbol_data_global; // this is for expression parser the left side ID to store value
-            
-                err = expression_start(parser);
-                CHECK_ERROR();
-
-                /* STATE: ID == <expression_start> <end> */
-               /* if(!(parser->expr_parser_call))
-                {
-                    GET_NEXT_TOKEN(); // TODO check if we need this token to get
-                }
-                if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
-                else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
-                else return SYNTAX_ERROR;
-            }
-
-            else if((parser->curr_token.type == TOKEN_EOL) || (parser->curr_token.type == TOKEN_EOF))            
-            {
-                if(parser->symbol_data_global == NULL)
-                {
-                    return UNDEFINE_REDEFINE_ERROR;
-                }
-            }
-
-            else return SYNTAX_ERROR;*/
         }
     }
 
@@ -506,6 +474,7 @@ int statement(Parser *parser)
     else if(parser->curr_token.type == KEYWORD_PRINT)
     {
         parser->is_in_print = true;
+
         /* STATE: PRINT ( */
         GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET); 
 
@@ -787,8 +756,6 @@ int expression_start(Parser *parser)
             }
 
             GET_CHECK_TOKEN(TOKEN_RIGHT_BRACKET);
-
-            //GET_CHECK_TOKEN(TOKEN_EOL);
             
             break;  
 
@@ -1064,7 +1031,7 @@ int statement_inside(Parser *parser)
         else
         {   
             parser->is_in_return = true;
-            //parser->left_side = parser->symbol_data_global;
+
             /* STATE: <statement_inside> RETURN <expression_start> */
             err = expression_start(parser);
             CHECK_ERROR();
@@ -1109,9 +1076,6 @@ int statement_inside(Parser *parser)
         err = statement_inside(parser);
         CHECK_ERROR();
 
-        //if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
-        //else if(parser->curr_token.type == TOKEN_DEDENT) err = NO_ERROR;
-
         if(parser->curr_token.type == TOKEN_EOF) return SYNTAX_ERROR;
         else if(parser->curr_token.type == TOKEN_DEDENT) err = NO_ERROR;
 
@@ -1138,17 +1102,6 @@ int statement_inside(Parser *parser)
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> DEDENT */
         CHECK_TOKEN(TOKEN_DEDENT);
         CHECK_ERROR();
-
-        /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> */
-        //GET_NEXT_TOKEN(); // expected EOF or EOL and anything else is syntax_error
-        //if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
-        //else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
-        //else return SYNTAX_ERROR;
-
-        /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> DEDENT */
-        //GET_CHECK_TOKEN(TOKEN_DEDENT); 
-        //parser->nested_cnt--;
-        //return NO_ERROR;
     }
 
     /* Rule 11. <statement_inside> -> WHILE <expression_start>: EOL INDENT <statement_inside> EOL DEDENT <statement> */
@@ -1333,39 +1286,6 @@ int statement_inside(Parser *parser)
                 else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
                 else return SYNTAX_ERROR;
             }
-
-            /*else if(parser->curr_token.type == TOKEN_EQUAL)
-            {
-                if(parser->symbol_data_global == NULL)
-                {
-                    return UNDEFINE_REDEFINE_ERROR;
-                }
-
-                parser->left_side = parser->symbol_data_global; // this is for expression parser the left side ID to store value
-            
-                err = expression_start(parser);
-                CHECK_ERROR();
-
-                /* STATE: ID == <expression_start> <end> */
-              /*  if(!(parser->expr_parser_call))
-                {
-                    GET_NEXT_TOKEN(); // TODO check if we need this token to get
-                }
-                if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
-                else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
-                else return SYNTAX_ERROR;
-            }
-
-
-            else if((parser->curr_token.type == TOKEN_EOL) || (parser->curr_token.type == TOKEN_EOF))            
-            {
-                if(parser->symbol_data_global == NULL)
-                {
-                    return UNDEFINE_REDEFINE_ERROR;
-                }
-            }
-
-            else return SYNTAX_ERROR;*/
         }
     }
 
