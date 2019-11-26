@@ -423,6 +423,28 @@ int statement(Parser *parser)
                 }
             }
 
+            else if(parser->curr_token.type == TOKEN_EQUAL)
+            {
+                if(parser->symbol_data_global == NULL)
+                {
+                    return UNDEFINE_REDEFINE_ERROR;
+                }
+
+                parser->left_side = parser->symbol_data_global; // this is for expression parser the left side ID to store value
+            
+                err = expression_start(parser);
+                CHECK_ERROR();
+
+                /* STATE: ID == <expression_start> <end> */
+                if(!(parser->expr_parser_call))
+                {
+                    GET_NEXT_TOKEN(); // TODO check if we need this token to get
+                }
+                if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
+                else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
+                else return SYNTAX_ERROR;
+            }
+
             else if((parser->curr_token.type == TOKEN_EOL) || (parser->curr_token.type == TOKEN_EOF))            
             {
                 if(parser->symbol_data_global == NULL)
@@ -1235,6 +1257,29 @@ int statement_inside(Parser *parser)
                     }
                 }
             }
+
+            else if(parser->curr_token.type == TOKEN_EQUAL)
+            {
+                if(parser->symbol_data_global == NULL)
+                {
+                    return UNDEFINE_REDEFINE_ERROR;
+                }
+
+                parser->left_side = parser->symbol_data_global; // this is for expression parser the left side ID to store value
+            
+                err = expression_start(parser);
+                CHECK_ERROR();
+
+                /* STATE: ID == <expression_start> <end> */
+                if(!(parser->expr_parser_call))
+                {
+                    GET_NEXT_TOKEN(); // TODO check if we need this token to get
+                }
+                if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
+                else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
+                else return SYNTAX_ERROR;
+            }
+
 
             else if((parser->curr_token.type == TOKEN_EOL) || (parser->curr_token.type == TOKEN_EOF))            
             {

@@ -1,6 +1,12 @@
-def func():
-    a=2+3
-    if a==5:
-        return 6
-    else:
-        pass
+#def func():
+#    a=2+3
+#    if a==5:
+#        return 6
+#    else:
+#        pass
+a=10
+if a==10:
+    b = 3
+    b == 3
+else:
+    pass
