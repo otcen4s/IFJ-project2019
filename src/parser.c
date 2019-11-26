@@ -665,8 +665,15 @@ int expression_start(Parser *parser)
                     return SYNTAX_ERROR;
                 }
 
+                str_copy(&(parser->key),parser->previous_token.attribute.string.str);
+
                 parser->symbol_data_global = symtab_lookup(parser->global_table, parser->key.str, &err);
                 CHECK_ERROR();
+
+                if((parser->symbol_data_global != NULL) && (parser->symbol_data_global->symbol_type != SYMBOL_FUNC))
+                {
+                    return UNDEFINE_REDEFINE_ERROR;
+                }
                 
                 if(parser->is_in_def) //if we are in definition of function
                 {
@@ -680,7 +687,7 @@ int expression_start(Parser *parser)
                     }
                 }
                 
-                else if((parser->symbol_data_global->symbol_state != SYMBOL_DEFINED)) // TODO maybe chceck if parser->symbol_data_global != NULL
+                else if((parser->symbol_data_global == NULL) || (parser->symbol_data_global->symbol_state != SYMBOL_DEFINED)) // TODO maybe chceck if parser->symbol_data_global != NULL
                 {
                     return UNDEFINE_REDEFINE_ERROR;
                 }
