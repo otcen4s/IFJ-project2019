@@ -11,13 +11,13 @@ SRC = $(wildcard $(PATHT)*.c)
 BIN = $(addprefix $(PATHB), $(basename $(notdir $(SRC))))
 
 test : $(PATHB) $(BIN)
-	./$(PATHB)string_lib_test
+	#./$(PATHB)string_lib_test
 	#./$(PATHB)scanner_test
 	#./$(PATHB)stack_test
 	./$(PATHB)parser_test
 	#./$(PATHB)symtable_test
 	#./$(PATHB)generator_test
-	./$(PATHB)expr_test
+	#./$(PATHB)expr_test
 	### MEZIKOD ###
 	#cat -n program.code
 	### OUTPUT ###
@@ -47,6 +47,8 @@ $(PATHB)symtable_test : $(PATHT)symtable_test.c $(PATHS)symtable.c $(PATHS)strin
 $(PATHB)expr_test : $(PATHT)expr_test.c $(PATHS)parser.c $(PATHS)string_lib.c $(PATHS)scanner.c $(PATHS)symtable.c $(PATHS)stack.c $(PATHS)expr_parser.c  $(PATHS)scanner.c $(PATHS)generator.c
 	$(CC) $(CFLAGS) $^ -o $@
 
+main : $(PATHS)main.c $(PATHS)parser.c $(PATHS)string_lib.c $(PATHS)scanner.c $(PATHS)symtable.c $(PATHS)stack.c $(PATHS)function_str.c $(PATHS)expr_parser.c $(PATHS)generator.c
+	$(CC) -Wall -g -W -std=c99 $^ -o $(PATHB)$@
 
 clean :
 	rm -r $(PATHB)
