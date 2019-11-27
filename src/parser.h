@@ -19,7 +19,8 @@ typedef struct Parser
     tSymbol* global_table;
     tSymbol* local_table;
     tSymbol_item* symbol_data_global;
-    tSymbol_item* symbol_data_local; 
+    tSymbol_item* symbol_data_local;
+    tSymbol_item* current_function;
     tSymbol_item* left_side; // for storing current left hand side identifier 
     bool is_in_if;
     bool if_expression;

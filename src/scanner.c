@@ -55,7 +55,8 @@ void check_keyword(tString* string, Token* token){
     else if(str_cmp_keyword(string, "inputf")) token->type = KEYWORD_INPUTF;
     else if(str_cmp_keyword(string, "substr")) token->type = KEYWORD_SUBSTR;
     else if(str_cmp_keyword(string, "ord")) token->type = KEYWORD_ORD;   
-    else if(str_cmp_keyword(string, "chr")) token->type = KEYWORD_CHR; 
+    else if(str_cmp_keyword(string, "chr")) token->type = KEYWORD_CHR;
+    else if(str_cmp_keyword(string, "len")) token->type = KEYWORD_LEN;
     else
     {
         token->type = TOKEN_IDENTIFIER;

@@ -1,11 +1,8 @@
-if 7 == 2:
-    if 3 == 4:
-        if 9 == 8:
-            pass
-        else:
-            pass
-    else:
-        pass
-else:
-    pass
- 
+def foo(a,b):
+    a = 3
+
+a = 10
+chr(a)
+
+a = 3
+foo(a,a)

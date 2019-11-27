@@ -111,6 +111,40 @@ int init_parser(Parser* parser)
     return NO_ERROR;
 }
 
+
+int check_is_defined(Parser *parser)
+{
+    int err;
+    parser->symbol_data_global = parser->symbol_data_local = NULL;
+
+    if(parser->is_in_def)
+    {
+        parser->symbol_data_local = symtab_lookup(parser->local_table, parser->key.str, &err);
+        CHECK_ERROR();
+
+        if(parser->symbol_data_local == NULL)
+        {
+            parser->symbol_data_global = symtab_lookup(parser->global_table, parser->key.str, &err);
+            CHECK_ERROR();
+        }
+    }
+    else
+    {
+        parser->symbol_data_global = symtab_lookup(parser->global_table, parser->key.str, &err);
+        CHECK_ERROR();
+    }
+
+    if((parser->symbol_data_local == NULL) && (parser->symbol_data_global == NULL))
+    {
+        return UNDEFINE_REDEFINE_ERROR;
+    }
+    else
+    {
+        return NO_ERROR;
+    }
+    
+}
+
 void dispose_parser(Parser* parser)
 {
     free(parser->scanner);
@@ -171,7 +205,7 @@ int start_compiler(char* src_file_name, char* out_file_name)
         if(fopen(out_file_name, "w")== NULL) return INTERNAL_ERROR;
     }
 
-    // generate_code(output_file);
+    //generate_code(output_file);
 
     destroy_scanner(parser->scanner);
     dispose_parser(parser);
@@ -757,6 +791,9 @@ int expression_start(Parser *parser)
 
         case KEYWORD_LEN:
 
+            parser->symbol_data_global = symtab_lookup(parser->global_table, "len", &err);
+            CHECK_ERROR();
+
             if((parser->is_in_return) || (parser->if_expression) || (parser->while_expression))
             {
                 return SYNTAX_ERROR;
@@ -764,28 +801,21 @@ int expression_start(Parser *parser)
 
             GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);
             
-            GET_NEXT_TOKEN();
-            if(parser->curr_token.type == TOKEN_IDENTIFIER)
-            {
-                GET_KEY();
-                //call generator
-            }
-            else if(parser->curr_token.type == TOKEN_STRING)
-            {
-                GET_KEY();
-                // call generator
-            }
-            else
-            {
-                // error call
-            }
+            err = arg(parser);
+            CHECK_ERROR();
 
-            GET_CHECK_TOKEN(TOKEN_RIGHT_BRACKET);
+            if(parser->current_function->params_count_used != parser->current_function->params_count_defined)
+            {
+                return PARAM_COUNT_ERROR;
+            }
             
             break;  
 
         case KEYWORD_SUBSTR:
 
+            parser->symbol_data_global = symtab_lookup(parser->global_table, "substr", &err);
+            CHECK_ERROR();
+
             if((parser->is_in_return) || (parser->if_expression) || (parser->while_expression))
             {
                 return SYNTAX_ERROR;
@@ -793,65 +823,20 @@ int expression_start(Parser *parser)
 
             GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);
             
-            GET_NEXT_TOKEN();
-            if(parser->curr_token.type == TOKEN_IDENTIFIER)
+            err = arg(parser);
+            CHECK_ERROR();
+
+            if(parser->current_function->params_count_used != parser->current_function->params_count_defined)
             {
-                GET_KEY();
-                //call generator
-            }
-            else if(parser->curr_token.type == TOKEN_STRING)
-            {
-                GET_KEY();
-                // call generator
-            }
-            else
-            {
-                // error call
+                return PARAM_COUNT_ERROR;
             }
             
-
-            GET_CHECK_TOKEN(TOKEN_COMMA);
-
-            GET_NEXT_TOKEN();
-            if(parser->curr_token.type == TOKEN_IDENTIFIER)
-            {
-               GET_KEY();
-                //call generator
-            }
-            else if(parser->curr_token.type == TOKEN_INTEGER)
-            {
-                // call generator
-            }
-            else
-            {
-                //error call
-            }
-            
-
-            GET_CHECK_TOKEN(TOKEN_COMMA);
-
-            GET_NEXT_TOKEN();
-            if(parser->curr_token.type == TOKEN_IDENTIFIER)
-            {
-                GET_KEY();
-                //call generator
-            }
-            else if(parser->curr_token.type == TOKEN_INTEGER)
-            {
-                // call generator
-            }
-            else
-            {
-                //error call
-            }
-
-            GET_CHECK_TOKEN(TOKEN_RIGHT_BRACKET);
-
-            //GET_CHECK_TOKEN(TOKEN_EOL);
-         
             break;
         case KEYWORD_ORD:
 
+            parser->symbol_data_global = symtab_lookup(parser->global_table, "ord", &err);
+            CHECK_ERROR();
+
             if((parser->is_in_return) || (parser->if_expression) || (parser->while_expression))
             {
                 return SYNTAX_ERROR;
@@ -859,48 +844,21 @@ int expression_start(Parser *parser)
 
             GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);
 
-            GET_NEXT_TOKEN();
-            if(parser->curr_token.type == TOKEN_IDENTIFIER)
-            {
-                GET_KEY();
-                //call generator
-            }
-            else if(parser->curr_token.type == TOKEN_STRING)
-            {
-               GET_KEY();
-                // call generator
-            }
-            else
-            {
-                // error call
-            }
+            err = arg(parser);
+            CHECK_ERROR();
 
-            GET_CHECK_TOKEN(TOKEN_COMMA);
-
-            GET_NEXT_TOKEN();
-            if(parser->curr_token.type == TOKEN_IDENTIFIER)
+            if(parser->current_function->params_count_used != parser->current_function->params_count_defined)
             {
-                GET_KEY();
-                //call generator
+                return PARAM_COUNT_ERROR;
             }
-            else if(parser->curr_token.type == TOKEN_INTEGER)
-            {
-               GET_KEY();
-                // call generator
-            }
-            else
-            {
-                // error call
-            }
-
-            GET_CHECK_TOKEN(TOKEN_RIGHT_BRACKET);
-
-            //GET_CHECK_TOKEN(TOKEN_EOL);
 
             break;
 
         case KEYWORD_CHR:
 
+            parser->symbol_data_global = symtab_lookup(parser->global_table, "chr", &err);
+            CHECK_ERROR();
+
             if((parser->is_in_return) || (parser->if_expression) || (parser->while_expression))
             {
                 return SYNTAX_ERROR;
@@ -908,30 +866,14 @@ int expression_start(Parser *parser)
 
             GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);
 
-            GET_NEXT_TOKEN();
-            if(parser->curr_token.type == TOKEN_IDENTIFIER)
-            {
-                GET_KEY();
-                
-                //call generator
-            }
-            else if(parser->curr_token.type == TOKEN_INTEGER)
-            {
-                //GET_KEY();
+            err = arg(parser);
+            CHECK_ERROR();
 
-                //gen_instruct("CREATEFRAME");
-                //gen_instruct("DEFVAR TF@%1");
-                //gen_instruct("MOVE TF@%1")
-                // call generator
-            }
-            else
+            if(parser->current_function->params_count_used != parser->current_function->params_count_defined)
             {
-                // error call
+                return PARAM_COUNT_ERROR;
             }
 
-            GET_CHECK_TOKEN(TOKEN_RIGHT_BRACKET);
-
-            //GET_CHECK_TOKEN(TOKEN_EOL);
             
             break;
         
@@ -957,6 +899,8 @@ int arg(Parser *parser)
 {
     int err;
 
+    parser->current_function = parser->symbol_data_global;
+
     GET_NEXT_TOKEN();
 
     /* Rule 37. <arg> -> eps ... expands to STATE: ID () */
@@ -968,24 +912,14 @@ int arg(Parser *parser)
     case TOKEN_IDENTIFIER:
         GET_KEY(); // save string of ID into key
         
-        parser->symbol_data_local = symtab_lookup(parser->global_table, parser->key.str, &err);
+
+        err = check_is_defined(parser);
         CHECK_ERROR();
-
-        if((parser->symbol_data_local == NULL) || (parser->symbol_data_local->symbol_type == SYMBOL_FUNC) || (parser->symbol_data_local->symbol_state != SYMBOL_DEFINED))
-        {
-            return UNDEFINE_REDEFINE_ERROR; // trying to use undefined argument in function
-        }
-
-        if(!(parser->is_in_print)) // counting arguments number into global 
-        {
-            parser->symbol_data_global->params_count_used++;
-        }
-        else // TODO ZATIAL DOCASNE
-        {
-            gen_print(true, parser->curr_token);
-        }
          
-
+        if(!parser->is_in_print)
+        {
+            parser->current_function->params_count_used++;
+        }
         // calling generator 
 
         break;
@@ -996,11 +930,11 @@ int arg(Parser *parser)
     case KEYWORD_NONE:
         if(!(parser->is_in_print))
         {
-            parser->symbol_data_global->params_count_used++;
+            parser->current_function->params_count_used++;
         }
         else // TODO DOCASNE
         {
-            gen_print(true, parser->curr_token);
+            //gen_print(1, true, parser->curr_token);
         }
         
         // calling code generator
@@ -1356,6 +1290,11 @@ int statement_inside(Parser *parser)
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
         else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
         else return SYNTAX_ERROR;
+    }
+
+    else if(parser->curr_token.type == TOKEN_EOF)
+    {
+        return NO_ERROR;
     }
 
     /* Rule 16. <statement_inside> -> <value> <end> <statement> */
