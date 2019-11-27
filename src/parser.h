@@ -22,16 +22,13 @@ typedef struct Parser
     tSymbol_item* symbol_data_local;
     tSymbol_item* current_function;
     tSymbol_item* left_side; // for storing current left hand side identifier 
-    bool is_in_if;
     bool if_expression;
-    bool is_in_while;
     bool while_expression;
     bool is_in_def;
     bool is_in_print;
     bool no_assign_expression;
     bool is_in_return;
     bool expr_parser_call;
-    unsigned nested_cnt;
     tString key;
     tString prev_key;
 } Parser;

@@ -1,8 +1,4 @@
-def foo(a,b):
-    a = 3
+c = 4
 
-a = 10
-chr(a)
-
-a = 3
-foo(a,a)
+def b():
+    print(a)

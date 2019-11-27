@@ -81,17 +81,15 @@ int init_parser(Parser* parser)
     parser->curr_token.type = -1;
     parser->symbol_data_local = NULL;
     parser->symbol_data_global = NULL; 
+    parser->current_function = NULL;
     parser->left_side = NULL;
     parser->is_in_def = false;
-    parser->is_in_if = false;
     parser->if_expression = false;
-    parser->is_in_while = false;
     parser->while_expression = false;
     parser->is_in_print = false;
     parser->is_in_return = false;
     parser->no_assign_expression = false;
     parser->expr_parser_call = false;
-    parser->nested_cnt = 0;
 
     /* Predefine built-in functions into global table*/
     tSymbol_item* tmp;                      
@@ -230,7 +228,7 @@ int statement(Parser *parser)
 {
     symtab_clear(parser->local_table);
     parser->left_side = NULL;
-    parser->is_in_def = parser->is_in_if = parser->is_in_while = parser->is_in_print = parser->no_assign_expression = parser->expr_parser_call = false;
+    parser->is_in_def = parser->is_in_print = parser->no_assign_expression = parser->expr_parser_call = false;
     int err;
 
     GET_NEXT_TOKEN();
@@ -276,6 +274,11 @@ int statement(Parser *parser)
         
         else
         {
+            if((parser->symbol_data_global != NULL) && (parser->symbol_data_global->symbol_type == SYMBOL_VAR))
+            {
+                return UNDEFINE_REDEFINE_ERROR;
+            }
+            
             parser->symbol_data_global = symtab_add(parser->global_table, parser->key.str, &err); // add ID of function into global table
             CHECK_ERROR(); // check for internal error of used function
             parser->symbol_data_global->symbol_type = SYMBOL_FUNC; // specifying it's function
@@ -322,7 +325,6 @@ int statement(Parser *parser)
     /* Rule 4. <statement> -> IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE : EOL INDENT <statement_inside> <end> DEDENT <statement> */
     else if(parser->curr_token.type == KEYWORD_IF)
     {
-        parser->is_in_if = true;
 
         parser->if_expression = true;
         err = expression_start(parser);
@@ -377,9 +379,7 @@ int statement(Parser *parser)
 
     /* Rule 5. <statement> -> WHILE <expression_start>: EOL INDENT <statement_inside> <end> DEDENT <statement> */
     else if(parser->curr_token.type == KEYWORD_WHILE)
-    {
-        parser->is_in_while = true;
-        
+    {   
         parser->while_expression = true;
         err = expression_start(parser);
         CHECK_ERROR();
@@ -474,7 +474,8 @@ int statement(Parser *parser)
                 {
                     return UNDEFINE_REDEFINE_ERROR;
                 }
-
+                
+                parser->current_function = parser->symbol_data_global;
                 err = arg(parser);
                 CHECK_ERROR();
 
@@ -517,25 +518,6 @@ int statement(Parser *parser)
     {
         /* STATE: PASS <end> */
         GET_NEXT_TOKEN();
-        if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
-        else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
-        else return SYNTAX_ERROR;
-    }
-
-    /* Rule 8. <statement> -> PRINT ( <arg> ) <end> <statement> */
-    else if(parser->curr_token.type == KEYWORD_PRINT)
-    {
-        parser->is_in_print = true;
-
-        /* STATE: PRINT ( */
-        GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET); 
-
-        /* STATE: PRINT ( <arg> */
-        err = arg(parser);
-        CHECK_ERROR();
-        
-        /* STATE: PRINT ( <arg> ) <end> */
-        GET_NEXT_TOKEN(); // expected EOF or EOL and anything else is syntax_error
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
         else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
         else return SYNTAX_ERROR;
@@ -746,6 +728,11 @@ int expression_start(Parser *parser)
             break;
 
         case KEYWORD_PRINT:
+
+            parser->current_function = symtab_lookup(parser->global_table, "print", &err);
+            CHECK_ERROR();
+
+
             if((parser->is_in_return) || (parser->if_expression) || (parser->while_expression))
             {
                 return SYNTAX_ERROR;
@@ -791,7 +778,7 @@ int expression_start(Parser *parser)
 
         case KEYWORD_LEN:
 
-            parser->symbol_data_global = symtab_lookup(parser->global_table, "len", &err);
+            parser->current_function = symtab_lookup(parser->global_table, "len", &err);
             CHECK_ERROR();
 
             if((parser->is_in_return) || (parser->if_expression) || (parser->while_expression))
@@ -813,7 +800,7 @@ int expression_start(Parser *parser)
 
         case KEYWORD_SUBSTR:
 
-            parser->symbol_data_global = symtab_lookup(parser->global_table, "substr", &err);
+            parser->current_function = symtab_lookup(parser->global_table, "substr", &err);
             CHECK_ERROR();
 
             if((parser->is_in_return) || (parser->if_expression) || (parser->while_expression))
@@ -834,7 +821,7 @@ int expression_start(Parser *parser)
             break;
         case KEYWORD_ORD:
 
-            parser->symbol_data_global = symtab_lookup(parser->global_table, "ord", &err);
+            parser->current_function = symtab_lookup(parser->global_table, "ord", &err);
             CHECK_ERROR();
 
             if((parser->is_in_return) || (parser->if_expression) || (parser->while_expression))
@@ -856,7 +843,7 @@ int expression_start(Parser *parser)
 
         case KEYWORD_CHR:
 
-            parser->symbol_data_global = symtab_lookup(parser->global_table, "chr", &err);
+            parser->current_function = symtab_lookup(parser->global_table, "chr", &err);
             CHECK_ERROR();
 
             if((parser->is_in_return) || (parser->if_expression) || (parser->while_expression))
@@ -899,8 +886,6 @@ int arg(Parser *parser)
 {
     int err;
 
-    parser->current_function = parser->symbol_data_global;
-
     GET_NEXT_TOKEN();
 
     /* Rule 37. <arg> -> eps ... expands to STATE: ID () */
@@ -916,10 +901,8 @@ int arg(Parser *parser)
         err = check_is_defined(parser);
         CHECK_ERROR();
          
-        if(!parser->is_in_print)
-        {
-            parser->current_function->params_count_used++;
-        }
+        parser->current_function->params_count_used++;
+        
         // calling generator 
 
         break;
@@ -928,14 +911,8 @@ int arg(Parser *parser)
     case TOKEN_DECIMAL:
     case TOKEN_STRING:
     case KEYWORD_NONE:
-        if(!(parser->is_in_print))
-        {
-            parser->current_function->params_count_used++;
-        }
-        else // TODO DOCASNE
-        {
-            //gen_print(1, true, parser->curr_token);
-        }
+    
+        parser->current_function->params_count_used++;
         
         // calling code generator
         break;
@@ -988,7 +965,7 @@ int statement_inside(Parser *parser)
     }
 
     /* Function definition in <statement_inside> is not valid */
-    else if((parser->curr_token.type == KEYWORD_DEF) && (parser->is_in_def || parser->is_in_if || parser->is_in_while))
+    else if(parser->curr_token.type == KEYWORD_DEF)
     {
         return SYNTAX_ERROR;
     }
@@ -1024,8 +1001,6 @@ int statement_inside(Parser *parser)
     /* Rule 10. <statement_inside> -> IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE : EOL INDENT <statement_inside> <end> DEDENT <statement> */
     else if(parser->curr_token.type == KEYWORD_IF)
     {
-        parser->nested_cnt++;
-        parser->is_in_if = true;
 
         parser->if_expression = true;
         err = expression_start(parser);
@@ -1081,9 +1056,6 @@ int statement_inside(Parser *parser)
     /* Rule 11. <statement_inside> -> WHILE <expression_start>: EOL INDENT <statement_inside> EOL DEDENT <statement> */
     else if(parser->curr_token.type == KEYWORD_WHILE)
     {
-        parser->nested_cnt++;
-        parser->is_in_while = true;
-        
         parser->while_expression = true;
         err = expression_start(parser);
         CHECK_ERROR();
@@ -1116,7 +1088,7 @@ int statement_inside(Parser *parser)
 
          /* STATE: WHILE <expression_start>: EOL INDENT <statement_inside> <end>  DEDENT */
         GET_CHECK_TOKEN(TOKEN_DEDENT);
-        parser->nested_cnt--; 
+        
         return NO_ERROR;
     }
 
@@ -1213,6 +1185,7 @@ int statement_inside(Parser *parser)
                     return UNDEFINE_REDEFINE_ERROR;
                 }
 
+                parser->current_function = parser->symbol_data_global;
                 err = arg(parser);
                 CHECK_ERROR();
 
@@ -1269,24 +1242,6 @@ int statement_inside(Parser *parser)
         /* STATE: PASS <end> */
         GET_NEXT_TOKEN();
 
-        if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
-        else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
-        else return SYNTAX_ERROR;
-    }
-
-    /* Rule 15. <statement_inside> -> PRINT ( <arg> ) <end> */
-    else if(parser->curr_token.type == KEYWORD_PRINT)
-    {
-        parser->is_in_print = true;
-        /* STATE: PRINT ( */
-        GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET); 
-
-        /* STATE: PRINT ( <arg> */
-        err = arg(parser);
-        CHECK_ERROR();
-        
-        /* STATE: PRINT ( <arg> ) <end> */
-        GET_NEXT_TOKEN(); // expected EOF or EOL and anything else is syntax_error
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
         else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
         else return SYNTAX_ERROR;
