@@ -25,8 +25,22 @@ void test_stack_empty(void)
     TEST_ASSERT_FALSE(stack_empty(stack));
 
     stack_free(stack);
+
     stack = stack_create(0, INTEGER_TYPE);
     TEST_ASSERT_TRUE(stack_empty(stack));
+
+    stack_push(stack, 25);
+    TEST_ASSERT_FALSE(stack_empty(stack));
+
+    stack_push(stack, 9);
+    TEST_ASSERT_FALSE(stack_empty(stack));
+
+    int err;
+    stack_pop(stack, err);
+    
+    stack_pop(stack, err);
+    TEST_ASSERT_TRUE(stack_empty(stack));
+
     stack_free(stack);
 }
 

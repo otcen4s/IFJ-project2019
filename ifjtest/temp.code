@@ -370,23 +370,44 @@ EQS
 RETURN
 LABEL $$main
 DEFVAR GF@a
-PUSHS int@50
+PUSHS int@20
 POPS GF@a
-LABEL $while2Begin
+DEFVAR GF@b
+PUSHS int@25
+POPS GF@b
+LABEL $while0Begin
 PUSHS GF@a
 PUSHS int@10
 CALL $glt
 GTS
 CALL $eval
-JUMPIFEQ $while2End GF@$temp bool@false
+JUMPIFEQ $while0End GF@$temp bool@false
+LABEL $while1Begin
+PUSHS GF@b
+PUSHS int@15
+CALL $glt
+GTS
+CALL $eval
+JUMPIFEQ $while1End GF@$temp bool@false
+WRITE string@ide\032to
+WRITE string@\032
 WRITE GF@a
+WRITE string@\032
+WRITE GF@b
 WRITE string@\010
 CREATEFRAME
 DEFVAR TF@%retval
 MOVE TF@%retval nil@nil
-DEFVAR GF@b
-PUSHS int@5
+PUSHS GF@b
+PUSHS int@1
+POPS GF@$op2
+POPS GF@$op1
+TYPE GF@$op1Type GF@$op1
+TYPE GF@$op2Type GF@$op2
+CALL $subs
 POPS GF@b
+JUMP $while1Begin
+LABEL $while1End
 PUSHS GF@a
 PUSHS int@1
 POPS GF@$op2
@@ -395,5 +416,5 @@ TYPE GF@$op1Type GF@$op1
 TYPE GF@$op2Type GF@$op2
 CALL $subs
 POPS GF@a
-JUMP $while2Begin
-LABEL $while2End
+JUMP $while0Begin
+LABEL $while0End

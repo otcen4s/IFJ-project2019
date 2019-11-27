@@ -4,7 +4,7 @@ t_stack* stack_create  (const unsigned cap, const enum stack_type type)
 {
     t_stack* stack; 
        
-    if((stack = malloc(sizeof(t_stack))) == NULL) return NULL; 
+    if((stack = malloc(sizeof(t_stack))) == NULL) return NULL;
  
     stack->cap = cap;
     stack->top = -1;

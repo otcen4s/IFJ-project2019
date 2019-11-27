@@ -2,12 +2,12 @@
 
 #define ADDLINE(line) \
 do { \
-str_append(&code, line); \
-str_append(&code, "\n"); \
+str_append((inWhile ? &whileCode : &code), line); \
+str_append((inWhile ? &whileCode : &code), "\n"); \
  } while (0) \
 
 #define ADDCODE(line) \
-str_append(&code, line); \
+str_append((inWhile ? &whileCode : &code), line); \
 
 #define ISGLOBAL(global) \
 global ? "GF@" : "LF@" \
@@ -17,12 +17,16 @@ global ? "GF@" : "LF@" \
 tString code;
 tString line;
 tString helper;
+tString whileCode;
 
 int error;
+bool inWhile = false;
 int paramCounter = 0;
 int uid = 0;
+int whileUID = 0;
 char uidStr[STRLEN];
 t_stack * stack;
+t_stack * whileStack;
 
 int generator_begin() {
     if ((error = str_init(&code))) {
@@ -37,7 +41,12 @@ int generator_begin() {
         return error;
     }
 
+    if ((error = str_init(&whileCode))) {
+        return error;
+    }
+
     stack = stack_create(0, INTEGER_TYPE);
+    whileStack = stack_create(0, INTEGER_TYPE);
 
     // generate header
     ADDLINE(".IFJcode19");
@@ -539,6 +548,9 @@ void generator_end() {
     ADDLINE("popframe");
     ADDLINE("clears");
 
+    stack_free(stack);
+    stack_free(whileStack);
+
     str_destroy(&code);
     str_destroy(&line);
     str_destroy(&helper);
@@ -546,7 +558,10 @@ void generator_end() {
 }
 
 void gen_defvar(char *varName, bool global) {
-    ADDCODE("DEFVAR "); ADDCODE(ISGLOBAL(global)); ADDLINE(varName);
+    str_append(&code, "DEFVAR ");
+    str_append(&code, ISGLOBAL(global));
+    str_append(&code, varName);
+    str_append(&code, "\n");
 }
 
 // void gen_var_assign(char *varName, bool global, Token token) {
@@ -701,22 +716,44 @@ void gen_else_end() {
     ADDCODE("LABEL $if"); ADDCODE(uidStr); ADDLINE("End");
 }
 
-void gen_while_start() {
-    sprintf(uidStr, "%d", 2);
 
+
+void gen_while_start() {
+    if (stack_empty(whileStack)) {
+        str_copy(&whileCode, "");
+        inWhile = true;
+    }
+
+    stack_push(whileStack, whileUID);
+    stack_push(whileStack, whileUID);
+    sprintf(uidStr, "%d", whileUID);
+    whileUID++;
+    
     ADDCODE("LABEL $while"); ADDCODE(uidStr); ADDLINE("Begin");
 }
 
 void gen_while_eval() {
+    int top = stack_pop(whileStack, &error).integer;
+    sprintf(uidStr, "%d", top);
+
     ADDLINE("CALL $eval");
 
     ADDCODE("JUMPIFEQ $while"); ADDCODE(uidStr); ADDLINE("End GF@$temp bool@false");
 }
 
 void gen_while_end() {
+    int top = stack_pop(whileStack, &error).integer;
+    sprintf(uidStr, "%d", top);
+
     ADDCODE("JUMP $while"); ADDCODE(uidStr); ADDLINE("Begin");
 
     ADDCODE("LABEL $while"); ADDCODE(uidStr); ADDLINE("End");
+
+    if (stack_empty(whileStack)) {
+        str_append(&code, whileCode.str);
+
+        inWhile = false;
+    }
 }
 
 void gen_func_start(char *funcName) {

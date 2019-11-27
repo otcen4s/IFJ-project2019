@@ -1127,10 +1127,14 @@ int statement_inside(Parser *parser)
     /* Rule 11. <statement_inside> -> WHILE <expression_start>: EOL INDENT <statement_inside> EOL DEDENT <statement> */
     else if(parser->curr_token.type == KEYWORD_WHILE)
     {
+        gen_while_start();
+
         parser->while_expression = true;
         err = expression_start(parser);
         CHECK_ERROR();
         parser->while_expression = false;
+
+        gen_while_eval();
 
         if(!(parser->expr_parser_call))
         {
@@ -1153,6 +1157,8 @@ int statement_inside(Parser *parser)
 
         err = statement_inside(parser);
         CHECK_ERROR();
+
+        gen_while_end();
 
         /* STATE: WHILE <expression_start>: EOL INDENT <statement_inside> <end> */
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;

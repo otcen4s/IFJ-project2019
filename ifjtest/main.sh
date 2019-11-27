@@ -46,7 +46,7 @@ run_test() {
 
 make main -C ../
 
-if [ $1 != "" ]; then
+if [ "$1" != "" ]; then
     filename=$1
     run_test
 else
