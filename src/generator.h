@@ -5,6 +5,7 @@
 #include <string.h>
 #include "string_lib.h"
 #include "typedefs.h"
+#include "stack.h"
 #include <stdio.h>
 #include <stdbool.h>
 

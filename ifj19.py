@@ -80,11 +80,33 @@ def print(*args):
 
 # Zde bude nasledovat program jazyka IFJ19
 
-a = 10
-b = 20
-c = 40
 
-def abc(a, b, c):
-    print('cau')
+a = 1
 
-abc(a, b, c)
+if a == 1:
+    a = 3
+    if a == 3:
+        print('som tu juchu')
+    else:
+        if 9 == 9:
+            print('joshua')
+        else:
+            print('mic bjukenen')
+else:
+    if 2 == 42:
+        print('cusbus')
+    else:
+        if 8 == 2:
+            print('toot je print')
+        else:
+            print('vitajte')
+            if 14 == 14:
+                if 29 == 13:
+                    print('paradajka')
+                    print('mikro')
+                else:
+                    print('pizza')
+                    if 23 == 14:
+                        print('garaz')
+                    else:
+                        print('zubrienka')

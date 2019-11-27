@@ -13,7 +13,7 @@ BIN = $(addprefix $(PATHB), $(basename $(notdir $(SRC))))
 test : $(PATHB) $(BIN)
 	#./$(PATHB)string_lib_test
 	#./$(PATHB)scanner_test
-	#./$(PATHB)stack_test
+	./$(PATHB)stack_test
 	./$(PATHB)parser_test
 	#./$(PATHB)symtable_test
 	#./$(PATHB)generator_test
@@ -35,7 +35,7 @@ $(PATHB)string_lib_test : $(PATHT)string_lib_test.c $(PATHS)string_lib.c
 $(PATHB)stack_test : $(PATHT)stack_test.c $(PATHS)stack.c
 	$(CC) $(CFLAGS) $^ -o $@
 
-$(PATHB)generator_test : $(PATHT)generator_test.c $(PATHS)generator.c $(PATHS)string_lib.c
+$(PATHB)generator_test : $(PATHT)generator_test.c $(PATHS)generator.c $(PATHS)string_lib.c $(PATHS)stack.c
 	$(CC) $(CFLAGS) $^ -o $@
 
 $(PATHB)parser_test : $(PATHT)parser_test.c $(PATHS)parser.c $(PATHS)string_lib.c $(PATHS)scanner.c $(PATHS)symtable.c $(PATHS)stack.c $(PATHS)function_str.c $(PATHS)expr_parser.c $(PATHS)generator.c

@@ -19,9 +19,10 @@ tString line;
 tString helper;
 
 int error;
-int uid = 0;
 int paramCounter = 0;
+int uid = 0;
 char uidStr[STRLEN];
+t_stack * stack;
 
 int generator_begin() {
     if ((error = str_init(&code))) {
@@ -35,6 +36,8 @@ int generator_begin() {
     if ((error = str_init(&helper))) {
         return error;
     }
+
+    stack = stack_create(0, INTEGER_TYPE);
 
     // generate header
     ADDLINE(".IFJcode19");
@@ -666,7 +669,11 @@ void gen_instruct(const char *instruct) {
 }
 
 void gen_if_start() {
-    sprintf(uidStr, "%d", uid++);
+    stack_push(stack, uid);
+    stack_push(stack, uid);
+    stack_push(stack, uid);
+    sprintf(uidStr, "%d", uid);
+    uid++;
 
     ADDLINE("CALL $eval");
 
@@ -674,21 +681,28 @@ void gen_if_start() {
 }
 
 void gen_if_end() {
+    int top = stack_pop(stack, &error).integer;
+    sprintf(uidStr, "%d", top);
+
     ADDCODE("JUMP $if"); ADDCODE(uidStr); ADDLINE("End");
 }
 
 void gen_else_start() {
+    int top = stack_pop(stack, &error).integer;
+    sprintf(uidStr, "%d", top);
+
     ADDCODE("LABEL $if"); ADDCODE(uidStr); ADDLINE("Else");
 }
 
 void gen_else_end() {
-    ADDCODE("JUMP $if"); ADDCODE(uidStr); ADDLINE("End");
+    int top = stack_pop(stack, &error).integer;
+    sprintf(uidStr, "%d", top);
 
     ADDCODE("LABEL $if"); ADDCODE(uidStr); ADDLINE("End");
 }
 
 void gen_while_start() {
-    sprintf(uidStr, "%d", uid++);
+    sprintf(uidStr, "%d", 2);
 
     ADDCODE("LABEL $while"); ADDCODE(uidStr); ADDLINE("Begin");
 }

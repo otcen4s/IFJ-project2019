@@ -8,5 +8,4 @@ else:
 if a == 4:
     print('cicka')
 else:
-    print("je to parada")
-
+    print('je to parada')

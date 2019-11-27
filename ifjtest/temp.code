@@ -370,36 +370,36 @@ EQS
 RETURN
 LABEL $$main
 DEFVAR GF@a
-PUSHS int@1
+PUSHS int@5
 POPS GF@a
 PUSHS GF@a
-PUSHS int@1
+PUSHS int@5
 CALL $eq
 CALL $eval
 JUMPIFEQ $if0Else GF@$temp bool@false
-PUSHS int@3
-POPS GF@a
+WRITE string@macka
+WRITE string@\010
+CREATEFRAME
+DEFVAR TF@%retval
+MOVE TF@%retval nil@nil
+JUMP $if0End
+LABEL $if0Else
+LABEL $if0End
 PUSHS GF@a
-PUSHS int@3
+PUSHS int@4
 CALL $eq
-POPS GF@a
 CALL $eval
 JUMPIFEQ $if1Else GF@$temp bool@false
-WRITE string@som\032tu\032juchu
+WRITE string@cicka
 WRITE string@\010
 CREATEFRAME
 DEFVAR TF@%retval
 MOVE TF@%retval nil@nil
 JUMP $if1End
 LABEL $if1Else
-JUMP $if1End
-LABEL $if1End
-JUMP $if1End
-LABEL $if1Else
-WRITE string@cau
+WRITE string@je\032to\032parada
 WRITE string@\010
 CREATEFRAME
 DEFVAR TF@%retval
 MOVE TF@%retval nil@nil
-JUMP $if1End
 LABEL $if1End
