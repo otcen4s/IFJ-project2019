@@ -192,10 +192,11 @@ Token read_token(Scanner *scanner, int *err)
                 if (scanner->curr_char == ' ') scanner->indent_cnt++; //count number of spaces
                 else
                 {
-                    if((scanner->curr_char == EOF)||(scanner->curr_char== '\n'))
+                    if((scanner->curr_char == EOF)||(scanner->curr_char== '\n') ||(scanner->curr_char == '#'))
                     {
                         scanner->state = STATE_START;
                         scanner->is_line_start = false;
+                        if(scanner->curr_char == '#') ungetc(scanner->curr_char, scanner->src_file);
                     }
                     else
                     {
@@ -405,6 +406,7 @@ Token read_token(Scanner *scanner, int *err)
             case STATE_COMMENT_SINGLE_LINE:
                 if(scanner->curr_char == '\n')
                 {
+                    ungetc(scanner->curr_char, scanner->src_file);
                     scanner->state = STATE_START;
                 }
                 else if(scanner->curr_char  == EOF)
