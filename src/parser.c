@@ -150,12 +150,22 @@ int check_is_defined(Parser *parser)
         CHECK_ERROR();
     }
 
+    
     if((parser->symbol_data_local == NULL) && (parser->symbol_data_global == NULL))
     {
         return UNDEFINE_REDEFINE_ERROR;
     }
     else
     {
+        if((parser->symbol_data_local != NULL) && (parser->symbol_data_local->symbol_type == SYMBOL_VAR) && (parser->symbol_data_local->symbol_state == SYMBOL_USED))
+        {
+            return UNDEFINE_REDEFINE_ERROR;
+        }
+        if((parser->symbol_data_global != NULL) && (parser->symbol_data_global->symbol_type == SYMBOL_VAR) && (parser->symbol_data_global->symbol_state == SYMBOL_USED))
+        {
+            return UNDEFINE_REDEFINE_ERROR;
+        }
+
         return NO_ERROR;
     }
     
@@ -421,6 +431,7 @@ int statement(Parser *parser)
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
          /* STATE: WHILE <expression_start>: EOL INDENT <statement_inside> <end>  DEDENT */
         CHECK_TOKEN(TOKEN_DEDENT); 
+        CHECK_ERROR();
     }
 
     /* Rule 6. <statement> -> ID = <expression_start> <end> <statement> */
@@ -443,14 +454,21 @@ int statement(Parser *parser)
                 parser->symbol_data_global = symtab_add(parser->global_table, parser->key.str, &err); // add ID of variable into global table
                 CHECK_ERROR(); // check for internal error of used function
                 parser->symbol_data_global->symbol_type = SYMBOL_VAR; // specifying for variable
-                parser->symbol_data_global->symbol_state = SYMBOL_DEFINED;
+                parser->symbol_data_global->symbol_state = SYMBOL_USED;
 
                 gen_defvar(parser->key.str, true); // CODE GENERATOR
             }
+            else if((parser->symbol_data_global != NULL) && (parser->symbol_data_global->symbol_type == SYMBOL_FUNC))
+            {
+                return UNDEFINE_REDEFINE_ERROR;
+            }
+
             parser->left_side = parser->symbol_data_global; // this is for expression parser the left side ID to store value
             
             err = expression_start(parser);
             CHECK_ERROR();
+
+            parser->symbol_data_global->symbol_state = SYMBOL_DEFINED;
 
             /* STATE: ID = <expression_start> <end> */
             if(!(parser->expr_parser_call))
@@ -966,8 +984,7 @@ int arg(Parser *parser)
  * 12. <statement_inside> -> ID = <expression_start> EOL <statement_inside>
  * 13. <statement_inside> -> RETURN <expression_start> EOL <statement_inside>
  * 14. <statement_inside> -> PASS EOL <statement_inside>
- * 15. <statement_inside> -> PRINT ( <arg> ) EOL
- * 16. <statement_inside> -> <value> <end> <statement> 
+ * 15. <statement_inside> -> <value> <end> <statement> 
 */
 int statement_inside(Parser *parser)
 {
@@ -1112,15 +1129,11 @@ int statement_inside(Parser *parser)
         CHECK_ERROR();
 
         /* STATE: WHILE <expression_start>: EOL INDENT <statement_inside> <end> */
-        //GET_NEXT_TOKEN(); // expected EOF or EOL and anything else is syntax_error
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
-        else if(parser->curr_token.type == TOKEN_EOL) err = NO_ERROR;
-        else return SYNTAX_ERROR;
 
          /* STATE: WHILE <expression_start>: EOL INDENT <statement_inside> <end>  DEDENT */
-        GET_CHECK_TOKEN(TOKEN_DEDENT);
-        
-        return NO_ERROR;
+        CHECK_TOKEN(TOKEN_DEDENT);
+        CHECK_ERROR();
     }
 
     /* Rule 12. <statement> -> ID = <expression_start> <end> <statement> */
@@ -1159,7 +1172,11 @@ int statement_inside(Parser *parser)
                     parser->symbol_data_local = symtab_add(parser->local_table, parser->key.str, &err); // add ID of variable into local table
                     CHECK_ERROR(); // check for internal error of used function
                     parser->symbol_data_local->symbol_type = SYMBOL_VAR; // specifying for variable
-                    parser->symbol_data_local->symbol_type = SYMBOL_DEFINED; 
+                    parser->symbol_data_local->symbol_type = SYMBOL_USED; 
+                }
+                else if((parser->symbol_data_local != NULL) && (parser->symbol_data_local->symbol_type == SYMBOL_FUNC))
+                {
+                    return UNDEFINE_REDEFINE_ERROR;
                 }
                 parser->left_side = parser->symbol_data_local;
             }
@@ -1170,13 +1187,25 @@ int statement_inside(Parser *parser)
                     parser->symbol_data_global = symtab_add(parser->global_table, parser->key.str, &err); // add ID of variable into global table
                     CHECK_ERROR(); // check for internal error of used function
                     parser->symbol_data_global->symbol_type = SYMBOL_VAR; // specifying for variable
-                    parser->symbol_data_global->symbol_type = SYMBOL_DEFINED; 
+                    parser->symbol_data_global->symbol_type = SYMBOL_USED; 
                 }
+                else if((parser->symbol_data_global != NULL) && (parser->symbol_data_global->symbol_type == SYMBOL_FUNC))
+                {
+                    return UNDEFINE_REDEFINE_ERROR;
+                }
+
                 parser->left_side = parser->symbol_data_global;
             }
 
             err = expression_start(parser);
             CHECK_ERROR();
+
+            if(parser->is_in_def)
+            {
+                parser->symbol_data_local->symbol_state = SYMBOL_DEFINED;
+            }
+            else parser->symbol_data_global->symbol_state = SYMBOL_DEFINED;
+            
 
             if(!(parser->expr_parser_call))
             {
