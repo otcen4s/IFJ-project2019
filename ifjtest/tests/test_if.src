@@ -4,5 +4,3 @@ if a == 5:
     print('cicka')
 else:
     pass
-
-

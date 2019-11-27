@@ -356,7 +356,7 @@ int statement(Parser *parser)
         if(parser->curr_token.type == TOKEN_EOF) return SYNTAX_ERROR;
         else if(parser->curr_token.type == TOKEN_DEDENT) err = NO_ERROR;
 
-        gen_if_end();
+        gen_if_end(); // generator call
 
         
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE */
@@ -373,13 +373,14 @@ int statement(Parser *parser)
         GET_CHECK_TOKEN(TOKEN_INDENT); 
 
 
-        gen_else_start();
+        gen_else_start(); // generator call
 
          /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> */
         err = statement_inside(parser);
         CHECK_ERROR();
 
-        gen_else_end();
+        gen_else_end(); // generator call
+
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> */
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> DEDENT */
@@ -1033,17 +1034,18 @@ int statement_inside(Parser *parser)
     /* Rule 10. <statement_inside> -> IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE : EOL INDENT <statement_inside> <end> DEDENT <statement> */
     else if(parser->curr_token.type == KEYWORD_IF)
     {
-
+        
         parser->if_expression = true;
         err = expression_start(parser);
         CHECK_ERROR();
         parser->if_expression = false;
+        
+        gen_if_start(); // generator call
 
         if(!(parser->expr_parser_call))
         {
             GET_NEXT_TOKEN();
         }
-
         /* STATE: IF <expression_start>: */
         CHECK_TOKEN(TOKEN_COLON);
         CHECK_ERROR();
@@ -1060,6 +1062,7 @@ int statement_inside(Parser *parser)
         if(parser->curr_token.type == TOKEN_EOF) return SYNTAX_ERROR;
         else if(parser->curr_token.type == TOKEN_DEDENT) err = NO_ERROR;
 
+        gen_if_end();
 
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE */
         GET_CHECK_TOKEN(KEYWORD_ELSE); // else statement always have tp be after if 
@@ -1073,11 +1076,15 @@ int statement_inside(Parser *parser)
 
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT */
         GET_CHECK_TOKEN(TOKEN_INDENT); 
+        
+        gen_else_start();
 
          /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> */
         err = statement_inside(parser);
         CHECK_ERROR();
 
+        gen_else_end();
+        
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> */
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> DEDENT */
