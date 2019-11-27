@@ -65,13 +65,14 @@ def print(*args):
   return None
 
 # Zde bude nasledovat program jazyka IFJ19
-a = 1
+a = 5
 
-if a == 1:
-    a = 3
-    if a == 3:
-        print('som tu juchu')
-    else:
-        pass
+if a == 5:
+    print('macka')
 else:
-    print('cau')
+    pass
+
+if a == 4:
+    print('cicka')
+else:
+    print('je to parada')

@@ -4,9 +4,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
-make main -C ../
-
-for filename in tests/*.src; do
+run_test() {
     echo \# \# \# "$filename" \# \# \#
     cat ifj19.py "$filename" > temp.src
     if [ -f $(basename $filename .src).in ]; then
@@ -44,4 +42,15 @@ for filename in tests/*.src; do
     fi
 
     echo
-done
+}
+
+make main -C ../
+
+if [ $1 != "" ]; then
+    filename=$1
+    run_test
+else
+    for filename in tests/*.src; do
+        run_test
+    done
+fi
