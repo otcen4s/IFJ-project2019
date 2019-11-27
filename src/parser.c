@@ -3,6 +3,8 @@
 /************** MACROS **********/
 #define CHECK_ERROR() if(err) return err
 
+#define SKIP_EOL() while(parser->curr_token.type == TOKEN_EOL) GET_NEXT_TOKEN()
+
 #define COPY_CURRENT_TOKEN()                                                                                                        \
                             do{                                                                                                     \
                                 parser->previous_token = parser->curr_token;                                                        \
@@ -324,7 +326,10 @@ int statement(Parser *parser)
         GET_CHECK_TOKEN(TOKEN_EOL);  // expected end of line (EOL)
 
         /* Expected state -> STATE: DEF ID ( <params> ): EOL INDENT */
-        GET_CHECK_TOKEN(TOKEN_INDENT); // python indentation expected
+        SKIP_EOL();
+
+        CHECK_TOKEN(TOKEN_INDENT);
+        CHECK_ERROR();
 
         /* Expected state -> STATE: DEF ID ( <params> ): EOL INDENT <statement_inside> */
         err = statement_inside(parser);
@@ -358,9 +363,11 @@ int statement(Parser *parser)
         
         /* STATE: IF <expression_start>: EOL */
         GET_CHECK_TOKEN(TOKEN_EOL); // expected end of line(EOL)
-    
-        /* STATE: IF <expression_start>: EOL INDENT */
-        GET_CHECK_TOKEN(TOKEN_INDENT); // python dedentation expected
+
+        SKIP_EOL();
+
+        CHECK_TOKEN(TOKEN_INDENT);
+        CHECK_ERROR();
         
 
         err = statement_inside(parser);
@@ -382,9 +389,10 @@ int statement(Parser *parser)
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL */
         GET_CHECK_TOKEN(TOKEN_EOL); // expected end of line(EOL)
 
-        /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT */
-        GET_CHECK_TOKEN(TOKEN_INDENT); 
+        SKIP_EOL();
 
+        CHECK_TOKEN(TOKEN_INDENT);
+        CHECK_ERROR();
 
         gen_else_start(); // generator call
 
@@ -421,8 +429,12 @@ int statement(Parser *parser)
         /* STATE: WHILE <expression_start>: EOL */
         GET_CHECK_TOKEN(TOKEN_EOL); // expected end of line(EOL)
 
-        /* STATE: WHILE <expression_start>: EOL INDENT */
-        GET_CHECK_TOKEN(TOKEN_INDENT); // python dedentation expected
+
+        SKIP_EOL();
+
+        CHECK_TOKEN(TOKEN_INDENT);
+        CHECK_ERROR();
+
 
         err = statement_inside(parser);
         CHECK_ERROR();
@@ -1063,7 +1075,10 @@ int statement_inside(Parser *parser)
         GET_CHECK_TOKEN(TOKEN_EOL); // expected end of line(EOL)
     
         /* STATE: IF <expression_start>: EOL INDENT */
-        GET_CHECK_TOKEN(TOKEN_INDENT); // python dedentation expected
+        SKIP_EOL();
+
+        CHECK_TOKEN(TOKEN_INDENT);
+        CHECK_ERROR();
         
         err = statement_inside(parser);
         CHECK_ERROR();
@@ -1084,7 +1099,10 @@ int statement_inside(Parser *parser)
         GET_CHECK_TOKEN(TOKEN_EOL); // expected end of line(EOL)
 
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT */
-        GET_CHECK_TOKEN(TOKEN_INDENT); 
+        SKIP_EOL();
+
+        CHECK_TOKEN(TOKEN_INDENT);
+        CHECK_ERROR(); 
         
         gen_else_start();
 
@@ -1123,7 +1141,10 @@ int statement_inside(Parser *parser)
         GET_CHECK_TOKEN(TOKEN_EOL); // expected end of line(EOL)
 
         /* STATE: WHILE <expression_start>: EOL INDENT */
-        GET_CHECK_TOKEN(TOKEN_INDENT); // python dedentation expected
+        SKIP_EOL();
+
+        CHECK_TOKEN(TOKEN_INDENT);
+        CHECK_ERROR();
 
         err = statement_inside(parser);
         CHECK_ERROR();
