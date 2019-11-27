@@ -411,11 +411,15 @@ int statement(Parser *parser)
 
     /* Rule 5. <statement> -> WHILE <expression_start>: EOL INDENT <statement_inside> <end> DEDENT <statement> */
     else if(parser->curr_token.type == KEYWORD_WHILE)
-    {   
+    {
+        gen_while_start();
+
         parser->while_expression = true;
         err = expression_start(parser);
         CHECK_ERROR();
         parser->while_expression = false;
+
+        gen_while_eval();
 
         if(!(parser->expr_parser_call))
         {
@@ -438,6 +442,8 @@ int statement(Parser *parser)
 
         err = statement_inside(parser);
         CHECK_ERROR();
+
+        gen_while_end();
 
         /* STATE: WHILE <expression_start>: EOL INDENT <statement_inside> <end> */
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
@@ -1192,7 +1198,9 @@ int statement_inside(Parser *parser)
                     parser->symbol_data_local = symtab_add(parser->local_table, parser->key.str, &err); // add ID of variable into local table
                     CHECK_ERROR(); // check for internal error of used function
                     parser->symbol_data_local->symbol_type = SYMBOL_VAR; // specifying for variable
-                    parser->symbol_data_local->symbol_type = SYMBOL_USED; 
+                    parser->symbol_data_local->symbol_type = SYMBOL_USED;
+                    
+                    gen_defvar(parser->key.str, false); 
                 }
                 else if((parser->symbol_data_local != NULL) && (parser->symbol_data_local->symbol_type == SYMBOL_FUNC))
                 {
@@ -1208,6 +1216,8 @@ int statement_inside(Parser *parser)
                     CHECK_ERROR(); // check for internal error of used function
                     parser->symbol_data_global->symbol_type = SYMBOL_VAR; // specifying for variable
                     parser->symbol_data_global->symbol_type = SYMBOL_USED; 
+
+                    gen_defvar(parser->key.str, true); 
                 }
                 else if((parser->symbol_data_global != NULL) && (parser->symbol_data_global->symbol_type == SYMBOL_FUNC))
                 {
