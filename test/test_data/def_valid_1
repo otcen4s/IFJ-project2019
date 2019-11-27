@@ -1,8 +1,22 @@
-a = 5
+def foo():
+    a = foo1()
 
-if a == 5:
-    print('cicka')
+def foo1():
+    if 1: #cau
+        print(1)
+    else:
+        pass
+
+a = 4
+
+if a == 4:
+
+
+
+
+    
+
+
+    a = 3
 else:
-    pass
-
-
+    x = 'kokos'
