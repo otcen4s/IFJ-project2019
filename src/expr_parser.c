@@ -253,6 +253,14 @@ int get_reduction_rule(Expr_parser* expr_parser)
         return E_LEQ_E;
     }
 
+    /********* E -> E != E ***************/
+    if( expr_parser->op1.symbol == NON_TERM &&
+        expr_parser->op2.symbol == NEQ &&
+        expr_parser->op3.symbol == NON_TERM)
+    {
+        return E_NEQ_E;
+    }
+
     /********* E-> (E) ***************/
     if( expr_parser->op1.symbol == RBRACKET &&
         expr_parser->op2.symbol == NON_TERM &&
@@ -378,6 +386,13 @@ int reduce(Expr_parser * expr_parser)
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
        break;
+    
+    case E_NEQ_E:
+        //TODO generate stack compare here 
+        //add new not terminal which represents result to the sym stack
+        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
+        if(err) return INTERNAL_ERROR;
+        break;
 
     case PAR_E_PAR:
        //add new not terminal which represents result to the sym stack

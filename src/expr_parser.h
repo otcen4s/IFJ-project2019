@@ -41,6 +41,7 @@ typedef enum{
 	E_GEQ_E,
 	E_LEQ_E,
 	PAR_E_PAR,
+	E_NEQ_E,
 	NO_RULE,
 
 } Rules_enum; 

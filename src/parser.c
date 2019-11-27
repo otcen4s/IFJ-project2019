@@ -208,7 +208,7 @@ int start_compiler(char* src_file_name, char* out_file_name)
         if(fopen(out_file_name, "w")== NULL) return INTERNAL_ERROR;
     }
 
-    generate_code(output_file);
+    //generate_code(output_file);
 
     destroy_scanner(parser->scanner);
     dispose_parser(parser);
