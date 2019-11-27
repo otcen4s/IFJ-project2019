@@ -75,8 +75,8 @@ bool is_defined(Parser* parser, int token_cnt)
         }
         else
         {
-            if ((curr_sym_glob && curr_sym_glob->symbol_type==SYMBOL_FUNC) ||
-                (curr_sym_loc && curr_sym_loc->symbol_type==SYMBOL_FUNC))
+            if ((curr_sym_glob && curr_sym_glob->symbol_state ==SYMBOL_USED) ||
+                (curr_sym_loc && curr_sym_loc->symbol_state == SYMBOL_USED))
             {
                 return false; 
             }
@@ -91,7 +91,7 @@ bool is_defined(Parser* parser, int token_cnt)
         }
         else
         {
-            if ((curr_sym_glob && curr_sym_glob->symbol_type==SYMBOL_FUNC)) return false;
+            if ((curr_sym_glob && curr_sym_glob->symbol_state == SYMBOL_USED)) return false;
             return true; 
         }
     }                                          
