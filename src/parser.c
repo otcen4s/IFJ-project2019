@@ -740,6 +740,7 @@ int expression_start(Parser *parser)
             break;
 
         case KEYWORD_PRINT:
+            parser->is_in_print = true;
 
             parser->current_function = symtab_lookup(parser->global_table, "print", &err);
             CHECK_ERROR();
@@ -913,8 +914,14 @@ int arg(Parser *parser)
         err = check_is_defined(parser);
         CHECK_ERROR();
          
-        parser->current_function->params_count_used++;
-        
+        if(!parser->is_in_print)
+        {
+            parser->current_function->params_count_used++;
+        }
+        else
+        {
+            gen_print(true, parser->curr_token);
+        }
         // calling generator 
 
         break;
@@ -923,8 +930,14 @@ int arg(Parser *parser)
     case TOKEN_DECIMAL:
     case TOKEN_STRING:
     case KEYWORD_NONE:
-    
-        parser->current_function->params_count_used++;
+        if(!(parser->is_in_print))
+        {
+            parser->current_function->params_count_used++;
+        }
+        else // TODO DOCASNE
+        {
+            gen_print(true, parser->curr_token);
+        }
         
         // calling code generator
         break;
