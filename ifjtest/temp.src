@@ -65,5 +65,4 @@ def print(*args):
   return None
 
 # Zde bude nasledovat program jazyka IFJ19
-#0
-2+5
+a=2
