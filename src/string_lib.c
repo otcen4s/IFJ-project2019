@@ -17,11 +17,14 @@ int str_init(tString *s){
 }
 
 int str_realloc(tString *s, unsigned new_arr_size){
-    s->str = (char*)realloc(s->str, REALLOC_CONST + new_arr_size);
+    
+    //unsigned s_len = strlen(s->str);
+
+    s->str = (char*)realloc(s->str, s->len + REALLOC_CONST + new_arr_size);
 
     if(s->str == NULL) return INTERNAL_ERROR;
     
-    s->arr_size = new_arr_size + REALLOC_CONST;
+    s->arr_size = new_arr_size + REALLOC_CONST + s->len;
 
     //realocated memory is uninitialised so we must set it to 0
     for(unsigned i=s->len; i < s->arr_size; i++)
@@ -61,7 +64,7 @@ int str_insert_char(tString *s, const char new_char){
         return INTERNAL_ERROR;
     }
     s->str[s->len] = new_char;
-    s->str[s->len + 1] = '\0';
+    //s->str[s->len + 1] = '\0';
     s->len++;
 
     return NO_ERROR;
