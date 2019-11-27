@@ -195,7 +195,7 @@ Token read_token(Scanner *scanner, int *err)
                     if((scanner->curr_char == EOF)||(scanner->curr_char== '\n') ||(scanner->curr_char == '#'))
                     {
                         scanner->state = STATE_START;
-                        scanner->is_line_start = false;
+                        if(scanner->curr_char != '\n')  scanner->is_line_start = false;
                         if(scanner->curr_char == '#') ungetc(scanner->curr_char, scanner->src_file);
                     }
                     else
