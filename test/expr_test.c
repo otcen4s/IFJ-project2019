@@ -50,7 +50,7 @@ void expr_test1(void)
     str_init(&(print_var.attribute.string));
     str_copy(&(print_var.attribute.string), "test_res");
 
-    gen_print(1, true,  print_var);
+    gen_print(true,  print_var);
 
     FILE *file = fopen("program.code", "w+");
     generate_code(file);

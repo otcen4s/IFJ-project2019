@@ -171,7 +171,7 @@ int start_compiler(char* src_file_name, char* out_file_name)
         if(fopen(out_file_name, "w")== NULL) return INTERNAL_ERROR;
     }
 
-    generate_code(output_file);
+    // generate_code(output_file);
 
     destroy_scanner(parser->scanner);
     dispose_parser(parser);
@@ -982,7 +982,7 @@ int arg(Parser *parser)
         }
         else // TODO ZATIAL DOCASNE
         {
-            gen_print(1, true, parser->curr_token);
+            gen_print(true, parser->curr_token);
         }
          
 
@@ -1000,7 +1000,7 @@ int arg(Parser *parser)
         }
         else // TODO DOCASNE
         {
-            gen_print(1, true, parser->curr_token);
+            gen_print(true, parser->curr_token);
         }
         
         // calling code generator

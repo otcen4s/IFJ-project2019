@@ -67,7 +67,7 @@ void test1(void)
     str_copy(&token.attribute.string, "Cau\nko");
     token.type = TOKEN_STRING;
 
-    gen_print(1, true, token);
+    gen_print(true, token);
 
     generate_code(sourceCode);
 }

@@ -191,7 +191,16 @@ Token read_token(Scanner *scanner, int *err)
                 if (scanner->curr_char == ' ') scanner->indent_cnt++; //count number of spaces
                 else
                 {
-                    scanner->state = STATE_INDENT_ENDED;
+                    if((scanner->curr_char == EOF)||(scanner->curr_char== '\n'))
+                    {
+                        scanner->state = STATE_START;
+                        scanner->is_line_start = false;
+                    }
+                    else
+                    {
+                        scanner->state = STATE_INDENT_ENDED;
+                    }
+                
                     ungetc(scanner->curr_char, scanner->src_file);
                 }                
                 break;
