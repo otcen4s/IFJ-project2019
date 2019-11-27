@@ -205,7 +205,7 @@ int start_compiler(char* src_file_name, char* out_file_name)
         if(fopen(out_file_name, "w")== NULL) return INTERNAL_ERROR;
     }
 
-    //generate_code(output_file);
+    generate_code(output_file);
 
     destroy_scanner(parser->scanner);
     dispose_parser(parser);
@@ -948,9 +948,16 @@ int arg(Parser *parser)
     GET_NEXT_TOKEN();
 
     // check again if there is right bracket
-    if(parser->curr_token.type == TOKEN_RIGHT_BRACKET) return NO_ERROR;
+    if(parser->curr_token.type == TOKEN_RIGHT_BRACKET) {
+        // TODO SAMO
+        gen_print_end();
+        return NO_ERROR;
+    }
     CHECK_TOKEN(TOKEN_COMMA);  /* STATE: ID ( <arg> , */
     CHECK_ERROR();
+
+    // TODO SAMO - mozno to je zle, funckia iba prida riadok, dalo by sa riesit iba gen_instruct, ale kvoli prehladnosti kodu som vytvoril dalsiu funckiu
+    gen_print_space();
     
     err = arg(parser);
     CHECK_ERROR();
