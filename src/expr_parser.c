@@ -63,16 +63,24 @@ bool is_defined(Parser* parser, int token_cnt)
         id_name = parser->curr_token.attribute.string.str;
     }
 
+    tSymbol_item *curr_sym_glob = NULL;
+    tSymbol_item *curr_sym_loc = NULL; 
+
     if(parser->is_in_def)
     {
-        if(symtab_lookup(parser->local_table,id_name, &err)==NULL &&
-            symtab_lookup(parser->global_table,id_name, &err)==NULL)
+        if(curr_sym_loc = symtab_lookup(parser->local_table,id_name, &err)==NULL &&
+           (curr_sym_glob = symtab_lookup(parser->global_table,id_name, &err))==NULL)
         {
             return false;
         }
         else
         {
-            return true;
+            if ((curr_sym_glob && curr_sym_glob->symbol_type==SYMBOL_FUNC) ||
+                (curr_sym_loc && curr_sym_loc->symbol_type==SYMBOL_FUNC))
+            {
+                return false; 
+            }
+            else  return true;
         }
     }
     else
@@ -83,6 +91,7 @@ bool is_defined(Parser* parser, int token_cnt)
         }
         else
         {
+            if ((curr_sym_glob && curr_sym_glob->symbol_type==SYMBOL_FUNC)) return false;
             return true; 
         }
     }                                          
