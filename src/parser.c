@@ -218,7 +218,7 @@ int start_compiler(char* src_file_name, char* out_file_name)
         if(fopen(out_file_name, "w")== NULL) return INTERNAL_ERROR;
     }
 
-    //generate_code(output_file);
+    generate_code(output_file);
 
     destroy_scanner(parser->scanner);
     dispose_parser(parser);
@@ -990,10 +990,6 @@ int statement_inside(Parser *parser)
 {
     parser->is_in_return = parser->is_in_print = parser->no_assign_expression = parser->expr_parser_call = false;
     parser->left_side = NULL;
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
     int err;
 
     GET_NEXT_TOKEN();
