@@ -369,10 +369,6 @@ PUSHS GF@$op2
 EQS
 RETURN
 LABEL $$main
+DEFVAR GF@a
 PUSHS int@2
-PUSHS int@5
-POPS GF@$op2
-POPS GF@$op1
-TYPE GF@$op1Type GF@$op1
-TYPE GF@$op2Type GF@$op2
-CALL $adds
+POPS GF@a

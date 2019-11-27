@@ -720,9 +720,25 @@ void gen_func_call_start() {
     ADDLINE("CREATEFRAME");
 }
 
-void gen_func_call_add_param(Token token) {
-    ADDCODE("DEFVAR TF@%"); ADDLINE(++paramCounter);
-    ADDCODE("MOVE TF@%"); ADDLINE(paramCounter);
+void gen_func_call_add_param(Token token, bool global) {
+    char temp[STRLEN];
+    sprintf(temp, "%d", ++paramCounter);
+
+    ADDCODE("DEFVAR TF@%"); ADDLINE(temp);
+    ADDCODE("MOVE TF@%"); ADDCODE(temp);
+
+    if (token.type == TOKEN_INTEGER) {
+        sprintf(temp, " int@%d", token.attribute.integer);
+    } else if (token.type == TOKEN_DECIMAL) {
+        sprintf(temp, " float@%a", token.attribute.decimal);
+    } else if (token.type == TOKEN_STRING) {
+        sprintf(temp, " string@%s", replace_space(token.attribute.string.str));
+    } else if (token.type == TOKEN_IDENTIFIER) {
+        str_concat(&line, " ", ISGLOBAL(global), token.attribute.string.str, NULL);
+        strcpy(temp, line.str);
+    }
+
+    ADDLINE(temp);
 }
 
 void gen_func_call_end(char *funcName, char *varName, bool global) {
@@ -750,18 +766,21 @@ void gen_print(bool global, Token token) {
             strcpy(temp, replace_space(token.attribute.string.str));
         }
 
-        ADDCODE(temp);
-        ADDLINE("\\032");
+        ADDLINE(temp);
     }
+}
+
+void gen_print_space() {
+    ADDLINE("WRITE string@\\032");
+}
+
+void gen_print_end() {
+    ADDLINE("WRITE string@\\010");
 
     // return value is always None
     ADDLINE("CREATEFRAME");
     ADDLINE("DEFVAR TF@%retval");
     ADDLINE("MOVE TF@%retval nil@nil");
-}
-
-void gen_print_end() {
-    ADDLINE("\\010");
 }
 
 // void gen_print(unsigned n, bool global, Token token, ...) {

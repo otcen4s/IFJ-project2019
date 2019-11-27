@@ -4,6 +4,8 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
+make main -C ../
+
 for filename in tests/*.src; do
     echo \# \# \# "$filename" \# \# \#
     cat ifj19.py "$filename" > temp.src
@@ -11,19 +13,12 @@ for filename in tests/*.src; do
         fileIn=< $(basename $filename .src).in
     fi
     ./../bin/main < $filename > temp.code
-    python3 temp.src $fileIn > vzor.out
-    ./ic19int temp.code $fileIn > test.out
-    expCode=$(head -n 1 $filename | cut -c 2-)
+
     code=$?
 
-    diff=$(diff -s vzor.out test.out)
-
-    if [ "$diff" == "Files vzor.out and test.out are identical" ]; then
-        printf "${GREEN}DIFF OK${NC}\n"
-    else
-        printf "${RED}DIFF BAD${NC}\n"
-        echo $diff
-        exit 1
+    expCode=0
+    if [ "$(head -n 1 $filename | cut -c 1-2)" == "##" ]; then
+        expCode=$(head -n 1 $filename | cut -c 3-)
     fi
 
     if [ $expCode == $code ]; then
@@ -33,5 +28,20 @@ for filename in tests/*.src; do
         echo "EXPECTED $expCode WAS $code"
         exit 1
     fi
+
+    if [ "$code" == "0" ]; then
+        python3 temp.src $fileIn > vzor.out
+        ./ic19int temp.code $fileIn > test.out
+        diff=$(diff -s vzor.out test.out)
+
+        if [ "$diff" == "Files vzor.out and test.out are identical" ]; then
+            printf "${GREEN}DIFF OK${NC}\n"
+        else
+            printf "${RED}DIFF BAD${NC}\n"
+            echo $diff
+            exit 1
+        fi
+    fi
+
     echo
 done
