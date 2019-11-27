@@ -68,7 +68,7 @@ bool is_defined(Parser* parser, int token_cnt)
 
     if(parser->is_in_def)
     {
-        if(curr_sym_loc = symtab_lookup(parser->local_table,id_name, &err)==NULL &&
+        if(((curr_sym_loc = symtab_lookup(parser->local_table,id_name, &err))==NULL) &&
            (curr_sym_glob = symtab_lookup(parser->global_table,id_name, &err))==NULL)
         {
             return false;
@@ -85,7 +85,7 @@ bool is_defined(Parser* parser, int token_cnt)
     }
     else
     {
-        if(symtab_lookup(parser->global_table,id_name, &err)== NULL)
+        if((curr_sym_glob = symtab_lookup(parser->global_table,id_name, &err))== NULL)
         {
             return false;
         }
@@ -96,7 +96,6 @@ bool is_defined(Parser* parser, int token_cnt)
         }
     }                                          
 }
-
 /**
     Helper function for creation of symbol struct
     @return return Symbol struct filled with given data
@@ -527,9 +526,6 @@ int expression(Parser* parser)
                 dispose_expr_parser(expr_parser);
                 return err;
             }
-
-            Symbol top= stack_top(expr_parser->stack, &err).symbol;
-            DEBUG_PRINT("non term je  %d, %d \n" ,top.data_type, top.symbol ); 
             continue;
         }
 
@@ -537,7 +533,6 @@ int expression(Parser* parser)
         if(parser_action == F)
         {
             dispose_expr_parser(expr_parser);
-            DEBUG_PRINT("INVALID EXPRESSION \n");
             return SYNTAX_ERROR;
             continue; 
         }
