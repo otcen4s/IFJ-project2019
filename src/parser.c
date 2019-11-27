@@ -331,6 +331,8 @@ int statement(Parser *parser)
         CHECK_ERROR();
         parser->if_expression = false;
 
+        gen_if_start(); // generator call
+
         if(!(parser->expr_parser_call))
         {
             GET_NEXT_TOKEN(); // TODO check if we need this token to get
@@ -354,9 +356,13 @@ int statement(Parser *parser)
         if(parser->curr_token.type == TOKEN_EOF) return SYNTAX_ERROR;
         else if(parser->curr_token.type == TOKEN_DEDENT) err = NO_ERROR;
 
+        gen_if_end();
+
+        
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE */
         GET_CHECK_TOKEN(KEYWORD_ELSE); // else statement always have tp be after if 
         
+
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: */
         GET_CHECK_TOKEN(TOKEN_COLON); // expected ':'
         
@@ -366,15 +372,21 @@ int statement(Parser *parser)
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT */
         GET_CHECK_TOKEN(TOKEN_INDENT); 
 
+
+        gen_else_start();
+
          /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> */
         err = statement_inside(parser);
         CHECK_ERROR();
 
+        gen_else_end();
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> */
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> DEDENT */
         CHECK_TOKEN(TOKEN_DEDENT);
         CHECK_ERROR();
+
+        
     }
 
     /* Rule 5. <statement> -> WHILE <expression_start>: EOL INDENT <statement_inside> <end> DEDENT <statement> */

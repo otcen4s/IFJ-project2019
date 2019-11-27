@@ -2,3 +2,4 @@ c = 4
 
 def b():
     print(a)
+
