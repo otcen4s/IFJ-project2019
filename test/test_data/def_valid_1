@@ -3,7 +3,7 @@ if 1:
 #cau
 #ako
     pass
-else:
+else: 
     b = 10
     c = 100
     if b > c: #+sfsafsa
@@ -12,3 +12,16 @@ else:
     else:
         #pass
         pass
+
+
+
+""" co jeeeeeeeee 
+fdsadfsasfsadfsafd
+sfdsdafsafsdafadsfsfdsafsafddsafsdf
+sfdsdafsafsdafadsfsfdsafsafddsafsdffsaf
+sfsafsas
+fdsadfsasfsadfsafdsa
+fdsadfsasfsadfsafdsd
+fdsadfsasfsadfsafdaf
+sfdsdafsafsdafadsfsfdsafsafddsafsdffads
+"""
