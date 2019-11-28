@@ -49,8 +49,11 @@ int str_cmp_keyword(tString *s, const char* keyword){
 int str_copy(tString *s, const char* new_string){
     unsigned new_str_len = strlen(new_string); // getting new size for reallocation, strlen() returns length of string without '/0' char counted
 
-    if(str_realloc(s, new_str_len) == INTERNAL_ERROR){
-        return INTERNAL_ERROR;
+    if(new_str_len >= s->arr_size)
+    {
+        if(str_realloc(s, new_str_len) == INTERNAL_ERROR){
+            return INTERNAL_ERROR;
+        }
     }
 
     strcpy(s->str, new_string);
@@ -60,9 +63,14 @@ int str_copy(tString *s, const char* new_string){
 }
 
 int str_insert_char(tString *s, const char new_char){
-    if(str_realloc(s, 1) == INTERNAL_ERROR){
-        return INTERNAL_ERROR;
+    if((s->len + 1) >= s->arr_size)
+    {
+        if(str_realloc(s, 1) == INTERNAL_ERROR)
+        {
+            return INTERNAL_ERROR;
+        }
     }
+
     s->str[s->len] = new_char;
     //s->str[s->len + 1] = '\0';
     s->len++;
@@ -75,8 +83,12 @@ int str_append(tString *s, const char *new_string) {
 
     unsigned new_len = s->len + new_str_len;
 
-    if (str_realloc(s, new_len) == INTERNAL_ERROR) {
-        return INTERNAL_ERROR;
+    if(s->arr_size <= new_len)
+    {
+        if (str_realloc(s, new_len) == INTERNAL_ERROR) 
+        {
+            return INTERNAL_ERROR;
+        }
     }
 
     strcat(s->str, new_string);

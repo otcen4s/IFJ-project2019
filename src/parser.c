@@ -626,7 +626,7 @@ int params(Parser *parser)
     parser->symbol_data_local->symbol_state = SYMBOL_DEFINED;
     parser->symbol_data_global->params_count_defined++;
 
-    gen_func_def_add_param(parser->key.str)    //generator call
+    gen_func_def_add_param(parser->key.str);    //generator call
     
     err = next_params(parser); // next rule
     CHECK_ERROR(); // always check the ret value

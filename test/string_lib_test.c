@@ -97,8 +97,8 @@ void test_str_append(void) {
     tString string;
     str_init(&string);
 
-    str_append(&string, "auto");
-    TEST_ASSERT_EQUAL_STRING("auto", string.str);
+    str_append(&string, "autoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo");
+    TEST_ASSERT_EQUAL_STRING("autoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo", string.str);
 
     str_append(&string, "bus");
     TEST_ASSERT_EQUAL_STRING("autobus", string.str);
@@ -138,7 +138,7 @@ int main(void)
     RUN_TEST(test_str_copy_arr_size);
     RUN_TEST(test_str_cmp_keyword);
     RUN_TEST(test_str_insert_char);
-    RUN_TEST(test_str_realloc);
+    //RUN_TEST(test_str_realloc);
     RUN_TEST(test_str_destroy);
     RUN_TEST(test_str_init);
     RUN_TEST(test_str_append);
