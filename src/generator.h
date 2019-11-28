@@ -6,8 +6,11 @@
 #include "string_lib.h"
 #include "typedefs.h"
 #include "stack.h"
+#include "parser.h"
 #include <stdio.h>
 #include <stdbool.h>
+
+typedef struct Parser Parser;
 
 int generator_begin();
 void generator_end();
@@ -22,7 +25,7 @@ void gen_double_symb(char *instruct, Type type, char *var, Value symb1, Value sy
 void gen_single_symb(char *instruct, Type type, char *var, Value symb, bool global);
 void generate_code(FILE *destFile);
 
-void gen_pushs(Token token, bool global);
+void gen_pushs(Token token, bool global, Parser *parser);
 void gen_pops(char *var, bool global);
 void gen_stack(const char *instruct);
 

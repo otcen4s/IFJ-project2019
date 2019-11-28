@@ -349,7 +349,6 @@ int statement(Parser *parser)
         err = statement_inside(parser);
         CHECK_ERROR();
 
-        gen_func_def_return();
         gen_func_def_end();
 
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
@@ -1346,6 +1345,9 @@ int statement_inside(Parser *parser)
                 }
 
                 parser->current_function = parser->symbol_data_global;
+
+                gen_func_call_start();
+
                 err = arg(parser);
                 CHECK_ERROR();
 
@@ -1360,6 +1362,18 @@ int statement_inside(Parser *parser)
                         return PARAM_COUNT_ERROR;
                     }
                 }
+
+                //generate function call end 
+                if(parser->left_side)
+                {
+                    gen_func_call_end(parser->current_function->key, parser->left_side->key, is_global(parser->left_side, parser));
+                }
+                    
+                else
+                {
+                    gen_func_call_end(parser->current_function->key, NULL , false);
+                }
+                
             }
 
             else
