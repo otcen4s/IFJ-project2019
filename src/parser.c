@@ -874,8 +874,23 @@ int expression_start(Parser *parser)
 
             GET_CHECK_TOKEN(TOKEN_RIGHT_BRACKET);
 
-
             //call code_generator
+            gen_instruct("CREATEFRAME");
+
+            if (parser->previous_token.type == KEYWORD_INPUTI) {
+                gen_instruct("CALL $inputi");
+            }
+            if (parser->previous_token.type == KEYWORD_INPUTF) {
+                gen_instruct("CALL $inputf");
+            }
+            if (parser->previous_token.type == KEYWORD_INPUTS) {
+                gen_instruct("CALL $inputs");
+            }
+
+            if(parser->left_side)
+            {
+                gen_move_retval(parser->left_side->key, is_global(parser->left_side, parser));
+            }
 
             break;
 

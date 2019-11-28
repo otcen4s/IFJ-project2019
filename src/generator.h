@@ -26,6 +26,7 @@ void gen_pushs(Token token, bool global);
 void gen_pops(char *var, bool global);
 void gen_stack(const char *instruct);
 
+void gen_move_retval(char *varName, bool global);
 void gen_func_def_start(char *funcName);
 void gen_func_def_add_param(char *paramName);
 void gen_func_def_return();

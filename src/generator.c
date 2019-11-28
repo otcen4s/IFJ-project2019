@@ -764,6 +764,10 @@ void gen_while_end() {
     }
 }
 
+void gen_move_retval(char *varName, bool global) {
+    ADDCODE("MOVE "); ADDCODE(ISGLOBAL(global)); ADDCODE(varName); ADDLINE(" TF@%retval");
+}
+
 void gen_func_def_start(char *funcName) {
     str_copy(&currFuncName, funcName);
     ADDCODE("JUMP %"); ADDCODE(funcName); ADDLINE("End");

@@ -7,19 +7,16 @@ NC='\033[0m'
 run_test() {
     echo \# \# \# "$filename" \# \# \#
     cat ifj19.py "$filename" > temp.src
-    if [ -f $(basename $filename .src).in ]; then
-        fileIn=< $(basename $filename .src).in
-    fi
-    ./../bin/main < $filename > temp.code
+    ./../bin/main < "$filename" > temp.code
 
     code=$?
 
     expCode=0
-    if [ "$(head -n 1 $filename | cut -c 1-2)" == "##" ]; then
-        expCode=$(head -n 1 $filename | cut -c 3-)
+    if [ "$(head -n 1 "$filename" | cut -c 1-2)" == "##" ]; then
+        expCode=$(head -n 1 "$filename" | cut -c 3-)
     fi
 
-    if [ $expCode == $code ]; then
+    if [ "$expCode" == "$code" ]; then
         printf "${GREEN}RETURN CODE OK${NC}\n"
     else
         printf "${RED}RETURN CODE BAD${NC}\n"
@@ -28,15 +25,21 @@ run_test() {
     fi
 
     if [ "$code" == "0" ]; then
-        python3 temp.src $fileIn > vzor.out
-        ./ic19int temp.code $fileIn > test.out
+        inFile="${filename%.*}.in"
+        if [ -f "$inFile" ]; then
+            python3 temp.src < "$inFile" > vzor.out
+            ./ic19int temp.code < "$inFile" > test.out
+        else
+            python3 temp.src > vzor.out
+            ./ic19int temp.code > test.out
+        fi
         diff=$(diff -s vzor.out test.out)
 
         if [ "$diff" == "Files vzor.out and test.out are identical" ]; then
             printf "${GREEN}DIFF OK${NC}\n"
         else
             printf "${RED}DIFF BAD${NC}\n"
-            echo $diff
+            echo "$diff"
             exit 1
         fi
     fi
