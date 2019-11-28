@@ -772,6 +772,8 @@ int expression_start(Parser *parser)
 
                 parser->current_function = parser->symbol_data_global;
 
+                gen_func_call_start();
+
                 err = arg(parser);
                 CHECK_ERROR();
 
@@ -785,6 +787,17 @@ int expression_start(Parser *parser)
                     {
                         return PARAM_COUNT_ERROR;
                     }
+                }
+
+                //generate function call end 
+                if(parser->left_side)
+                {
+                    gen_func_call_end(parser->current_function->key, parser->left_side->key, is_global(parser->left_side, parser));
+                }
+                    
+                else
+                {
+                    gen_func_call_end(parser->current_function->key, NULL , false);
                 }
             }
 
@@ -924,8 +937,6 @@ int expression_start(Parser *parser)
             }
 
             GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);
-
-            gen_func_call_start();
             err = arg(parser);
             CHECK_ERROR();
 
@@ -934,15 +945,6 @@ int expression_start(Parser *parser)
                 return PARAM_COUNT_ERROR;
             }
 
-            if(parser->left_side)
-                gen_func_call_end(parser->current_function->key, parser->left_side->key, is_global(parser->left_side, parser));
-            else
-            {
-                gen_func_call_end(parser->current_function->key, NULL , false);
-            }
-            
-
-            
             break;
         
         default:
