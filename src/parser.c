@@ -110,6 +110,18 @@ int init_parser(Parser* parser)
     return NO_ERROR;
 }
 
+bool is_global(tSymbol_item * var, Parser * parser)
+{
+    int err= NO_ERROR;
+    //TODO UROB TO PORIADNE 
+    if(parser->is_in_def)
+    {
+        if (symtab_lookup(parser->local_table, var->key, &err)) return false;
+        if (symtab_lookup(parser->global_table, var->key, &err)) return true; 
+    }
+    if (symtab_lookup(parser->global_table, var->key, &err)) return true; 
+}
+
 int check_function_defined(Parser *parser)
 {
     for(size_t i = 0; i < SYMTAB_SIZE; i++)
@@ -338,6 +350,7 @@ int statement(Parser *parser)
         CHECK_ERROR();
 
         gen_func_def_return();
+        gen_func_def_end();
 
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> DEDENT */
@@ -529,6 +542,9 @@ int statement(Parser *parser)
                 }
                 
                 parser->current_function = parser->symbol_data_global;
+
+                gen_func_call_start();
+
                 err = arg(parser);
                 CHECK_ERROR();
 
@@ -543,6 +559,18 @@ int statement(Parser *parser)
                         return PARAM_COUNT_ERROR;
                     }
                 }
+
+                //generate function call end 
+                if(parser->left_side)
+                {
+                    gen_func_call_end(parser->current_function->key, parser->left_side->key, is_global(parser->left_side, parser));
+                }
+                    
+                else
+                {
+                    gen_func_call_end(parser->current_function->key, NULL , false);
+                }
+
             }
 
             else
@@ -626,7 +654,7 @@ int params(Parser *parser)
     parser->symbol_data_local->symbol_state = SYMBOL_DEFINED;
     parser->symbol_data_global->params_count_defined++;
 
-    gen_func_def_add_param(parser->key.str);    //generator call
+    gen_func_def_add_param(parser->key.str);   //generator call
     
     err = next_params(parser); // next rule
     CHECK_ERROR(); // always check the ret value
@@ -760,6 +788,8 @@ int expression_start(Parser *parser)
 
                 parser->current_function = parser->symbol_data_global;
 
+                gen_func_call_start();
+
                 err = arg(parser);
                 CHECK_ERROR();
 
@@ -773,6 +803,17 @@ int expression_start(Parser *parser)
                     {
                         return PARAM_COUNT_ERROR;
                     }
+                }
+
+                //generate function call end 
+                if(parser->left_side)
+                {
+                    gen_func_call_end(parser->current_function->key, parser->left_side->key, is_global(parser->left_side, parser));
+                }
+                    
+                else
+                {
+                    gen_func_call_end(parser->current_function->key, NULL , false);
                 }
             }
 
@@ -912,7 +953,6 @@ int expression_start(Parser *parser)
             }
 
             GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);
-
             err = arg(parser);
             CHECK_ERROR();
 
@@ -921,7 +961,6 @@ int expression_start(Parser *parser)
                 return PARAM_COUNT_ERROR;
             }
 
-            
             break;
         
         default:
@@ -963,7 +1002,15 @@ int arg(Parser *parser)
          
         parser->current_function->params_count_used++;
         
-        gen_print(true, parser->curr_token); 
+        if(parser->is_in_print)
+        {
+             gen_print(!parser->is_in_def, parser->curr_token); //generator call
+        }
+        else
+        {
+            gen_func_call_add_param(parser->curr_token, !parser->is_in_def); //generator call
+        }
+        
 
         break;
 
@@ -974,7 +1021,14 @@ int arg(Parser *parser)
         
         parser->current_function->params_count_used++;
         
-        gen_print(true, parser->curr_token);
+        if(parser->is_in_print)
+        {
+            gen_print(!parser->is_in_def, parser->curr_token); //generator call
+        }
+        else
+        {
+            gen_func_call_add_param(parser->curr_token, !parser->is_in_def); //generator call
+        }
     
         break;
 
@@ -988,7 +1042,11 @@ int arg(Parser *parser)
     // check again if there is right bracket
     if(parser->curr_token.type == TOKEN_RIGHT_BRACKET) 
     {
-        gen_print_end();
+        if(parser->is_in_print)
+        {
+             gen_print_end();
+             parser->is_in_print = false;
+        }
         
         return NO_ERROR;
     }
@@ -996,7 +1054,9 @@ int arg(Parser *parser)
     CHECK_ERROR();
 
     // TODO SAMO - mozno to je zle, funckia iba prida riadok, dalo by sa riesit iba gen_instruct, ale kvoli prehladnosti kodu som vytvoril dalsiu funckiu
-    gen_print_space();
+    if (parser->is_in_print) {
+        gen_print_space();
+    }
     
     err = arg(parser);
     CHECK_ERROR();
