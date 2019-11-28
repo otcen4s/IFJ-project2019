@@ -26,6 +26,14 @@ void gen_pushs(Token token, bool global);
 void gen_pops(char *var, bool global);
 void gen_stack(const char *instruct);
 
+void gen_func_def_start(char *funcName);
+void gen_func_def_add_param(char *paramName, int id);
+void gen_func_def_return();
+
+void gen_func_call_start();
+void gen_func_call_add_param(Token token, bool global);
+void gen_func_call_end(char *funcName, char *varName, bool global);
+
 void gen_if_start();
 void gen_if_end();
 void gen_else_start();

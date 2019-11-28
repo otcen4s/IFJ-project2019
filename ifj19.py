@@ -81,15 +81,8 @@ def print(*args):
 # Zde bude nasledovat program jazyka IFJ19
 
 
-a = 20
-
-if a > 10:
-    while a > 15:
-        print(a)
-        a = a - 1
-        if a < 5:
-            print('small')
-        else:
-            print('big')
-else:
+def cau():
     pass
+
+
+print(cau())

@@ -756,15 +756,28 @@ void gen_while_end() {
     }
 }
 
-void gen_func_start(char *funcName) {
+void gen_func_def_start(char *funcName) {
     ADDCODE("LABEL %"); ADDLINE(funcName);
     ADDLINE("PUSHFRAME");
+
+    ADDLINE("DEFVAR LF@%retval");
+    ADDLINE("MOVELF@%retval nil@nil");
 }
 
-void gen_func_return() {
+void gen_func_def_add_param(char *paramName, int id) {
+    char temp[STRLEN];
+    sprintf(temp, "%d", ++paramCounter);
+
+    ADDCODE("DEFVAR LF@%"); ADDLINE(paramName);
+    ADDCODE("MOVE LF@%"); ADDCODE(paramName); ADDCODE(" LF@%"); ADDLINE(temp);
+}
+
+void gen_func_def_return() {
     ADDCODE("POPS LF@%retval");
     ADDLINE("POPFRAME");
     ADDLINE("RETURN");
+
+    paramCounter = 0;
 }
 
 void gen_func_call_start() {
@@ -798,6 +811,8 @@ void gen_func_call_end(char *funcName, char *varName, bool global) {
     if (varName) {
         ADDCODE("MOVE "); ADDCODE(ISGLOBAL(global)); ADDCODE(varName); ADDLINE(" TF@%retval");
     }
+
+    paramCounter = 0;
 }
 
 void gen_print(bool global, Token token) {
