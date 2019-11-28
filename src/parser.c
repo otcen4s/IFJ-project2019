@@ -544,6 +544,8 @@ int statement(Parser *parser)
 
                 gen_func_call_start();
 
+
+                parser->current_function->params_count_used = 0;
                 err = arg(parser);
                 CHECK_ERROR();
 
@@ -788,7 +790,8 @@ int expression_start(Parser *parser)
                 parser->current_function = parser->symbol_data_global;
 
                 gen_func_call_start();
-
+                
+                parser->current_function->params_count_used = 0;
                 err = arg(parser);
                 CHECK_ERROR();
 
@@ -838,7 +841,8 @@ int expression_start(Parser *parser)
             }
 
             GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);
-
+            
+            parser->current_function->params_count_used = 0;
             err = arg(parser);
             CHECK_ERROR();
             
@@ -887,6 +891,7 @@ int expression_start(Parser *parser)
 
             GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);
             
+            parser->current_function->params_count_used = 0;
             err = arg(parser);
             CHECK_ERROR();
 
@@ -909,6 +914,7 @@ int expression_start(Parser *parser)
 
             GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);
             
+            parser->current_function->params_count_used = 0;
             err = arg(parser);
             CHECK_ERROR();
 
@@ -931,6 +937,7 @@ int expression_start(Parser *parser)
 
             GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);
 
+            parser->current_function->params_count_used = 0;
             err = arg(parser);
             CHECK_ERROR();
 
@@ -952,6 +959,8 @@ int expression_start(Parser *parser)
             }
 
             GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);
+
+            parser->current_function->params_count_used = 0;
             err = arg(parser);
             CHECK_ERROR();
 
@@ -1349,6 +1358,7 @@ int statement_inside(Parser *parser)
 
                 gen_func_call_start();
 
+                parser->current_function->params_count_used = 0;
                 err = arg(parser);
                 CHECK_ERROR();
 
