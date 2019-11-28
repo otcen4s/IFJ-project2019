@@ -878,13 +878,13 @@ int expression_start(Parser *parser)
             gen_instruct("CREATEFRAME");
 
             if (parser->previous_token.type == KEYWORD_INPUTI) {
-                gen_instruct("CALL $inputi");
+                gen_func_builtin_call_end("inputi");
             }
             if (parser->previous_token.type == KEYWORD_INPUTF) {
-                gen_instruct("CALL $inputf");
+                gen_func_builtin_call_end("inputf");
             }
             if (parser->previous_token.type == KEYWORD_INPUTS) {
-                gen_instruct("CALL $inputs");
+                gen_func_builtin_call_end("inputs");
             }
 
             if(parser->left_side)
@@ -917,7 +917,7 @@ int expression_start(Parser *parser)
                 return PARAM_COUNT_ERROR;
             }
 
-            gen_instruct("CALL $len");
+            gen_func_builtin_call_end("len");
 
             if(parser->left_side)
             {
@@ -949,7 +949,7 @@ int expression_start(Parser *parser)
                 return PARAM_COUNT_ERROR;
             }
             
-            gen_instruct("CALL $substr");
+            gen_func_builtin_call_end("substr");
 
             if(parser->left_side)
             {
@@ -981,7 +981,7 @@ int expression_start(Parser *parser)
                 return PARAM_COUNT_ERROR;
             }
 
-            gen_instruct("CALL $ord");
+            gen_func_builtin_call_end("ord");
 
             if(parser->left_side)
             {
@@ -1013,7 +1013,7 @@ int expression_start(Parser *parser)
                 return PARAM_COUNT_ERROR;
             }
 
-            gen_instruct("CALL $chr");
+            gen_func_builtin_call_end("chr");
 
             if(parser->left_side)
             {

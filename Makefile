@@ -12,7 +12,7 @@ BIN = $(addprefix $(PATHB), $(basename $(notdir $(SRC))))
 
 test : $(PATHB) $(BIN)
 	#./$(PATHB)string_lib_test
-	#./$(PATHB)scanner_test
+	./$(PATHB)scanner_test
 	#./$(PATHB)stack_test
 	./$(PATHB)parser_test
 	#./$(PATHB)symtable_test

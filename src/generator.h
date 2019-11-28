@@ -35,6 +35,7 @@ void gen_func_def_end();
 void gen_func_call_start();
 void gen_func_call_add_param(Token token, bool global);
 void gen_func_call_end(char *funcName, char *varName, bool global);
+void gen_func_builtin_call_end(char *funcName);
 
 void gen_if_start();
 void gen_if_end();

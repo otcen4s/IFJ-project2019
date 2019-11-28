@@ -410,6 +410,25 @@ void test10_docstring_escape_seq(void)
     TEST_ASSERT_EQUAL_STRING( " sadsad \" \"\"\ncontinue sasasdasd \"\"\" ",token.attribute.string.str);
 }
 
+void test11_error_indentation(void) {
+    int err = 0; 
+    Token token; 
+    Scanner s; 
+    Scanner *scanner = &s; 
+    init_scanner(scanner, "test/test_data/scanner_test_8.txt");
+    token = read_token(scanner, &err);
+
+    while (token.type != TOKEN_EOF) {
+        token = read_token(scanner, &err);
+        
+        if (err) {
+            break;
+        }
+    }
+
+    TEST_ASSERT_EQUAL_INT(LEXICAL_ERROR, err);
+}
+
 int main(void) 
 {
     UNITY_BEGIN();
@@ -423,6 +442,7 @@ int main(void)
     RUN_TEST(test8_indent);
     RUN_TEST(test9_function);
     RUN_TEST(test10_docstring_escape_seq);
+    RUN_TEST(test11_error_indentation);
 
     return UNITY_END();
 }

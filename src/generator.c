@@ -23,6 +23,7 @@ tString currFuncName;
 int error;
 bool inWhile = false;
 int paramCounter = 0;
+int defParamCounter = 0;
 int uid = 0;
 int whileUID = 0;
 char uidStr[STRLEN];
@@ -320,6 +321,8 @@ int generator_begin() {
     // function len
     ADDLINE("LABEL $len");
     ADDLINE("PUSHFRAME");
+    ADDLINE("TYPE GF@$temp LF@%1");
+    ADDLINE("JUMPIFNEQ $error GF@$temp string@string");
     ADDLINE("DEFVAR LF@%retval");
     ADDLINE("STRLEN LF@%retval LF@%1");
     ADDLINE("POPFRAME");
@@ -649,6 +652,8 @@ void gen_pushs(Token token, bool global) {
             sprintf(temp, "PUSHS int@%d", token.attribute.integer);
         } else if (token.type == TOKEN_DECIMAL) {
             sprintf(temp, "PUSHS float@%a", token.attribute.decimal);
+        } else {
+            strcpy(temp, "PUSHS nil@nil");
         }
 
         ADDLINE(temp);
@@ -769,6 +774,8 @@ void gen_move_retval(char *varName, bool global) {
 }
 
 void gen_func_def_start(char *funcName) {
+    defParamCounter = 0;
+
     str_copy(&currFuncName, funcName);
     ADDCODE("JUMP %"); ADDCODE(funcName); ADDLINE("End");
 
@@ -781,7 +788,7 @@ void gen_func_def_start(char *funcName) {
 
 void gen_func_def_add_param(char *paramName) {
     char temp[STRLEN];
-    sprintf(temp, "%d", ++paramCounter);
+    sprintf(temp, "%d", ++defParamCounter);
 
     ADDCODE("DEFVAR LF@"); ADDLINE(paramName);
     ADDCODE("MOVE LF@"); ADDCODE(paramName); ADDCODE(" LF@%"); ADDLINE(temp);
@@ -838,6 +845,11 @@ void gen_func_call_end(char *funcName, char *varName, bool global) {
         ADDCODE("MOVE "); ADDCODE(ISGLOBAL(global)); ADDCODE(varName); ADDLINE(" TF@%retval");
     }
 
+    paramCounter = 0;
+}
+
+void gen_func_builtin_call_end(char *funcName) {
+    ADDCODE("CALL $"); ADDLINE(funcName);
     paramCounter = 0;
 }
 
@@ -929,6 +941,8 @@ const char *replace_space (char *string) {
             str_append(&helper, "\\032");
         } else if (string[j] == '\n') {
             str_append(&helper, "\\010");
+        } else if (string[j] == '#') {
+            str_append(&helper, "\\035");
         } else {
             char temp[2];
             temp[0] = string[j];

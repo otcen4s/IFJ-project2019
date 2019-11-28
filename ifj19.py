@@ -80,9 +80,22 @@ def print(*args):
 
 # Zde bude nasledovat program jazyka IFJ19
 
-
-def cau():
-    pass
+# Ukazka kolize lokalni a globalni promenne v IFJ19 (chyba 3)
 
 
-print(cau())
+a = 10  # globalni promenna
+
+
+def f():
+    print(a)  # pracuji pouze s globalni promennou, OK
+
+
+def g():
+    print(a)  # pracuji s globalni promennou, ale chyba 3 kvuli zbytku tela funkce
+    a = 3
+    return a
+
+
+print(a)
+f()
+g()  # vyvola chybu 3
