@@ -50,6 +50,9 @@ void test2_token_after_line_commentary(void)
     init_scanner(scanner, "test/test_data/scanner_test_2.txt");
 
     token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_EOL); //firs toknen EOL
+
+    token = read_token(scanner, &err);
     TEST_ASSERT_EQUAL_INT32(token.type, TOKEN_ASSIGN); //next token is =
 
     token = read_token(scanner, &err);

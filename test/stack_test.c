@@ -35,10 +35,10 @@ void test_stack_empty(void)
     stack_push(stack, 9);
     TEST_ASSERT_FALSE(stack_empty(stack));
 
-    int err;
-    stack_pop(stack, err);
+    int err= NO_ERROR;
+    stack_pop(stack, &err);
     
-    stack_pop(stack, err);
+    stack_pop(stack, &err);
     TEST_ASSERT_TRUE(stack_empty(stack));
 
     stack_free(stack);
