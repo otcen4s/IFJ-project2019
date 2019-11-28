@@ -1,4 +1,7 @@
-
 def sucet(a, b):
     c = a + b
+    return c
     print('Sucet je', c)
+
+x = sucet(2, 3)
+print('Helou', x)

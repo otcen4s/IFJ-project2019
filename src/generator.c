@@ -633,23 +633,26 @@ void gen_var(char *varName, bool global) {
 //     ADDLINE(line.str);
 // }
 
-void gen_pushs(Token token, bool global) {
+void gen_pushs(Token token, bool global, Parser *parser) {
+    if (token.type == TOKEN_STRING || token.type == TOKEN_IDENTIFIER) {
+        if (token.type == TOKEN_STRING) {
+            str_concat(&line, "PUSHS string@", replace_space(token.attribute.string.str), NULL);
+        } else if (token.type == TOKEN_IDENTIFIER) {
+            str_concat(&line, "PUSHS ", ISGLOBAL(global), token.attribute.string.str, NULL);
+        }
 
-    char temp[STRLEN];
+        ADDLINE(line.str);
+    } else {
+        char temp[200];
 
-    if (token.type == TOKEN_INTEGER) {
-        sprintf(temp, "PUSHS int@%d", token.attribute.integer);
-    } else if (token.type == TOKEN_DECIMAL) {
-        sprintf(temp, "PUSHS float@%a", token.attribute.decimal);
-    } else if (token.type == TOKEN_STRING) {
-        sprintf(temp, "PUSHS string@%s", replace_space(token.attribute.string.str));
-    } else if (token.type == TOKEN_IDENTIFIER) {
-        str_concat(&line, "PUSHS ", ISGLOBAL(global), token.attribute.string.str, NULL);
-        strcpy(temp, line.str);
+        if (token.type == TOKEN_INTEGER) {
+            sprintf(temp, "PUSHS int@%d", token.attribute.integer);
+        } else if (token.type == TOKEN_DECIMAL) {
+            sprintf(temp, "PUSHS float@%a", token.attribute.decimal);
+        }
+
+        ADDLINE(temp);
     }
-
-    ADDLINE(temp);
-    
 }
 
 void gen_pops(char *varName, bool global) {
@@ -784,12 +787,14 @@ void gen_func_def_return() {
     ADDLINE("POPS LF@%retval");
     ADDLINE("POPFRAME");
     ADDLINE("RETURN");
-
-    paramCounter = 0;
 }
 
 void gen_func_def_end() {
+    ADDLINE("POPFRAME");
+    ADDLINE("RETURN");
     ADDCODE("LABEL %"); ADDCODE(currFuncName.str); ADDLINE("End");
+
+    paramCounter = 0;
 }
 
 void gen_func_call_start() {
