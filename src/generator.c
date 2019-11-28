@@ -636,7 +636,7 @@ void gen_var(char *varName, bool global) {
 void gen_pushs(Token token, bool global, Parser *parser) {
     if (token.type == TOKEN_STRING || token.type == TOKEN_IDENTIFIER) {
         if (token.type == TOKEN_STRING) {
-            str_concat(&line, "PUSHS string@%s", replace_space(token.attribute.string.str), NULL);
+            str_concat(&line, "PUSHS string@", replace_space(token.attribute.string.str), NULL);
         } else if (token.type == TOKEN_IDENTIFIER) {
             str_concat(&line, "PUSHS ", ISGLOBAL(global), token.attribute.string.str, NULL);
         }
