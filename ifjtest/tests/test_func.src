@@ -2,8 +2,3 @@
 def sucet(a, b):
     c = a + b
     print('Sucet je', c)
-
-if 2 == 2:
-    sucet(5, 8)
-else:
-    pass

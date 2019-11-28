@@ -65,15 +65,15 @@ int main(void)
 {
     UNITY_BEGIN();
     
-  //  RUN_TEST(print_one_param);
-    //RUN_TEST(print_multiple_params);
-   // RUN_TEST(print_errors);
+    RUN_TEST(print_one_param);
+    RUN_TEST(print_multiple_params);
+    RUN_TEST(print_errors);
     
-    //RUN_TEST(id_eq_expr);
-    //RUN_TEST(test_inputi);
-    //RUN_TEST(test_if);
+    RUN_TEST(id_eq_expr);
+    RUN_TEST(test_inputi);
+    RUN_TEST(test_if);
     RUN_TEST(test_def);
-   // RUN_TEST(test_function);
+    RUN_TEST(test_function);
 
     return UNITY_END();
 }
