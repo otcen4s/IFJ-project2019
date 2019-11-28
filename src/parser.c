@@ -232,7 +232,7 @@ int start_compiler(char* src_file_name, char* out_file_name)
         if(fopen(out_file_name, "w")== NULL) return INTERNAL_ERROR;
     }
 
-    generate_code(output_file);
+    //generate_code(output_file);
 
     destroy_scanner(parser->scanner);
     dispose_parser(parser);
@@ -503,7 +503,7 @@ int statement(Parser *parser)
             err = expression_start(parser);
             CHECK_ERROR();
 
-            parser->symbol_data_global->symbol_state = SYMBOL_DEFINED;
+            parser->left_side->symbol_state = SYMBOL_DEFINED;
 
             /* STATE: ID = <expression_start> <end> */
             if(!(parser->expr_parser_call))
@@ -1307,11 +1307,7 @@ int statement_inside(Parser *parser)
             err = expression_start(parser);
             CHECK_ERROR();
 
-            if(parser->is_in_def)
-            {
-                parser->symbol_data_local->symbol_state = SYMBOL_DEFINED;
-            }
-            else parser->symbol_data_global->symbol_state = SYMBOL_DEFINED;
+            parser->left_side->symbol_state = SYMBOL_DEFINED;
             
 
             if(!(parser->expr_parser_call))

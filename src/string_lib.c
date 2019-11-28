@@ -20,11 +20,11 @@ int str_realloc(tString *s, unsigned new_arr_size){
     
     //unsigned s_len = strlen(s->str);
 
-    s->str = (char*)realloc(s->str, REALLOC_CONST + new_arr_size);
+    s->str = (char*)realloc(s->str, s->len + REALLOC_CONST + new_arr_size);
 
     if(s->str == NULL) return INTERNAL_ERROR;
     
-    s->arr_size = new_arr_size + REALLOC_CONST;
+    s->arr_size = new_arr_size + REALLOC_CONST + s->len;
 
     //realocated memory is uninitialised so we must set it to 0
     for(unsigned i=s->len; i < s->arr_size; i++)
