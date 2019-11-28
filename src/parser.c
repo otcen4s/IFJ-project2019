@@ -1090,6 +1090,7 @@ int statement_inside(Parser *parser)
     {
         err = statement_inside(parser);
         CHECK_ERROR();
+        return NO_ERROR;
     }
 
     /* Function definition in <statement_inside> is not valid */
