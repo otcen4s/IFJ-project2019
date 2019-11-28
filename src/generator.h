@@ -27,7 +27,7 @@ void gen_pops(char *var, bool global);
 void gen_stack(const char *instruct);
 
 void gen_func_def_start(char *funcName);
-void gen_func_def_add_param(char *paramName, int id);
+void gen_func_def_add_param(char *paramName);
 void gen_func_def_return();
 
 void gen_func_call_start();
@@ -50,6 +50,8 @@ void gen_inputf();
 void gen_lts();
 void gen_gts();
 void gen_eqs();
+
+void gen_func_start(char *funcName);
 
 const char *replace_space(char *string);
 

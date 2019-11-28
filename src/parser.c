@@ -303,6 +303,8 @@ int statement(Parser *parser)
             parser->symbol_data_global->params_count_used = 0;
         }
 
+        gen_func_def_start(parser->key.str); //generator call
+
         /* STATE: DEF ID ( */
         GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET); // check if token type is left bracket
        
@@ -334,6 +336,8 @@ int statement(Parser *parser)
         /* Expected state -> STATE: DEF ID ( <params> ): EOL INDENT <statement_inside> */
         err = statement_inside(parser);
         CHECK_ERROR();
+
+        gen_func_def_return();
 
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> DEDENT */
@@ -621,6 +625,8 @@ int params(Parser *parser)
     parser->symbol_data_local->symbol_type = SYMBOL_PARAM;
     parser->symbol_data_local->symbol_state = SYMBOL_DEFINED;
     parser->symbol_data_global->params_count_defined++;
+
+    gen_func_def_add_param(parser->key.str)    //generator call
     
     err = next_params(parser); // next rule
     CHECK_ERROR(); // always check the ret value
@@ -662,6 +668,8 @@ int next_params(Parser *parser)
     parser->symbol_data_local->symbol_type = SYMBOL_PARAM; // symbol type set as parameter
     parser->symbol_data_global->params_count_defined++;
 
+    gen_func_def_add_param(parser->key.str); // generator call
+
     err = next_params(parser); // recursively go to next rule
     CHECK_ERROR(); // always check the return value
 
@@ -697,6 +705,7 @@ int expression_start(Parser *parser)
 
         if((parser->is_in_return) && ((parser->previous_token.type == TOKEN_EOL) || (parser->previous_token.type == TOKEN_EOF)))
         {
+            gen_instruct("PUSHS nil@nil"); // generator call
             parser->expr_parser_call = true;
             parser->curr_token = parser->previous_token;
             return NO_ERROR;
@@ -1045,6 +1054,8 @@ int statement_inside(Parser *parser)
             /* STATE: <statement_inside> RETURN <expression_start> */
             err = expression_start(parser);
             CHECK_ERROR();
+
+            gen_func_def_return(); //generator call
 
             if(!(parser->expr_parser_call))
             {

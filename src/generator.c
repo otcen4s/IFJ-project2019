@@ -761,10 +761,10 @@ void gen_func_def_start(char *funcName) {
     ADDLINE("PUSHFRAME");
 
     ADDLINE("DEFVAR LF@%retval");
-    ADDLINE("MOVELF@%retval nil@nil");
+    ADDLINE("MOVE LF@%retval nil@nil");
 }
 
-void gen_func_def_add_param(char *paramName, int id) {
+void gen_func_def_add_param(char *paramName) {
     char temp[STRLEN];
     sprintf(temp, "%d", ++paramCounter);
 
