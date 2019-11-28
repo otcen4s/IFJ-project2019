@@ -906,6 +906,8 @@ int expression_start(Parser *parser)
 
             GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);
             
+            gen_instruct("CREATEFRAME");
+
             parser->current_function->params_count_used = 0;
             err = arg(parser);
             CHECK_ERROR();
@@ -913,6 +915,13 @@ int expression_start(Parser *parser)
             if(parser->current_function->params_count_used != parser->current_function->params_count_defined)
             {
                 return PARAM_COUNT_ERROR;
+            }
+
+            gen_instruct("CALL $len");
+
+            if(parser->left_side)
+            {
+                gen_move_retval(parser->left_side->key, is_global(parser->left_side, parser));
             }
             
             break;  
@@ -928,6 +937,8 @@ int expression_start(Parser *parser)
             }
 
             GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);
+
+            gen_instruct("CREATEFRAME");
             
             parser->current_function->params_count_used = 0;
             err = arg(parser);
@@ -938,6 +949,13 @@ int expression_start(Parser *parser)
                 return PARAM_COUNT_ERROR;
             }
             
+            gen_instruct("CALL $substr");
+
+            if(parser->left_side)
+            {
+                gen_move_retval(parser->left_side->key, is_global(parser->left_side, parser));
+            }
+
             break;
 
         case KEYWORD_ORD:
@@ -952,6 +970,8 @@ int expression_start(Parser *parser)
 
             GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);
 
+            gen_instruct("CREATEFRAME");
+
             parser->current_function->params_count_used = 0;
             err = arg(parser);
             CHECK_ERROR();
@@ -959,6 +979,13 @@ int expression_start(Parser *parser)
             if(parser->current_function->params_count_used != parser->current_function->params_count_defined)
             {
                 return PARAM_COUNT_ERROR;
+            }
+
+            gen_instruct("CALL $ord");
+
+            if(parser->left_side)
+            {
+                gen_move_retval(parser->left_side->key, is_global(parser->left_side, parser));
             }
 
             break;
@@ -975,6 +1002,8 @@ int expression_start(Parser *parser)
 
             GET_CHECK_TOKEN(TOKEN_LEFT_BRACKET);
 
+            gen_instruct("CREATEFRAME");
+
             parser->current_function->params_count_used = 0;
             err = arg(parser);
             CHECK_ERROR();
@@ -982,6 +1011,13 @@ int expression_start(Parser *parser)
             if(parser->current_function->params_count_used != parser->current_function->params_count_defined)
             {
                 return PARAM_COUNT_ERROR;
+            }
+
+            gen_instruct("CALL $chr");
+
+            if(parser->left_side)
+            {
+                gen_move_retval(parser->left_side->key, is_global(parser->left_side, parser));
             }
 
             break;

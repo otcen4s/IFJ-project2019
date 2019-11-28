@@ -1,0 +1,2 @@
+a = chr(123)
+print(a)
