@@ -47,8 +47,14 @@ run_test() {
 make main -C ../
 
 if [ "$1" != "" ]; then
-    filename=$1
-    run_test
+    if [ "${1: -1}" == "/" ]; then
+        for filename in "$1"*.src; do
+            run_test
+        done
+    else
+        filename=$1
+        run_test
+    fi
 else
     for filename in tests/*.src; do
         run_test
