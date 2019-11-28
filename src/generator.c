@@ -18,6 +18,7 @@ tString code;
 tString line;
 tString helper;
 tString whileCode;
+tString currFuncName;
 
 int error;
 bool inWhile = false;
@@ -42,6 +43,10 @@ int generator_begin() {
     }
 
     if ((error = str_init(&whileCode))) {
+        return error;
+    }
+
+    if ((error = str_init(&currFuncName))) {
         return error;
     }
 
@@ -757,6 +762,9 @@ void gen_while_end() {
 }
 
 void gen_func_def_start(char *funcName) {
+    str_copy(&currFuncName, funcName);
+    ADDCODE("JUMP %"); ADDCODE(funcName); ADDLINE("End");
+
     ADDCODE("LABEL %"); ADDLINE(funcName);
     ADDLINE("PUSHFRAME");
 
@@ -768,16 +776,20 @@ void gen_func_def_add_param(char *paramName) {
     char temp[STRLEN];
     sprintf(temp, "%d", ++paramCounter);
 
-    ADDCODE("DEFVAR LF@%"); ADDLINE(paramName);
-    ADDCODE("MOVE LF@%"); ADDCODE(paramName); ADDCODE(" LF@%"); ADDLINE(temp);
+    ADDCODE("DEFVAR LF@"); ADDLINE(paramName);
+    ADDCODE("MOVE LF@"); ADDCODE(paramName); ADDCODE(" LF@%"); ADDLINE(temp);
 }
 
 void gen_func_def_return() {
-    ADDCODE("POPS LF@%retval");
+    ADDLINE("POPS LF@%retval");
     ADDLINE("POPFRAME");
     ADDLINE("RETURN");
 
     paramCounter = 0;
+}
+
+void gen_func_def_end() {
+    ADDCODE("LABEL %"); ADDCODE(currFuncName.str); ADDLINE("End");
 }
 
 void gen_func_call_start() {
@@ -806,7 +818,7 @@ void gen_func_call_add_param(Token token, bool global) {
 }
 
 void gen_func_call_end(char *funcName, char *varName, bool global) {
-    ADDCODE("CALL $"); ADDLINE(funcName);
+    ADDCODE("CALL %"); ADDLINE(funcName);
     
     if (varName) {
         ADDCODE("MOVE "); ADDCODE(ISGLOBAL(global)); ADDCODE(varName); ADDLINE(" TF@%retval");

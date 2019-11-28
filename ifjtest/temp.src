@@ -65,5 +65,12 @@ def print(*args):
   return None
 
 # Zde bude nasledovat program jazyka IFJ19
-def cau(a, b):
-    print(a, b)
+
+def sucet(a, b):
+    c = a + b
+    print('Sucet je', c)
+
+if 2 == 2:
+    sucet(5, 8)
+else:
+    pass

@@ -350,6 +350,7 @@ int statement(Parser *parser)
         CHECK_ERROR();
 
         gen_func_def_return();
+        gen_func_def_end();
 
         if(parser->curr_token.type == TOKEN_EOF) return NO_ERROR;
         /* STATE: IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> DEDENT */
@@ -541,6 +542,9 @@ int statement(Parser *parser)
                 }
                 
                 parser->current_function = parser->symbol_data_global;
+
+                gen_func_call_start();
+
                 err = arg(parser);
                 CHECK_ERROR();
 
@@ -555,6 +559,18 @@ int statement(Parser *parser)
                         return PARAM_COUNT_ERROR;
                     }
                 }
+
+                //generate function call end 
+                if(parser->left_side)
+                {
+                    gen_func_call_end(parser->current_function->key, parser->left_side->key, is_global(parser->left_side, parser));
+                }
+                    
+                else
+                {
+                    gen_func_call_end(parser->current_function->key, NULL , false);
+                }
+
             }
 
             else
@@ -988,7 +1004,7 @@ int arg(Parser *parser)
         
         if(parser->is_in_print)
         {
-             gen_print(true, parser->curr_token); //generator call
+             gen_print(!parser->is_in_def, parser->curr_token); //generator call
         }
         else
         {
@@ -1007,7 +1023,7 @@ int arg(Parser *parser)
         
         if(parser->is_in_print)
         {
-            gen_print(true, parser->curr_token); //generator call
+            gen_print(!parser->is_in_def, parser->curr_token); //generator call
         }
         else
         {
@@ -1038,7 +1054,9 @@ int arg(Parser *parser)
     CHECK_ERROR();
 
     // TODO SAMO - mozno to je zle, funckia iba prida riadok, dalo by sa riesit iba gen_instruct, ale kvoli prehladnosti kodu som vytvoril dalsiu funckiu
-    gen_print_space();
+    if (parser->is_in_print) {
+        gen_print_space();
+    }
     
     err = arg(parser);
     CHECK_ERROR();
