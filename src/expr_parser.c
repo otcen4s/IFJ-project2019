@@ -493,11 +493,11 @@ int expression(Parser* parser)
                 //we must check if we need to push current or previous token because it was pre readed
                 if(token_cnt == 1)
                 {
-                    gen_pushs(parser->previous_token, !parser->is_in_def, parser);
+                    gen_pushs(parser->previous_token, !parser->is_in_def);
                 }
                 else
                 {
-                    gen_pushs(parser->curr_token, !parser->is_in_def, parser);
+                    gen_pushs(parser->curr_token, !parser->is_in_def);
                 }
                 
                 DEBUG_PRINT("pushing value to the stack \n");

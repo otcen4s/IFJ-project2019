@@ -3,5 +3,9 @@ def sucet(a, b):
     return c
     print('Sucet je', c)
 
-x = sucet(2, 3)
-print('Helou', x)
+sucet(2, 3)
+
+if 2 == 2:
+    sucet(2, 5)
+else:
+    pass

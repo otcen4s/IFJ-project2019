@@ -633,7 +633,7 @@ void gen_var(char *varName, bool global) {
 //     ADDLINE(line.str);
 // }
 
-void gen_pushs(Token token, bool global, Parser *parser) {
+void gen_pushs(Token token, bool global) {
     if (token.type == TOKEN_STRING || token.type == TOKEN_IDENTIFIER) {
         if (token.type == TOKEN_STRING) {
             str_concat(&line, "PUSHS string@", replace_space(token.attribute.string.str), NULL);
@@ -802,24 +802,29 @@ void gen_func_call_start() {
 }
 
 void gen_func_call_add_param(Token token, bool global) {
-    char temp[STRLEN];
+    char temp[200];
     sprintf(temp, "%d", ++paramCounter);
 
     ADDCODE("DEFVAR TF@%"); ADDLINE(temp);
-    ADDCODE("MOVE TF@%"); ADDCODE(temp);
+    ADDCODE("MOVE TF@%"); ADDCODE(temp); ADDCODE(" ");
 
-    if (token.type == TOKEN_INTEGER) {
-        sprintf(temp, " int@%d", token.attribute.integer);
-    } else if (token.type == TOKEN_DECIMAL) {
-        sprintf(temp, " float@%a", token.attribute.decimal);
-    } else if (token.type == TOKEN_STRING) {
-        sprintf(temp, " string@%s", replace_space(token.attribute.string.str));
-    } else if (token.type == TOKEN_IDENTIFIER) {
-        str_concat(&line, " ", ISGLOBAL(global), token.attribute.string.str, NULL);
-        strcpy(temp, line.str);
+    if (token.type == TOKEN_STRING || token.type == TOKEN_IDENTIFIER) {
+        if (token.type == TOKEN_STRING) {
+            str_concat(&line, "string@", replace_space(token.attribute.string.str), NULL);
+        } else if (token.type == TOKEN_IDENTIFIER) {
+            str_concat(&line, ISGLOBAL(global), token.attribute.string.str, NULL);
+        }
+
+        ADDLINE(line.str);
+    } else {
+        if (token.type == TOKEN_INTEGER) {
+            sprintf(temp, "int@%d", token.attribute.integer);
+        } else if (token.type == TOKEN_DECIMAL) {
+            sprintf(temp, "float@%a", token.attribute.decimal);
+        }
+
+        ADDLINE(temp);
     }
-
-    ADDLINE(temp);
 }
 
 void gen_func_call_end(char *funcName, char *varName, bool global) {
