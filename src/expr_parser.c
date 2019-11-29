@@ -119,6 +119,7 @@ int token_enum_to_symb_enum (Token_type token_enum)
 {
     if(token_enum == TOKEN_STRING || 
        token_enum == TOKEN_INTEGER ||
+       token_enum == KEYWORD_NONE ||
        token_enum == TOKEN_DECIMAL)
       {
           return VALUE;
