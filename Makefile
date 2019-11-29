@@ -14,7 +14,7 @@ test : $(PATHB) $(BIN)
 	#./$(PATHB)string_lib_test
 	./$(PATHB)scanner_test
 	#./$(PATHB)stack_test
-	./$(PATHB)parser_test
+	#./$(PATHB)parser_test
 	#./$(PATHB)symtable_test
 	#./$(PATHB)generator_test
 	#./$(PATHB)expr_test

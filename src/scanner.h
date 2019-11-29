@@ -26,7 +26,7 @@ typedef struct {
 
 // functions forward declarations
 Token create_string_token(tString string);
-Token create_decimal_token(tString string);
+Token create_decimal_token(tString string, int*err);
 Token create_integer_token(tString string, int *error);
 void check_keyword(tString* string, Token* token);
 Token read_token(Scanner *scanner, int *err);

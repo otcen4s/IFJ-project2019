@@ -70,6 +70,17 @@ Token create_integer_token(tString string, int *error) {
     Token token;
     token.type = 0;
     char *endptr;
+
+    //TODO IMPLEMENT IN AUTOMATA
+    //HOTFIX
+    if(string.len > 2)
+    {
+        if((string.str[0] == '0') && (string.str[1] == '0'))
+        {
+            *error= LEXICAL_ERROR;
+            return token; 
+        }
+    }
     long  value = strtol(string.str, &endptr, 10);
 
     if (*endptr != '\0') {
@@ -83,10 +94,21 @@ Token create_integer_token(tString string, int *error) {
     return token;
 }
 
-Token create_decimal_token(tString string) 
+Token create_decimal_token(tString string, int* error) 
 {
     
-    Token token; 
+    Token token;
+    token.type = 0;
+    //TODO IMPLEMENT IN AUTOMATA
+    //HOTFIX
+    if(string.len > 2)
+    {
+        if((string.str[0] == '0') && (string.str[1] == '0'))
+        {
+            *error= LEXICAL_ERROR;
+            return token; 
+        }
+    }
     double value = atof(string.str);
     token.type = TOKEN_DECIMAL;
     token.attribute.decimal = value;
@@ -787,7 +809,12 @@ Token read_token(Scanner *scanner, int *err)
                     ungetc(scanner->curr_char, scanner->src_file);
 
                     //what we have readed so far is a correct int number
-                    token = create_decimal_token(*scanner->atr_string);
+                    token = create_decimal_token(*scanner->atr_string, err);
+                    if(*err) 
+                    {
+                        scanner->state = STATE_ERROR;
+                        break;
+                    }
                     return token; 
                 }
                 break;
@@ -843,10 +870,10 @@ Token read_token(Scanner *scanner, int *err)
                 else
                 {
                     ungetc(scanner->curr_char, scanner->src_file);  //TODO NEEDS A FIX
-                    //what we have readed so far is a correct int number
-                    token = create_decimal_token(*scanner->atr_string);
+                    //what we have readed so far is a correct  number
+                    token = create_decimal_token(*scanner->atr_string, err);
                     if(*err)
-                    { 
+                    {
                         return empty_token; //error code is allredy set
                     }
                     else return token;

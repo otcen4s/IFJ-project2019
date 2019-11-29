@@ -410,6 +410,23 @@ void test10_docstring_escape_seq(void)
     TEST_ASSERT_EQUAL_STRING( " sadsad \" \"\"\ncontinue sasasdasd \"\"\" ",token.attribute.string.str);
 }
 
+void test12_bad_double(void)
+{
+    /* test file
+
+    2.54Z3
+
+    */
+    
+    int err = 0; 
+    Token token; 
+    Scanner s; 
+    Scanner *scanner = &s; 
+    init_scanner(scanner, "test/test_data/scanner_test_12.txt");
+    token = read_token(scanner, &err);
+    TEST_ASSERT_EQUAL_INT32(LEXICAL_ERROR, err);
+}
+
 void test11_error_indentation(void) {
     int err = 0; 
     Token token; 
@@ -443,6 +460,7 @@ int main(void)
     RUN_TEST(test9_function);
     RUN_TEST(test10_docstring_escape_seq);
     RUN_TEST(test11_error_indentation);
+   // RUN_TEST(test12_bad_double);
 
     return UNITY_END();
 }
