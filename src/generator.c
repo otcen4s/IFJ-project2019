@@ -425,6 +425,52 @@ int generator_begin() {
     ADDLINE("POPFRAME");
     ADDLINE("RETURN");
 
+    // function greater than or equal
+    ADDLINE("LABEL $gtes");
+    ADDLINE("POPS GF@$op2");
+    ADDLINE("POPS GF@$op1");
+
+    ADDLINE("PUSHS GF@$op1");
+    ADDLINE("PUSHS GF@$op2");
+
+    ADDLINE("PUSHS GF@$op1");
+    ADDLINE("PUSHS GF@$op2");
+
+    ADDLINE("CALL $eq");
+    ADDLINE("PUSHS bool@true");
+    ADDLINE("JUMPIFEQS $gtesTrue");
+
+    ADDLINE("CALL $glt");
+    ADDLINE("GTS");
+    ADDLINE("RETURN");
+
+    ADDLINE("LABEL $gtesTrue");
+    ADDLINE("PUSHS bool@true");
+    ADDLINE("RETURN");
+
+    // function lesser than or equal
+    ADDLINE("LABEL $ltes");
+    ADDLINE("POPS GF@$op2");
+    ADDLINE("POPS GF@$op1");
+
+    ADDLINE("PUSHS GF@$op1");
+    ADDLINE("PUSHS GF@$op2");
+
+    ADDLINE("PUSHS GF@$op1");
+    ADDLINE("PUSHS GF@$op2");
+
+    ADDLINE("CALL $eq");
+    ADDLINE("PUSHS bool@true");
+    ADDLINE("JUMPIFEQS $ltesTrue");
+
+    ADDLINE("CALL $glt");
+    ADDLINE("LTS");
+    ADDLINE("RETURN");
+
+    ADDLINE("LABEL $ltesTrue");
+    ADDLINE("PUSHS bool@true");
+    ADDLINE("RETURN");
+
     // lesser than, greater than functions
     ADDLINE("LABEL $glt");
     ADDLINE("POPS GF@$op2");
@@ -492,6 +538,12 @@ int generator_begin() {
     ADDLINE("LABEL $gltFinish");
     ADDLINE("PUSHS GF@$op1");
     ADDLINE("PUSHS GF@$op2");
+    ADDLINE("RETURN");
+
+    // not equal function
+    ADDLINE("LABEL $neq");
+    ADDLINE("CALL $eq");
+    ADDLINE("NOTS");
     ADDLINE("RETURN");
 
     // equal function
@@ -711,9 +763,21 @@ void gen_gts() {
     ADDLINE("GTS");
 }
 
+void gen_gtes() {
+    ADDLINE("CALL $gtes");
+}
+
+void gen_ltes() {
+    ADDLINE("CALL $ltes");
+}
+
 // TODO bool support is not required?
 void gen_eqs() {
     gen_instruct("CALL $eq");
+}
+
+void gen_neqs() {
+    gen_instruct("CALL $neq");
 }
 
 // generate instruction with no parameters
@@ -959,23 +1023,20 @@ void gen_print_end() {
 
 // }
 
-// TODO we must convert every ASCII chars from 000-032 035 and 092, not just spaces !
+// TODO maybe change name because it now does more than just replace spaces
 const char *replace_space (char *string) {
+    char temp[100];
     str_copy(&helper, "");
 
     for (size_t j = 0; j < strlen(string); j++) {
-        if (string[j] == ' ') {
-            str_append(&helper, "\\032");
-        } else if (string[j] == '\n') {
-            str_append(&helper, "\\010");
-        } else if (string[j] == '#') {
-            str_append(&helper, "\\035");
+        
+        if (string[j] < 100) {
+            sprintf(temp, "\\%03d", string[j]);
         } else {
-            char temp[2];
-            temp[0] = string[j];
-            temp[1] = '\0';
-            str_append(&helper, temp);
+            sprintf(temp, "%c", string[j]);
         }
+
+        str_append(&helper, temp);
     }
 
     return helper.str;

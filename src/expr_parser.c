@@ -375,21 +375,21 @@ int reduce(Expr_parser * expr_parser)
        break;
     
     case E_LEQ_E:
-       //TODO generate stack compare here 
+       gen_ltes();
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
        break;
     
     case E_GEQ_E:
-       //TODO generate stack compare here 
+       gen_gtes();
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
        break;
     
     case E_NEQ_E:
-        //TODO generate stack compare here 
+        gen_neqs();
         //add new not terminal which represents result to the sym stack
         err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
         if(err) return INTERNAL_ERROR;

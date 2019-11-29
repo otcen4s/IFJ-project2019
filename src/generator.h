@@ -51,8 +51,11 @@ void gen_inputi();
 void gen_inputf();
 
 void gen_lts();
+void gen_ltes();
 void gen_gts();
+void gen_gtes();
 void gen_eqs();
+void gen_neqs();
 
 void gen_func_start(char *funcName);
 
