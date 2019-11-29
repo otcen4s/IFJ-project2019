@@ -422,15 +422,89 @@ PUSHS GF@$op2
 EQS
 RETURN
 LABEL $$main
-DEFVAR GF@a
-PUSHS int@0
-POPS GF@a
-DEFVAR GF@b
-PUSHS GF@a
-PUSHS int@0
+JUMP %factorialEnd
+LABEL %factorial
+PUSHFRAME
+DEFVAR LF@%retval
+MOVE LF@%retval nil@nil
+DEFVAR LF@n
+MOVE LF@n LF@%1
+PUSHS LF@n
+PUSHS int@2
+CALL $glt
+LTS
+CALL $eval
+JUMPIFEQ $if0Else GF@$temp bool@false
+DEFVAR LF@result
+PUSHS int@1
+POPS LF@result
+JUMP $if0End
+LABEL $if0Else
+DEFVAR LF@decremented_n
+PUSHS LF@n
+PUSHS int@1
 POPS GF@$op2
 POPS GF@$op1
 TYPE GF@$op1Type GF@$op1
 TYPE GF@$op2Type GF@$op2
-CALL $idivs
-POPS GF@b
+CALL $subs
+POPS LF@decremented_n
+DEFVAR LF@temp_result
+CREATEFRAME
+DEFVAR TF@%1
+MOVE TF@%1 LF@decremented_n
+CALL %factorial
+MOVE LF@temp_result TF@%retval
+PUSHS LF@n
+PUSHS LF@temp_result
+POPS GF@$op2
+POPS GF@$op1
+TYPE GF@$op1Type GF@$op1
+TYPE GF@$op2Type GF@$op2
+CALL $muls
+POPS LF@result
+LABEL $if0End
+PUSHS LF@result
+POPS LF@%retval
+POPFRAME
+RETURN
+POPFRAME
+RETURN
+LABEL %factorialEnd
+WRITE string@\090\097dejte\032\099islo\032pro\032vypo\099et\032f\097ktori\097lu\058\032
+WRITE string@\010
+CREATEFRAME
+DEFVAR TF@%retval
+MOVE TF@%retval nil@nil
+DEFVAR GF@a
+CREATEFRAME
+CALL $inputi
+MOVE GF@a TF@%retval
+PUSHS GF@a
+PUSHS float@0x0p+0
+CALL $glt
+LTS
+CALL $eval
+JUMPIFEQ $if1Else GF@$temp bool@false
+WRITE string@\070\097ktori\097l\032nelze\032spo\099it\097t
+WRITE string@\010
+CREATEFRAME
+DEFVAR TF@%retval
+MOVE TF@%retval nil@nil
+JUMP $if1End
+LABEL $if1Else
+DEFVAR GF@vysl
+CREATEFRAME
+DEFVAR TF@%1
+MOVE TF@%1 GF@a
+CALL %factorial
+MOVE GF@vysl TF@%retval
+WRITE string@\086ysledek\032je\058
+WRITE string@\032
+MOVE GF@$op1 GF@vysl
+CALL $print
+WRITE string@\010
+CREATEFRAME
+DEFVAR TF@%retval
+MOVE TF@%retval nil@nil
+LABEL $if1End
