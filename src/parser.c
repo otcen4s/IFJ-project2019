@@ -144,11 +144,12 @@ int check_function_defined(Parser *parser)
     return NO_ERROR;
 }
 
-int check_is_defined(Parser *parser)
+int curr_key_is_defined(Parser *parser, unsigned sym_type)
 {
     int err;
     parser->symbol_data_global = parser->symbol_data_local = NULL;
 
+    //look for symbol in relevant tables based on current scope
     if(parser->is_in_def)
     {
         parser->symbol_data_local = symtab_lookup(parser->local_table, parser->key.str, &err);
@@ -165,26 +166,15 @@ int check_is_defined(Parser *parser)
         parser->symbol_data_global = symtab_lookup(parser->global_table, parser->key.str, &err);
         CHECK_ERROR();
     }
-
     
-    if((parser->symbol_data_local == NULL) && (parser->symbol_data_global == NULL))
-    {
-        return UNDEFINE_REDEFINE_ERROR;
-    }
-    else
-    {
-        if((parser->symbol_data_local != NULL) && (parser->symbol_data_local->symbol_type == SYMBOL_VAR) && (parser->symbol_data_local->symbol_state == SYMBOL_USED))
-        {
-            return UNDEFINE_REDEFINE_ERROR;
-        }
-        if((parser->symbol_data_global != NULL) && (parser->symbol_data_global->symbol_type == SYMBOL_VAR) && (parser->symbol_data_global->symbol_state == SYMBOL_USED))
-        {
-            return UNDEFINE_REDEFINE_ERROR;
-        }
+    //cases when its undefined
+    if((!parser->symbol_data_local) &&(!parser->symbol_data_global)) return UNDEFINE_REDEFINE_ERROR;    
+    tSymbol_item * checked = NOT_NULL(parser->symbol_data_local, parser->symbol_data_global);
+    if((checked->symbol_state == SYMBOL_USED) && (sym_type == SYMBOL_VAR)) return UNDEFINE_REDEFINE_ERROR;
+    if(checked->symbol_type != sym_type) return UNDEFINE_REDEFINE_ERROR;
 
-        return NO_ERROR;
-    }
-    
+    //its defined
+    return NO_ERROR;    
 }
 
 void dispose_parser(Parser* parser)
@@ -1051,7 +1041,7 @@ int arg(Parser *parser)
         GET_KEY(); // save string of ID into key
         
         //this also sets parser->symbol_data_global and symbol_data_global (both null if not deffined else one of them not null)
-        err = check_is_defined(parser);
+        err = curr_key_is_defined(parser, SYMBOL_VAR);
         CHECK_ERROR();
          
         parser->current_function->params_count_used++;

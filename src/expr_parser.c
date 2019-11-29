@@ -66,13 +66,13 @@ bool is_defined(Parser* parser, int token_cnt, bool *is_global)
     //inside function
     if(parser->is_in_def)
     {
-       if (curr_sym_loc && curr_sym_loc->symbol_state== SYMBOL_DEFINED)
+       if (curr_sym_loc && curr_sym_loc->symbol_state== SYMBOL_DEFINED && curr_sym_loc->symbol_type == SYMBOL_VAR)
        {
            *is_global = false; 
            return true;
        }
       
-        if (curr_sym_glob && curr_sym_glob->symbol_state == SYMBOL_DEFINED)
+        if (curr_sym_glob && curr_sym_glob->symbol_state == SYMBOL_DEFINED && curr_sym_glob->symbol_type == SYMBOL_VAR)
         {
             *is_global= true;
             return true;
@@ -83,7 +83,7 @@ bool is_defined(Parser* parser, int token_cnt, bool *is_global)
     //outside function
 
     *is_global = true;
-    if(curr_sym_glob && curr_sym_glob ->symbol_state == SYMBOL_DEFINED) 
+    if(curr_sym_glob && curr_sym_glob ->symbol_state == SYMBOL_DEFINED && curr_sym_glob->symbol_type == SYMBOL_VAR) 
         return true;
 
     return false;     
