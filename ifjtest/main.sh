@@ -50,7 +50,7 @@ run_test() {
                 printf "${GREEN}DIFF OK${NC}\n"
             else
                 printf "${RED}DIFF BAD${NC}\n"
-                echo "$diff"
+                diff -y vzor.out test.out
                 exit 1
             fi
         fi
