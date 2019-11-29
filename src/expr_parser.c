@@ -33,7 +33,7 @@ int parsing_table[16][16] =
 	{ R, R, R, R, R, R, R, R, R, R, R, S, R, S, S, R }, // *
     { R, R, R, R, R, R, R, R, R, R, R, S, R, S, S, R }, // /
     { R, R, R, R, R, R, R, R, R, R, R, S, R, S, S, R }, // //
-    { S, S, S, S, S, R, F, F, F, F, F, S, R, S, S, R }, // >
+    { S, S, S, S, S, F, F, F, F, F, F, S, R, S, S, R }, // >
 	{ S, S, S, S, S, F, F, F, F, F, F, S, R, S, S, R }, // ==
     { S, S, S, S, S, F, F, F, F, F, F, S, R, S, S, R }, // !=
     { S, S, S, S, S, F, F, F, F, F, F, S, R, S, S, R }, // <=

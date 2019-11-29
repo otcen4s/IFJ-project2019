@@ -423,103 +423,14 @@ EQS
 RETURN
 LABEL $$main
 DEFVAR GF@a
-PUSHS int@2
-PUSHS int@2
-CALL $neq
+PUSHS int@0
 POPS GF@a
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-PUSHS int@2
-PUSHS float@0x1p+1
-CALL $neq
-POPS GF@a
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-PUSHS float@0x1p+1
-PUSHS float@0x1p+1
-CALL $neq
-POPS GF@a
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-PUSHS int@3
-PUSHS int@2
-CALL $neq
-POPS GF@a
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-PUSHS int@2
-PUSHS int@2
-CALL $gtes
-POPS GF@a
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-PUSHS int@2
-PUSHS int@2
-CALL $ltes
-POPS GF@a
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-PUSHS int@3
-PUSHS int@2
-CALL $gtes
-POPS GF@a
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-PUSHS int@3
-PUSHS int@2
-CALL $ltes
-POPS GF@a
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-PUSHS int@3
-PUSHS float@0x1p+3
-CALL $ltes
-POPS GF@a
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-PUSHS float@0x1p+1
-PUSHS int@2
-CALL $ltes
-POPS GF@a
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
+DEFVAR GF@b
+PUSHS GF@a
+PUSHS int@0
+POPS GF@$op2
+POPS GF@$op1
+TYPE GF@$op1Type GF@$op1
+TYPE GF@$op2Type GF@$op2
+CALL $idivs
+POPS GF@b

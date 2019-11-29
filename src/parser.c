@@ -781,12 +781,12 @@ int expression_start(Parser *parser)
                 CHECK_ERROR();
 
                 /* Checking the count of arguments */
-                if((parser->symbol_data_global != NULL)                         && 
-                (parser->symbol_data_global->symbol_state == SYMBOL_DEFINED)    && 
-                (parser->symbol_data_global->symbol_type == SYMBOL_FUNC)        &&
+                if((parser->current_function != NULL)                         && 
+                (parser->current_function->symbol_state == SYMBOL_DEFINED)    && 
+                (parser->current_function->symbol_type == SYMBOL_FUNC)        &&
                 (!(parser->is_in_print)))
                 {
-                    if(parser->symbol_data_global->params_count_defined != parser->symbol_data_global->params_count_used)
+                    if(parser->current_function->params_count_defined != parser->current_function->params_count_used)
                     {
                         return PARAM_COUNT_ERROR;
                     }
