@@ -945,13 +945,15 @@ void gen_func_builtin_call_end(char *funcName) {
 }
 
 void gen_print(bool global, Token token) {
-    char temp[STRLEN];
-
     if (token.type == TOKEN_IDENTIFIER) {
         ADDCODE("MOVE GF@$op1 "); ADDCODE(ISGLOBAL(global)); ADDLINE(token.attribute.string.str);
         ADDLINE("CALL $print");
-        // ADDCODE("WRITE "); ADDCODE(ISGLOBAL(global)); ADDLINE(token.attribute.string.str);
+    } else if (token.type == TOKEN_STRING) {
+        ADDCODE("WRITE string@");
+        ADDLINE(replace_space(token.attribute.string.str));
     } else {
+        char temp[200];
+        
         ADDCODE("WRITE string@");
         if (token.type == TOKEN_INTEGER) {
             sprintf(temp, "%d", token.attribute.integer);
@@ -959,8 +961,6 @@ void gen_print(bool global, Token token) {
             sprintf(temp, "%a", token.attribute.decimal);
         } else if (token.type == KEYWORD_NONE) {
             strcpy(temp, "None");
-        } else if (token.type == TOKEN_STRING) {
-            strcpy(temp, replace_space(token.attribute.string.str));
         }
 
         ADDLINE(temp);
