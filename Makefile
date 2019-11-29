@@ -52,3 +52,14 @@ main : $(PATHS)main.c $(PATHS)parser.c $(PATHS)string_lib.c $(PATHS)scanner.c $(
 
 clean :
 	rm -r $(PATHB)
+
+odovzdanie:
+	mkdir xzitna02
+	cp ./src/* ./xzitna02
+	cp ./rozdeleni ./xzitna02
+	cp ./dokumentace.pdf ./xzitna02
+	cp ./makefile_odovzdanie ./xzitna02/Makefile
+	cd ./xzitna02 && zip -r ../xzitna02.zip ./ && cd ..
+	rm -r ./xzitna02
+	./is_it_ok.sh ./xzitna02.zip ./temp_folder
+	rm -r ./temp_folder
