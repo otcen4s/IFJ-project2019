@@ -921,6 +921,8 @@ void gen_func_call_add_param(Token token, bool global) {
             sprintf(temp, "int@%d", token.attribute.integer);
         } else if (token.type == TOKEN_DECIMAL) {
             sprintf(temp, "float@%a", token.attribute.decimal);
+        } else if (token.type == KEYWORD_NONE) {
+            strcpy(temp, "nil@nil");
         }
 
         ADDLINE(temp);
