@@ -437,6 +437,11 @@ Token read_token(Scanner *scanner, int *err)
             
                     
             case STATE_STRING_START:
+                if((scanner->curr_char == '\n') || (scanner->curr_char == EOF))
+                {
+                    scanner->state = STATE_ERROR;  
+                    break;
+                }
                 if(scanner->curr_char == '\'')
                 {
                     scanner->state = STATE_STRING_END;
@@ -462,6 +467,13 @@ Token read_token(Scanner *scanner, int *err)
 
 
             case STATE_STRING_ESCAPE_SEQ:
+                //unterminated string
+                if((scanner->curr_char == '\n') || (scanner->curr_char == EOF))
+                {
+                    scanner->state = STATE_ERROR;  
+                    break;
+                }
+
                 if(scanner->curr_char == 'n')
                 {
                     if(str_insert_char(scanner->atr_string,'\n'))
@@ -509,6 +521,12 @@ Token read_token(Scanner *scanner, int *err)
                 break;
             
             case STATE_STR_ESCAPE_HEXA_1:
+                //unterminated string
+                if((scanner->curr_char == '\n') || (scanner->curr_char == EOF))
+                {
+                    scanner->state = STATE_ERROR;  
+                    break;
+                }
                 if (
                   (tolower(scanner->curr_char) >= 'a' && tolower(scanner->curr_char) <= 'f') ||
                   (scanner->curr_char >= '0' && scanner->curr_char <= '9')
@@ -526,6 +544,12 @@ Token read_token(Scanner *scanner, int *err)
             
 
             case STATE_STR_ESCAPE_HEXA_2:
+                //unterminated string
+                if((scanner->curr_char == '\n') || (scanner->curr_char == EOF))
+                {
+                    scanner->state = STATE_ERROR;  
+                    break;
+                }
                 if (
                         (tolower(scanner->curr_char) >= 'a' && tolower(scanner->curr_char) <= 'f') ||
                         (scanner->curr_char >= '0' && scanner->curr_char <= '9')
@@ -588,6 +612,11 @@ Token read_token(Scanner *scanner, int *err)
 
 
             case STATE_DOCSTRING_VALID:
+                if(scanner->curr_char == EOF) 
+                {
+                    scanner->state = STATE_ERROR;
+                    break;
+                }
                 if(scanner->curr_char == '\\')
                 {
                     scanner->state = STATE_DOCSTRING_ESCAPE_SEQ;
