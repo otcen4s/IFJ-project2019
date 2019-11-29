@@ -2,5 +2,4 @@
 def a():
     pass
 
-param = 4
-b = a(param,3)
+b = a(param)

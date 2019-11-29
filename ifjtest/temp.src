@@ -65,6 +65,8 @@ def print(*args):
   return None
 
 # Zde bude nasledovat program jazyka IFJ19
-##9
-a = 0
-b= a//0
+##2
+if :
+    pass
+else:
+    d = 8
