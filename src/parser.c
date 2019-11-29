@@ -233,7 +233,6 @@ int start_compiler(char* src_file_name, char* out_file_name)
     }
 
     generate_code(output_file);
-
     destroy_scanner(parser->scanner);
     dispose_parser(parser);
     return NO_ERROR;
@@ -651,7 +650,7 @@ int params(Parser *parser)
 
     parser->symbol_data_local = symtab_add(parser->local_table, parser->key.str, &err); // insert parameters here into local symtable ... also overwriting parser->symbol_data
     CHECK_ERROR();
-    parser->symbol_data_local->symbol_type = SYMBOL_PARAM;
+    parser->symbol_data_local->symbol_type = SYMBOL_VAR; //params
     parser->symbol_data_local->symbol_state = SYMBOL_DEFINED;
     parser->symbol_data_global->params_count_defined++;
 
@@ -687,14 +686,15 @@ int next_params(Parser *parser)
 
     parser->symbol_data_local = symtab_lookup(parser->local_table, parser->key.str, &err);
     CHECK_ERROR(); //internal error
-    if((parser->symbol_data_local != NULL) && (parser->symbol_data_local->symbol_type == SYMBOL_PARAM)) // parameter with same ID was found in our local table which indicates syntax error
+    if(parser->symbol_data_local != NULL) //alredy defined error 3
     {
-        return SYNTAX_ERROR; // this causes error -> def foo(a,a): ...
+        return UNDEFINE_REDEFINE_ERROR; // this causes error -> def foo(a,a): ...
     }
 
     parser->symbol_data_local = symtab_add(parser->local_table, parser->key.str, &err); // insert parameters into local symtable ... also overwriting parser->symbol_data
     CHECK_ERROR(); //internal error
-    parser->symbol_data_local->symbol_type = SYMBOL_PARAM; // symbol type set as parameter
+    parser->symbol_data_local->symbol_type = SYMBOL_VAR; // params are just local variables
+    parser->symbol_data_local->symbol_state = SYMBOL_DEFINED; // on call params are always defined
     parser->symbol_data_global->params_count_defined++;
 
     gen_func_def_add_param(parser->key.str); // generator call

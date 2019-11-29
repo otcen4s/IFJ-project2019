@@ -53,48 +53,40 @@ bool is_defined(Parser* parser, int token_cnt)
 {
     int err= NO_ERROR;
     char* id_name;
+    bool is_global = false; 
+
     //set id name from proper token (because 2 tokens were pre readed)
-    if(token_cnt== 1)
-    {
-        id_name = parser->previous_token.attribute.string.str;
-    }
-    else
-    {
-        id_name = parser->curr_token.attribute.string.str;
-    }
+    id_name = token_cnt==1?parser->previous_token.attribute.string.str:
+                           parser->curr_token.attribute.string.str;
+    
+    //lookup in symtables
+    tSymbol_item *curr_sym_loc = symtab_lookup(parser->local_table,id_name, &err);
+    tSymbol_item *curr_sym_glob =  symtab_lookup(parser->global_table,id_name, &err); 
 
-    tSymbol_item *curr_sym_glob = NULL;
-    tSymbol_item *curr_sym_loc = NULL; 
-
+    //inside function
     if(parser->is_in_def)
     {
-        if(((curr_sym_loc = symtab_lookup(parser->local_table,id_name, &err))==NULL) &&
-           (curr_sym_glob = symtab_lookup(parser->global_table,id_name, &err))==NULL)
+       if (curr_sym_loc && curr_sym_loc->symbol_state== SYMBOL_DEFINED)
+       {
+           is_global = false; 
+           return true;
+       }
+      
+        if (curr_sym_glob && curr_sym_glob->symbol_state == SYMBOL_DEFINED)
         {
-            return false;
+            is_global= true;
+            return true;
         }
-        else
-        {
-            if ((curr_sym_glob && curr_sym_glob->symbol_state ==SYMBOL_USED) ||
-                (curr_sym_loc && curr_sym_loc->symbol_state == SYMBOL_USED))
-            {
-                return false; 
-            }
-            else  return true;
-        }
+        return false;
     }
-    else
-    {
-        if((curr_sym_glob = symtab_lookup(parser->global_table,id_name, &err))== NULL)
-        {
-            return false;
-        }
-        else
-        {
-            if ((curr_sym_glob && curr_sym_glob->symbol_state == SYMBOL_USED)) return false;
-            return true; 
-        }
-    }                                          
+   
+    //outside function
+
+    is_global = true;
+    if(curr_sym_glob && curr_sym_glob ->symbol_state == SYMBOL_DEFINED) 
+        return true;
+
+    return false;     
 }
 /**
     Helper function for creation of symbol struct

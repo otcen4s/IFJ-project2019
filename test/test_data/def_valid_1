@@ -1,7 +1,4 @@
-def foo():
+def foo(b, c):
     pass
 
-if 1:
-    foo()
-else:
-    pass
+

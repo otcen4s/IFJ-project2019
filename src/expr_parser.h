@@ -29,6 +29,7 @@ typedef enum{
 } Sym_data_type;
 
 
+
 typedef enum{
 	E_PLUS_E,
 	E_MINUS_E,
@@ -57,6 +58,8 @@ typedef struct
 	Symbol op3;
 	int valid_sym_cnt;
 } Expr_parser;
+
+
 
 
 /*

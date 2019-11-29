@@ -66,3 +66,7 @@ _deps
 
 /bin
 /program.code
+*.code
+*.swp
+vgcore*
+
