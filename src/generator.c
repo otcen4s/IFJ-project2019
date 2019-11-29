@@ -427,6 +427,15 @@ int generator_begin() {
 
     // function greater than or equal
     ADDLINE("LABEL $gtes");
+    ADDLINE("POPS GF@$op2");
+    ADDLINE("POPS GF@$op1");
+
+    ADDLINE("PUSHS GF@$op1");
+    ADDLINE("PUSHS GF@$op2");
+
+    ADDLINE("PUSHS GF@$op1");
+    ADDLINE("PUSHS GF@$op2");
+
     ADDLINE("CALL $eq");
     ADDLINE("PUSHS bool@true");
     ADDLINE("JUMPIFEQS $gtesTrue");
@@ -441,12 +450,21 @@ int generator_begin() {
 
     // function lesser than or equal
     ADDLINE("LABEL $ltes");
+    ADDLINE("POPS GF@$op2");
+    ADDLINE("POPS GF@$op1");
+
+    ADDLINE("PUSHS GF@$op1");
+    ADDLINE("PUSHS GF@$op2");
+
+    ADDLINE("PUSHS GF@$op1");
+    ADDLINE("PUSHS GF@$op2");
+
     ADDLINE("CALL $eq");
     ADDLINE("PUSHS bool@true");
     ADDLINE("JUMPIFEQS $ltesTrue");
 
-    ADDLINE("CALL $ltes");
-    ADDLINE("GTS");
+    ADDLINE("CALL $glt");
+    ADDLINE("LTS");
     ADDLINE("RETURN");
 
     ADDLINE("LABEL $ltesTrue");
