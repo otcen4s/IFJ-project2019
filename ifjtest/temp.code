@@ -422,113 +422,89 @@ PUSHS GF@$op2
 EQS
 RETURN
 LABEL $$main
-PUSHS string@\032\080rogr\097m\032\051\058\032\080r\097\099e\032s\032retez\099i\032\097\032vest\097venymi\032funk\099emi\032
-DEFVAR GF@s1
-PUSHS string@\084oto\032je\032nej\097ky\032text
-POPS GF@s1
-DEFVAR GF@s2
-PUSHS GF@s1
-PUSHS string@\044\032ktery\032jeste\032tro\099hu\032o\098oh\097time
-POPS GF@$op2
-POPS GF@$op1
-TYPE GF@$op1Type GF@$op1
-TYPE GF@$op2Type GF@$op2
-CALL $adds
-POPS GF@s2
-MOVE GF@$op1 GF@s1
-CALL $print
-WRITE string@\032
-WRITE string@\010
-WRITE string@\032
-MOVE GF@$op1 GF@s2
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-DEFVAR GF@s1len
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 GF@s1
-CALL $len
-MOVE GF@s1len TF@%retval
-PUSHS GF@s1len
-PUSHS int@4
-POPS GF@$op2
-POPS GF@$op1
-TYPE GF@$op1Type GF@$op1
-TYPE GF@$op2Type GF@$op2
-CALL $subs
-POPS GF@s1len
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 GF@s2
-DEFVAR TF@%2
-MOVE TF@%2 GF@s1len
-DEFVAR TF@%3
-MOVE TF@%3 int@4
-CALL $substr
-MOVE GF@s1 TF@%retval
-PUSHS GF@s1len
+JUMP %factorialEnd
+LABEL %factorial
+PUSHFRAME
+DEFVAR LF@%retval
+MOVE LF@%retval nil@nil
+DEFVAR LF@n
+MOVE LF@n LF@%1
+PUSHS LF@n
+PUSHS int@2
+CALL $glt
+LTS
+CALL $eval
+JUMPIFEQ $if0Else GF@$temp bool@false
+DEFVAR LF@result
+PUSHS int@1
+POPS LF@result
+JUMP $if0End
+LABEL $if0Else
+DEFVAR LF@decremented_n
+PUSHS LF@n
 PUSHS int@1
 POPS GF@$op2
 POPS GF@$op1
 TYPE GF@$op1Type GF@$op1
 TYPE GF@$op2Type GF@$op2
-CALL $adds
-POPS GF@s1len
-WRITE string@\052\032zn\097ky\032od\032
-WRITE string@\032
-MOVE GF@$op1 GF@s1len
-CALL $print
-WRITE string@\032
-WRITE string@\046\032zn\097ku\032v\032\034
-WRITE string@\032
-MOVE GF@$op1 GF@s2
-CALL $print
-WRITE string@\032
-WRITE string@\034\058
-WRITE string@\032
-MOVE GF@$op1 GF@s1
-CALL $print
-WRITE string@\010
+CALL $subs
+POPS LF@decremented_n
+DEFVAR LF@temp_result
 CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-WRITE string@\090\097dejte\032ser\097zenou\032posloupnost\032vse\099h\032m\097ly\099h\032pismen\032\097\045h\044\032
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-WRITE string@pri\099emz\032se\032pismen\097\032nesmeji\032v\032posloupnosti\032op\097kov\097t\058\032
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-CREATEFRAME
-CALL $inputs
-MOVE GF@s1 TF@%retval
-PUSHS GF@s1
-PUSHS nil@nil
-CALL $neq
-CALL $eval
-JUMPIFEQ $if0Else GF@$temp bool@false
-LABEL $while0Begin
-PUSHS GF@s1
-PUSHS string@\097\098\099defgh
-CALL $neq
-CALL $eval
-JUMPIFEQ $while0End GF@$temp bool@false
-WRITE string@\083p\097tne\032z\097d\097n\097\032posloupnost\044\032zkuste\032znovu\058\032
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-CREATEFRAME
-CALL $inputs
-MOVE GF@s1 TF@%retval
-JUMP $while0Begin
-LABEL $while0End
-JUMP $if0End
-LABEL $if0Else
+DEFVAR TF@%1
+MOVE TF@%1 LF@decremented_n
+CALL %factorial
+MOVE LF@temp_result TF@%retval
+PUSHS LF@n
+PUSHS LF@temp_result
+POPS GF@$op2
+POPS GF@$op1
+TYPE GF@$op1Type GF@$op1
+TYPE GF@$op2Type GF@$op2
+CALL $muls
+POPS LF@result
 LABEL $if0End
+PUSHS LF@result
+POPS LF@%retval
+POPFRAME
+RETURN
+POPFRAME
+RETURN
+LABEL %factorialEnd
+WRITE string@\090\097dejte\032\099islo\032pro\032vypo\099et\032f\097ktori\097lu\058\032
+WRITE string@\010
+CREATEFRAME
+DEFVAR TF@%retval
+MOVE TF@%retval nil@nil
+DEFVAR GF@a
+CREATEFRAME
+CALL $inputi
+MOVE GF@a TF@%retval
+PUSHS GF@a
+PUSHS float@0x0p+0
+CALL $glt
+LTS
+CALL $eval
+JUMPIFEQ $if1Else GF@$temp bool@false
+WRITE string@\070\097ktori\097l\032nelze\032spo\099it\097t
+WRITE string@\010
+CREATEFRAME
+DEFVAR TF@%retval
+MOVE TF@%retval nil@nil
+JUMP $if1End
+LABEL $if1Else
+DEFVAR GF@vysl
+CREATEFRAME
+DEFVAR TF@%1
+MOVE TF@%1 GF@a
+CALL %factorial
+MOVE GF@vysl TF@%retval
+WRITE string@\086ysledek\032je\058
+WRITE string@\032
+MOVE GF@$op1 GF@vysl
+CALL $print
+WRITE string@\010
+CREATEFRAME
+DEFVAR TF@%retval
+MOVE TF@%retval nil@nil
+LABEL $if1End

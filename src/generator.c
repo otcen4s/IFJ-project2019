@@ -660,59 +660,6 @@ void gen_var(char *varName, bool global) {
     ADDCODE("POPS "); ADDLINE(line.str);
 }
 
-// add, sub, mul, lt, or, ... every function with 2 symb
-// void gen_double_symb(char *instruct, Type type, char *var, Value symb1, Value symb2, bool global) {
-
-//     char scope[STRLEN];
-//     setScope(scope, global);
-
-//     if (type == TYPE_FLOAT) {
-//         char temp[STRLEN];
-//         sprintf(temp, " float@%a float@%a", symb1.decimal, symb2.decimal);
-
-//         str_concat(&line, instruct, scope, var, temp, NULL);
-//     } else {
-//         char varType[STRLEN];
-//         if (type == TYPE_INT) {
-//             strcpy(varType, " int@");
-//         } else if (type == TYPE_STRING) {
-//             strcpy(varType, " string@");
-//         } else if (type == TYPE_BOOL) {
-//             strcpy(varType, " bool@");
-//         }
-        
-//         str_concat(&line, instruct, scope, var, varType, symb1.string, varType, symb2.string, NULL);
-//     }
-
-//     ADDLINE(line.str);
-// }
-
-// void gen_single_symb(char *instruct, Type type, char *var, Value symb, bool global) {
-
-//     char scope[STRLEN];
-//     setScope(scope, global);
-
-//     if (type == TYPE_FLOAT) {
-//         char temp[STRLEN];
-//         sprintf(temp, " float@%a", symb.decimal);
-
-//         str_concat(&line, instruct, scope, var, temp, NULL);
-//     } else {
-//         char varType[STRLEN];
-//         if (type == TYPE_INT) {
-//             strcpy(varType, " int@");
-//         } else if (type == TYPE_STRING) {
-//             strcpy(varType, " string@");
-//         } else if (type == TYPE_BOOL) {
-//             strcpy(varType, " bool@");
-//         }
-        
-//         str_concat(&line, instruct, scope, var, varType, symb.string, NULL);
-//     }
-
-//     ADDLINE(line.str);
-// }
-
 void gen_pushs(Token token, bool global) {
     if (token.type == TOKEN_STRING || token.type == TOKEN_IDENTIFIER) {
         if (token.type == TOKEN_STRING) {
@@ -979,51 +926,6 @@ void gen_print_end() {
     ADDLINE("DEFVAR TF@%retval");
     ADDLINE("MOVE TF@%retval nil@nil");
 }
-
-// void gen_print(unsigned n, bool global, Token token, ...) {
-
-//     va_list ap;
-//     char temp[STRLEN];
-
-//     va_start(ap, token);
-
-//     for (unsigned i = 0; i < n; i++) {
-//         if (token.type == TOKEN_IDENTIFIER) {
-//             ADDCODE("WRITE "); ADDCODE(ISGLOBAL(global)); ADDLINE(token.attribute.string.str);
-//         } else {
-//             ADDCODE("WRITE string@");
-
-//             if (token.type == TOKEN_INTEGER) {
-//                 sprintf(temp, "%d", token.attribute.integer);
-//             } else if (token.type ==  TOKEN_DECIMAL) {
-//                 sprintf(temp, "%a", token.attribute.decimal);
-//             } else if (token.type == KEYWORD_NONE) {
-//                 strcpy(temp, "None");
-//             } else if (token.type == TOKEN_STRING) {
-//                 strcpy(temp, replace_space(token.attribute.string.str));
-//             }
-
-//             ADDCODE(temp);
-//             if (i == n - 1) {
-//                 // last term, add new line
-//                 ADDLINE("\\010");
-//             } else {
-//                 // add space
-//                 ADDLINE("\\032");
-//             }
-//         }
-
-//         token = va_arg(ap, Token);
-//     }
-
-//     va_end(ap);
-
-//     // return value is always None
-//     ADDLINE("CREATEFRAME");
-//     ADDLINE("DEFVAR TF@%retval");
-//     ADDLINE("MOVE TF@%retval nil@nil");
-
-// }
 
 // TODO maybe change name because it now does more than just replace spaces
 const char *replace_space (char *string) {
