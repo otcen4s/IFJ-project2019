@@ -1091,8 +1091,12 @@ int arg(Parser *parser)
     {
         if(parser->is_in_print)
         {
-             gen_print_end();
-             parser->is_in_print = false;
+            gen_print_end();
+            if(parser->left_side)
+            {
+                gen_move_retval(parser->left_side->key, is_global(parser->left_side, parser));
+            }
+            parser->is_in_print = false;
         }
         
         return NO_ERROR;
