@@ -5,6 +5,8 @@
 
 #define SKIP_EOL() while(parser->curr_token.type == TOKEN_EOL) GET_NEXT_TOKEN()
 
+#define NOT_NULL(_a,_b) ((_a) ? (_a) : (_b))
+
 #define COPY_CURRENT_TOKEN()                                                                                                        \
                             do{                                                                                                     \
                                 parser->previous_token = parser->curr_token;                                                        \
@@ -113,13 +115,13 @@ int init_parser(Parser* parser)
 bool is_global(tSymbol_item * var, Parser * parser)
 {
     int err= NO_ERROR;
-    //TODO UROB TO PORIADNE 
     if(parser->is_in_def)
     {
         if (symtab_lookup(parser->local_table, var->key, &err)) return false;
         if (symtab_lookup(parser->global_table, var->key, &err)) return true; 
     }
     if (symtab_lookup(parser->global_table, var->key, &err)) return true; 
+    return false; 
 }
 
 int check_function_defined(Parser *parser)
@@ -326,7 +328,8 @@ int statement(Parser *parser)
 
         if(used_function) // expands to if our function was firstly used and then defined
         {
-            if(parser->symbol_data_global->params_count_defined != parser->symbol_data_global->params_count_used)
+            if(parser->symbol_data_global->params_count_defined != 
+               parser->symbol_data_global->params_count_used)
             {
                 return PARAM_COUNT_ERROR;
             }
@@ -339,8 +342,7 @@ int statement(Parser *parser)
         GET_CHECK_TOKEN(TOKEN_EOL);  // expected end of line (EOL)
 
         /* Expected state -> STATE: DEF ID ( <params> ): EOL INDENT */
-        SKIP_EOL();
-
+        SKIP_EOL(); // in case there is more than one eol before indent
         CHECK_TOKEN(TOKEN_INDENT);
         CHECK_ERROR();
 
@@ -560,17 +562,10 @@ int statement(Parser *parser)
                     }
                 }
 
-                //generate function call end 
-                if(parser->left_side)
-                {
-                    gen_func_call_end(parser->current_function->key, parser->left_side->key, is_global(parser->left_side, parser));
-                }
-                    
-                else
-                {
-                    gen_func_call_end(parser->current_function->key, NULL , false);
-                }
-
+                //generate function call end (also moves retval into left side variable if there is one ) 
+                gen_func_call_end(parser->current_function->key, 
+                parser->left_side ? parser->left_side->key : NULL , 
+                parser->left_side ? is_global(parser->left_side, parser) : false);
             }
 
             else
@@ -1055,19 +1050,22 @@ int arg(Parser *parser)
     case TOKEN_IDENTIFIER:
         GET_KEY(); // save string of ID into key
         
-
+        //this also sets parser->symbol_data_global and symbol_data_global (both null if not deffined else one of them not null)
         err = check_is_defined(parser);
         CHECK_ERROR();
          
         parser->current_function->params_count_used++;
         
+        //find out if current id used as arg is global or local variable (it was checked that its defined allredy)
+        bool curr_id_is_global = is_global(NOT_NULL(parser->symbol_data_global , parser->symbol_data_local),parser);                    
+
         if(parser->is_in_print)
         {
-             gen_print(!parser->is_in_def, parser->curr_token); //generator call
+             gen_print(curr_id_is_global,parser->curr_token); //generator call
         }
         else
         {
-            gen_func_call_add_param(parser->curr_token, !parser->is_in_def); //generator call
+            gen_func_call_add_param(parser->curr_token, curr_id_is_global); //generator call
         }
         
 
@@ -1275,7 +1273,6 @@ int statement_inside(Parser *parser)
         /* STATE: WHILE <expression_start>: */
         CHECK_TOKEN(TOKEN_COLON);
         CHECK_ERROR();
-        //GET_CHECK_TOKEN(TOKEN_COLON); // expected ':'
         
         /* STATE: WHILE <expression_start>: EOL */
         GET_CHECK_TOKEN(TOKEN_EOL); // expected end of line(EOL)
@@ -1366,7 +1363,8 @@ int statement_inside(Parser *parser)
 
             err = expression_start(parser);
             CHECK_ERROR();
-
+            
+            //expression was valid so left side is inited propperly now
             parser->left_side->symbol_state = SYMBOL_DEFINED;
             
 
@@ -1424,17 +1422,10 @@ int statement_inside(Parser *parser)
                         return PARAM_COUNT_ERROR;
                     }
                 }
-
                 //generate function call end 
-                if(parser->left_side)
-                {
-                    gen_func_call_end(parser->current_function->key, parser->left_side->key, is_global(parser->left_side, parser));
-                }
-                    
-                else
-                {
-                    gen_func_call_end(parser->current_function->key, NULL , false);
-                }
+                //also moves retval into left side variable if there is one
+                gen_func_call_end(parser->current_function->key, 
+                                  parser->left_side?parser->left_side->key:NULL , false);
                 
             }
 

@@ -18,7 +18,7 @@ int init_expr_parser(Expr_parser * expr_parser);
 void dispose_expr_parser(Expr_parser * expr_p);
 int reduce(Expr_parser * expr_parser);
 int get_reduction_rule(Expr_parser* expr_parser);
-bool is_defined(Parser* parser, int token_cnt); 
+bool is_defined(Parser *parser, int token_cnt, bool *is_global); 
 
 /**
  * Parsing table to determine next parser action based on
@@ -49,11 +49,11 @@ int parsing_table[16][16] =
 /**
  * Check if identifier from last token was defined
  **/
-bool is_defined(Parser* parser, int token_cnt)
+bool is_defined(Parser* parser, int token_cnt, bool *is_global)
 {
     int err= NO_ERROR;
     char* id_name;
-    bool is_global = false; 
+    *is_global = false; 
 
     //set id name from proper token (because 2 tokens were pre readed)
     id_name = token_cnt==1?parser->previous_token.attribute.string.str:
@@ -68,13 +68,13 @@ bool is_defined(Parser* parser, int token_cnt)
     {
        if (curr_sym_loc && curr_sym_loc->symbol_state== SYMBOL_DEFINED)
        {
-           is_global = false; 
+           *is_global = false; 
            return true;
        }
       
         if (curr_sym_glob && curr_sym_glob->symbol_state == SYMBOL_DEFINED)
         {
-            is_global= true;
+            *is_global= true;
             return true;
         }
         return false;
@@ -82,7 +82,7 @@ bool is_defined(Parser* parser, int token_cnt)
    
     //outside function
 
-    is_global = true;
+    *is_global = true;
     if(curr_sym_glob && curr_sym_glob ->symbol_state == SYMBOL_DEFINED) 
         return true;
 
@@ -466,7 +466,9 @@ int expression(Parser* parser)
             {
                 dispose_expr_parser(expr_parser);
                 return INTERNAL_ERROR;
-            } 
+            }
+                
+            bool id_is_global= false; 
 
             if (expr_parser->curr_sym.symbol == VALUE ||
                 expr_parser->curr_sym.symbol == ID )
@@ -475,7 +477,8 @@ int expression(Parser* parser)
                 if(expr_parser->curr_sym.symbol == ID)
                 {
                    // check if inserted id is defined
-                   if(!is_defined(parser, token_cnt))
+                   //if so id_is_global will be set
+                   if(!is_defined(parser, token_cnt, &id_is_global))
                    {
                     dispose_expr_parser(expr_parser);
                     return UNDEFINE_REDEFINE_ERROR; 
@@ -486,11 +489,11 @@ int expression(Parser* parser)
                 //we must check if we need to push current or previous token because it was pre readed
                 if(token_cnt == 1)
                 {
-                    gen_pushs(parser->previous_token, !parser->is_in_def);
+                    gen_pushs(parser->previous_token,id_is_global);
                 }
                 else
                 {
-                    gen_pushs(parser->curr_token, !parser->is_in_def);
+                    gen_pushs(parser->curr_token, id_is_global);
                 }
                 
                 DEBUG_PRINT("pushing value to the stack \n");
