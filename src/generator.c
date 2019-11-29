@@ -959,23 +959,20 @@ void gen_print_end() {
 
 // }
 
-// TODO we must convert every ASCII chars from 000-032 035 and 092, not just spaces !
+// TODO maybe change name because it now does more than just replace spaces
 const char *replace_space (char *string) {
+    char temp[100];
     str_copy(&helper, "");
 
     for (size_t j = 0; j < strlen(string); j++) {
-        if (string[j] == ' ') {
-            str_append(&helper, "\\032");
-        } else if (string[j] == '\n') {
-            str_append(&helper, "\\010");
-        } else if (string[j] == '#') {
-            str_append(&helper, "\\035");
+        
+        if (string[j] < 100) {
+            sprintf(temp, "\\%03d", string[j]);
         } else {
-            char temp[2];
-            temp[0] = string[j];
-            temp[1] = '\0';
-            str_append(&helper, temp);
+            sprintf(temp, "%c", string[j]);
         }
+
+        str_append(&helper, temp);
     }
 
     return helper.str;

@@ -386,15 +386,63 @@ PUSHS GF@$op2
 EQS
 RETURN
 LABEL $$main
+WRITE string@\068lzk\097\032noh\097vi\099\032je
+WRITE string@\032
+WRITE string@27
+WRITE string@\010
+CREATEFRAME
+DEFVAR TF@%retval
+MOVE TF@%retval nil@nil
+WRITE string@\084u\032je\032int
+WRITE string@\032
+WRITE string@27
+WRITE string@\032
+WRITE string@\097le\032\097j\032flo\097t
+WRITE string@\032
+WRITE string@0x1.f32f41f212d77p+7
+WRITE string@\032
+WRITE string@0x1.defae147ae148p+7
+WRITE string@\032
+WRITE string@666
+WRITE string@\032
+WRITE string@0x1.f39999999999ap+9
+WRITE string@\032
+WRITE string@\099\097u
+WRITE string@\010
+CREATEFRAME
+DEFVAR TF@%retval
+MOVE TF@%retval nil@nil
 DEFVAR GF@a
-PUSHS int@0
-POPS GF@a
-DEFVAR GF@b
-PUSHS GF@a
-PUSHS int@0
-POPS GF@$op2
-POPS GF@$op1
-TYPE GF@$op1Type GF@$op1
-TYPE GF@$op2Type GF@$op2
-CALL $idivs
-POPS GF@b
+WRITE string@\084er\097z\032sp\097j\097m\032string
+WRITE string@\032
+WRITE string@s\032d\097lsim\032stringom
+WRITE string@\032
+WRITE string@23
+WRITE string@\032
+WRITE string@28
+WRITE string@\032
+WRITE string@0x1.7133333333333p+6
+WRITE string@\032
+WRITE string@123
+WRITE string@\032
+WRITE string@None
+WRITE string@\032
+WRITE string@None
+WRITE string@\032
+WRITE string@0x1.d63d70a3d70a4p+4
+WRITE string@\010
+CREATEFRAME
+DEFVAR TF@%retval
+MOVE TF@%retval nil@nil
+MOVE GF@a TF@%retval
+MOVE GF@$op1 GF@a
+CALL $print
+WRITE string@\010
+CREATEFRAME
+DEFVAR TF@%retval
+MOVE TF@%retval nil@nil
+WRITE string@\097\098\099defg
+WRITE string@\010
+CREATEFRAME
+DEFVAR TF@%retval
+MOVE TF@%retval nil@nil
