@@ -80,22 +80,6 @@ def print(*args):
 
 # Zde bude nasledovat program jazyka IFJ19
 
-# Ukazka kolize lokalni a globalni promenne v IFJ19 (chyba 3)
 
-
-a = 10  # globalni promenna
-
-
-def f():
-    print(a)  # pracuji pouze s globalni promennou, OK
-
-
-def g():
-    print(a)  # pracuji s globalni promennou, ale chyba 3 kvuli zbytku tela funkce
-    a = 3
-    return a
-
-
+a = substr('auto', 5, 1)
 print(a)
-f()
-g()  # vyvola chybu 3

@@ -72,6 +72,18 @@ int generator_begin() {
     ADDLINE("LABEL $divisionByZero");
     ADDLINE("EXIT int@9");
     
+    // defining helper function for print
+    ADDLINE("LABEL $print");
+    ADDLINE("TYPE GF@$op1Type GF@$op1");
+    ADDLINE("JUMPIFNEQ $printEnd GF@$op1Type string@nil");
+    ADDLINE("WRITE string@None");
+    ADDLINE("RETURN");
+
+    ADDLINE("LABEL $printEnd");
+    ADDLINE("WRITE GF@$op1");
+    ADDLINE("RETURN");
+
+
     // defining function adds
     ADDLINE("LABEL $adds");
 
@@ -273,50 +285,62 @@ int generator_begin() {
     // function substr
     ADDLINE("LABEL $substr");
     ADDLINE("PUSHFRAME");
-    ADDLINE("DEFVAR LF@%retval");
-    ADDLINE("DEFVAR LF@letter");
-    ADDLINE("DEFVAR LF@cond");
-    ADDLINE("DEFVAR LF@limit");
-    ADDLINE("DEFVAR LF@len");
-
-    ADDLINE("MOVE LF@%retval nil@nil");
 
     ADDLINE("TYPE GF@$temp LF@%1");
-    ADDLINE("JUMPIFNEQ $substrFinish GF@$temp string@string");
+    ADDLINE("JUMPIFNEQ $error GF@$temp string@string");
 
     ADDLINE("TYPE GF@$temp LF@%2");
-    ADDLINE("JUMPIFNEQ $substrFinish GF@$temp string@int");
+    ADDLINE("JUMPIFNEQ $error GF@$temp string@int");
 
     ADDLINE("TYPE GF@$temp LF@%3");
-    ADDLINE("JUMPIFNEQ $substrFinish GF@$temp string@int");
+    ADDLINE("JUMPIFNEQ $error GF@$temp string@int");
 
-    ADDLINE("STRLEN LF@len LF@%1");
-    ADDLINE("GT LF@cond LF@%2 LF@len");
-    ADDLINE("JUMPIFEQ $ordNone LF@cond bool@true");
+    ADDLINE("DEFVAR LF@%retval");
+	ADDLINE("MOVE LF@%retval string@");
+
+    ADDLINE("DEFVAR LF@str_length");
+    ADDLINE("STRLEN LF@str_length LF@%1");
+
+    ADDLINE("DEFVAR LF@cond");
 
     ADDLINE("LT LF@cond LF@%2 int@0");
-    ADDLINE("JUMPIFEQ $ordNone LF@cond bool@true");
+    ADDLINE("JUMPIFEQ $substrNone LF@cond bool@true");
 
-    ADDLINE("MOVE LF@%retval string@");
-    ADDLINE("ADD LF@limit LF@%2 LF@%3");
-    
-    ADDLINE("EQ LF@cond LF@%3 int@0");
-    ADDLINE("JUMPIFEQ $substrFinish LF@cond bool@true");
+    ADDLINE("GT LF@cond LF@%2 LF@str_length");
+    ADDLINE("JUMPIFEQ $substrNone LF@cond bool@true");
 
+    ADDLINE("LT LF@cond LF@%3 int@0");
+    ADDLINE("JUMPIFEQ $substrNone LF@cond bool@true");
+
+    ADDLINE("LT LF@cond LF@str_length int@1");
+    ADDLINE("JUMPIFEQ $substrReturn LF@cond bool@true");
+
+    ADDLINE("JUMPIFEQ $substrReturn LF@%3 int@0");
+
+    ADDLINE("DEFVAR LF@letter");
+    ADDLINE("DEFVAR LF@index");
+    ADDLINE("MOVE LF@index LF@%2");
+
+    ADDLINE("SUB LF@str_length LF@str_length int@1");
     ADDLINE("LABEL $substrLoop");
-    ADDLINE("GETCHAR LF@letter LF@%1 LF@%2");
+    ADDLINE("GT LF@cond LF@index LF@str_length");
+    ADDLINE("JUMPIFEQ $substrReturn LF@cond bool@true");
+
+    ADDLINE("GETCHAR LF@letter LF@%1 LF@index");
     ADDLINE("CONCAT LF@%retval LF@%retval LF@letter");
-    ADDLINE("ADD LF@%2 LF@%2 int@1");
+    ADDLINE("ADD LF@index LF@index int@1");
+    ADDLINE("SUB LF@%3 LF@%3 int@1");
 
-    ADDLINE("GT LF@cond LF@len LF@%2");
-    ADDLINE("JUMPIFEQ $substrFinish LF@cond bool@false");
+    ADDLINE("JUMPIFNEQ $substrLoop LF@%3 int@0");
+    ADDLINE("JUMP $substrReturn");
 
-    ADDLINE("GT LF@cond LF@limit LF@%2");
-    ADDLINE("JUMPIFEQ $substrLoop LF@cond bool@true");
+    ADDLINE("LABEL $substrNone");
+    ADDLINE("MOVE LF@%retval nil@nil");
 
-    ADDLINE("LABEL $substrFinish");
-    ADDLINE("POPFRAME");
-    ADDLINE("RETURN");
+    ADDLINE("LABEL $substrReturn");
+	ADDLINE("POPFRAME");
+	ADDLINE("RETURN");
+    
 
     // function len
     ADDLINE("LABEL $len");
@@ -857,7 +881,9 @@ void gen_print(bool global, Token token) {
     char temp[STRLEN];
 
     if (token.type == TOKEN_IDENTIFIER) {
-        ADDCODE("WRITE "); ADDCODE(ISGLOBAL(global)); ADDLINE(token.attribute.string.str);
+        ADDCODE("MOVE GF@$op1 "); ADDCODE(ISGLOBAL(global)); ADDLINE(token.attribute.string.str);
+        ADDLINE("CALL $print");
+        // ADDCODE("WRITE "); ADDCODE(ISGLOBAL(global)); ADDLINE(token.attribute.string.str);
     } else {
         ADDCODE("WRITE string@");
         if (token.type == TOKEN_INTEGER) {
