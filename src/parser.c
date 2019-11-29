@@ -524,29 +524,29 @@ int statement(Parser *parser)
                         parser->symbol_data_global->symbol_type = SYMBOL_FUNC;
                         parser->symbol_data_global->params_count_used = 0;
                     }
-                }
-                
-                else if((parser->symbol_data_global->symbol_state != SYMBOL_DEFINED)) // TODO maybe chceck if parser->symbol_data_global != NULL
+                }                
+                else if(parser->symbol_data_global == NULL) //undeclared function call outside func def = error 3
                 {
                     return UNDEFINE_REDEFINE_ERROR;
                 }
                 
+                //this name was alredy defined but not as a function (error code 3)
+                if (parser->symbol_data_global->symbol_type != SYMBOL_FUNC) return UNDEFINE_REDEFINE_ERROR; 
+                
+                //save symbol as current function to use it later  
                 parser->current_function = parser->symbol_data_global;
 
-                gen_func_call_start();
-
+                gen_func_call_start(); //code genrator call
 
                 parser->current_function->params_count_used = 0;
                 err = arg(parser);
                 CHECK_ERROR();
 
                 /* Checking the count of arguments */
-                if((parser->symbol_data_global != NULL)                         && 
-                (parser->symbol_data_global->symbol_state == SYMBOL_DEFINED)    && 
-                (parser->symbol_data_global->symbol_type == SYMBOL_FUNC)        &&
+                if((parser->current_function->symbol_state == SYMBOL_DEFINED)&& 
                 (!(parser->is_in_print)))
                 {
-                    if(parser->symbol_data_global->params_count_defined != parser->symbol_data_global->params_count_used)
+                    if(parser->current_function->params_count_defined != parser->current_function->params_count_used)
                     {
                         return PARAM_COUNT_ERROR;
                     }
