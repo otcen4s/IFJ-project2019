@@ -293,7 +293,7 @@ int statement(Parser *parser)
         
         else
         {
-            if((parser->symbol_data_global != NULL) && (parser->symbol_data_global->symbol_type == SYMBOL_VAR))
+            if((parser->symbol_data_global != NULL) && (parser->symbol_data_global->symbol_type == SYMBOL_FUNC))
             {
                 return UNDEFINE_REDEFINE_ERROR;
             }
