@@ -830,6 +830,8 @@ int expression_start(Parser *parser)
             parser->current_function->params_count_used = 0;
             err = arg(parser);
             CHECK_ERROR();
+
+            gen_print_end();
             
             break;
 
@@ -1091,7 +1093,6 @@ int arg(Parser *parser)
     {
         if(parser->is_in_print)
         {
-            gen_print_end();
             if(parser->left_side)
             {
                 gen_move_retval(parser->left_side->key, is_global(parser->left_side, parser));

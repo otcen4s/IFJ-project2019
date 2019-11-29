@@ -65,24 +65,21 @@ def print(*args):
   return None
 
 # Zde bude nasledovat program jazyka IFJ19
-print('Dlzka nohavic je', 27)
-
-print('Tu je int', 27, 'ale aj float', 249.5923, 239.49, 666, 999.2, 'cau')
-
-a = print('Teraz spajam string', 's dalsim stringom', 23, 28, 92.3, 123, None, None, 29.39)
-
-print(a)
-
-print('abcdefg')
-
-print()
-
-x = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-print(x)
-
-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa = 'cau'
-print(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa)
-
-print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-
-print('cau')
+""" Program 3: Prace s retezci a vestavenymi funkcemi """
+s1 = 'Toto je nejaky text'
+s2 = s1 + ', ktery jeste trochu obohatime'
+print(s1, '\n', s2)
+s1len = len(s1)
+s1len = s1len - 4
+s1 = substr(s2, s1len, 4)
+s1len = s1len + 1  # korekce indexu znaku na poradi znaku
+print('4 znaky od ', s1len, '. znaku v "', s2, '\":', s1)
+print('Zadejte serazenou posloupnost vsech malych pismen a-h, ')
+print('pricemz se pismena nesmeji v posloupnosti opakovat: ')
+s1 = inputs()
+if s1 != None:
+  while s1 != 'abcdefgh':
+    print('Spatne zadana posloupnost, zkuste znovu: ')
+    s1 = inputs()
+else:  # nezadan zadny vstup (EOF)
+  pass

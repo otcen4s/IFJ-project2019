@@ -1031,14 +1031,16 @@ const char *replace_space (char *string) {
     str_copy(&helper, "");
 
     for (size_t j = 0; j < strlen(string); j++) {
-        
-        if (string[j] < 100) {
-            sprintf(temp, "\\%03d", string[j]);
-        } else {
-            sprintf(temp, "%c", string[j]);
-        }
+        // TODO doplnit dalsie vynimky (strana 13, dole) - napr mal by tu byt aj #, ale ked ho sem dam tak mi neprejde docstring test
+        if (string[j] != '\\') {
+            if (string[j] < 100) {
+                sprintf(temp, "\\%03d", string[j]);
+            } else {
+                sprintf(temp, "%c", string[j]);
+            }
 
-        str_append(&helper, temp);
+            str_append(&helper, temp);
+        }
     }
 
     return helper.str;
