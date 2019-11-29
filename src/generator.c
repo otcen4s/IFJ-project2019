@@ -425,6 +425,34 @@ int generator_begin() {
     ADDLINE("POPFRAME");
     ADDLINE("RETURN");
 
+    // function greater than or equal
+    ADDLINE("LABEL $gtes");
+    ADDLINE("CALL $eq");
+    ADDLINE("PUSHS bool@true");
+    ADDLINE("JUMPIFEQS $gtesTrue");
+
+    ADDLINE("CALL $glt");
+    ADDLINE("GTS");
+    ADDLINE("RETURN");
+
+    ADDLINE("LABEL $gtesTrue");
+    ADDLINE("PUSHS bool@true");
+    ADDLINE("RETURN");
+
+    // function lesser than or equal
+    ADDLINE("LABEL $ltes");
+    ADDLINE("CALL $eq");
+    ADDLINE("PUSHS bool@true");
+    ADDLINE("JUMPIFEQS $ltesTrue");
+
+    ADDLINE("CALL $ltes");
+    ADDLINE("GTS");
+    ADDLINE("RETURN");
+
+    ADDLINE("LABEL $ltesTrue");
+    ADDLINE("PUSHS bool@true");
+    ADDLINE("RETURN");
+
     // lesser than, greater than functions
     ADDLINE("LABEL $glt");
     ADDLINE("POPS GF@$op2");
@@ -492,6 +520,12 @@ int generator_begin() {
     ADDLINE("LABEL $gltFinish");
     ADDLINE("PUSHS GF@$op1");
     ADDLINE("PUSHS GF@$op2");
+    ADDLINE("RETURN");
+
+    // not equal function
+    ADDLINE("LABEL $neq");
+    ADDLINE("CALL $eq");
+    ADDLINE("NOTS");
     ADDLINE("RETURN");
 
     // equal function
@@ -711,9 +745,21 @@ void gen_gts() {
     ADDLINE("GTS");
 }
 
+void gen_gtes() {
+    ADDLINE("CALL $gtes");
+}
+
+void gen_ltes() {
+    ADDLINE("CALL $ltes");
+}
+
 // TODO bool support is not required?
 void gen_eqs() {
     gen_instruct("CALL $eq");
+}
+
+void gen_neqs() {
+    gen_instruct("CALL $neq");
 }
 
 // generate instruction with no parameters

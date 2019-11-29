@@ -50,7 +50,7 @@ run_test() {
                 printf "${GREEN}DIFF OK${NC}\n"
             else
                 printf "${RED}DIFF BAD${NC}\n"
-                diff vzor.out test.out
+                diff --old-line-format="%5dn. < %L" --new-line-format="%5dn. > %L" --unchanged-line-format="" vzor.out test.out
                 exit 1
             fi
         fi
