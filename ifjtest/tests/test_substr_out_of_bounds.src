@@ -1,5 +1,3 @@
-#TODO https://github.com/otcen4s/IFJ-project2019/issues/10
-
 a = substr('auto', 0, 2)
 print(a)
 

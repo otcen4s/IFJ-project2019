@@ -379,12 +379,13 @@ int generator_begin() {
     ADDLINE("DEFVAR LF@type");
 
     ADDLINE("TYPE LF@type LF@%1");
-    ADDLINE("JUMPIFNEQ $ordNone LF@type string@string");
+    ADDLINE("JUMPIFNEQ $error LF@type string@string");
 
     ADDLINE("TYPE LF@type LF@%2");
-    ADDLINE("JUMPIFNEQ $ordNone LF@type string@int");
+    ADDLINE("JUMPIFNEQ $error LF@type string@int");
 
     ADDLINE("STRLEN LF@len LF@%1");
+    ADDLINE("SUB LF@len LF@len int@1");
     ADDLINE("GT LF@cond LF@%2 LF@len");
     ADDLINE("JUMPIFEQ $ordNone LF@cond bool@true");
 
