@@ -1,0 +1,6 @@
+##2 ? podla diskordu 2 podla mna nastane 3 skor ako sa zisti zla syntax
+def a():
+    pass
+
+param = 4
+b = a(param,3)
