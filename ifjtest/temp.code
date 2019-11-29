@@ -235,10 +235,11 @@ DEFVAR LF@cond
 DEFVAR LF@len
 DEFVAR LF@type
 TYPE LF@type LF@%1
-JUMPIFNEQ $ordNone LF@type string@string
+JUMPIFNEQ $error LF@type string@string
 TYPE LF@type LF@%2
-JUMPIFNEQ $ordNone LF@type string@int
+JUMPIFNEQ $error LF@type string@int
 STRLEN LF@len LF@%1
+SUB LF@len LF@len int@1
 GT LF@cond LF@%2 LF@len
 JUMPIFEQ $ordNone LF@cond bool@true
 LT LF@cond LF@%2 int@0
@@ -386,363 +387,54 @@ EQS
 RETURN
 LABEL $$main
 DEFVAR GF@a
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@auto
-DEFVAR TF@%2
-MOVE TF@%2 int@0
-DEFVAR TF@%3
-MOVE TF@%3 int@2
-CALL $substr
-MOVE GF@a TF@%retval
+PUSHS int@20
+POPS GF@a
+DEFVAR GF@b
+DEFVAR GF@c
+LABEL $while0Begin
+PUSHS GF@a
+PUSHS int@10
+CALL $glt
+GTS
+CALL $eval
+JUMPIFEQ $while0End GF@$temp bool@false
 MOVE GF@$op1 GF@a
 CALL $print
 WRITE string@\010
 CREATEFRAME
 DEFVAR TF@%retval
 MOVE TF@%retval nil@nil
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@auto
-DEFVAR TF@%2
-MOVE TF@%2 int@2
-DEFVAR TF@%3
-MOVE TF@%3 int@2
-CALL $substr
-MOVE GF@a TF@%retval
+PUSHS int@5
+POPS GF@b
+PUSHS GF@b
+PUSHS GF@a
+POPS GF@$op2
+POPS GF@$op1
+TYPE GF@$op1Type GF@$op1
+TYPE GF@$op2Type GF@$op2
+CALL $adds
+POPS GF@c
+PUSHS GF@a
+PUSHS int@1
+POPS GF@$op2
+POPS GF@$op1
+TYPE GF@$op1Type GF@$op1
+TYPE GF@$op2Type GF@$op2
+CALL $subs
+POPS GF@a
+WRITE string@Vysledok\032je
+WRITE string@\032
 MOVE GF@$op1 GF@a
+CALL $print
+WRITE string@\032
+MOVE GF@$op1 GF@b
+CALL $print
+WRITE string@\032
+MOVE GF@$op1 GF@c
 CALL $print
 WRITE string@\010
 CREATEFRAME
 DEFVAR TF@%retval
 MOVE TF@%retval nil@nil
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@auto
-DEFVAR TF@%2
-MOVE TF@%2 int@3
-DEFVAR TF@%3
-MOVE TF@%3 int@2
-CALL $substr
-MOVE GF@a TF@%retval
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@auto
-DEFVAR TF@%2
-MOVE TF@%2 int@7
-DEFVAR TF@%3
-MOVE TF@%3 int@2
-CALL $substr
-MOVE GF@a TF@%retval
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@auto
-DEFVAR TF@%2
-MOVE TF@%2 int@0
-DEFVAR TF@%3
-MOVE TF@%3 int@9
-CALL $substr
-MOVE GF@a TF@%retval
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@auto
-DEFVAR TF@%2
-MOVE TF@%2 int@2
-DEFVAR TF@%3
-MOVE TF@%3 int@9
-CALL $substr
-MOVE GF@a TF@%retval
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@auto
-DEFVAR TF@%2
-MOVE TF@%2 int@3
-DEFVAR TF@%3
-MOVE TF@%3 int@3
-CALL $substr
-MOVE GF@a TF@%retval
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@auto
-DEFVAR TF@%2
-MOVE TF@%2 int@0
-DEFVAR TF@%3
-MOVE TF@%3 int@0
-CALL $substr
-MOVE GF@a TF@%retval
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@auto
-DEFVAR TF@%2
-MOVE TF@%2 int@3
-DEFVAR TF@%3
-MOVE TF@%3 int@0
-CALL $substr
-MOVE GF@a TF@%retval
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@
-DEFVAR TF@%2
-MOVE TF@%2 int@0
-DEFVAR TF@%3
-MOVE TF@%3 int@0
-CALL $substr
-MOVE GF@a TF@%retval
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@
-DEFVAR TF@%2
-MOVE TF@%2 int@3
-DEFVAR TF@%3
-MOVE TF@%3 int@0
-CALL $substr
-MOVE GF@a TF@%retval
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@
-DEFVAR TF@%2
-MOVE TF@%2 int@3
-DEFVAR TF@%3
-MOVE TF@%3 int@8
-CALL $substr
-MOVE GF@a TF@%retval
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@
-DEFVAR TF@%2
-MOVE TF@%2 int@0
-DEFVAR TF@%3
-MOVE TF@%3 int@9
-CALL $substr
-MOVE GF@a TF@%retval
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@
-DEFVAR TF@%2
-MOVE TF@%2 int@3
-DEFVAR TF@%3
-MOVE TF@%3 int@3
-CALL $substr
-MOVE GF@a TF@%retval
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@abs
-DEFVAR TF@%2
-MOVE TF@%2 int@3
-DEFVAR TF@%3
-MOVE TF@%3 int@3
-CALL $substr
-MOVE GF@a TF@%retval
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@abssad
-DEFVAR TF@%2
-MOVE TF@%2 int@3
-DEFVAR TF@%3
-MOVE TF@%3 int@3
-CALL $substr
-MOVE GF@a TF@%retval
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@autobus\032je\032krasna\032vec
-DEFVAR TF@%2
-MOVE TF@%2 int@3
-DEFVAR TF@%3
-MOVE TF@%3 int@3
-CALL $substr
-MOVE GF@a TF@%retval
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@autobus\032je\032krasna\032vec
-DEFVAR TF@%2
-MOVE TF@%2 int@0
-DEFVAR TF@%3
-MOVE TF@%3 int@3
-CALL $substr
-MOVE GF@a TF@%retval
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@autobus\032je\032krasna\032vec
-DEFVAR TF@%2
-MOVE TF@%2 int@3
-DEFVAR TF@%3
-MOVE TF@%3 int@0
-CALL $substr
-MOVE GF@a TF@%retval
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@autobus\032je\032krasna\032vec
-DEFVAR TF@%2
-MOVE TF@%2 int@0
-DEFVAR TF@%3
-MOVE TF@%3 int@0
-CALL $substr
-MOVE GF@a TF@%retval
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@autobus\032je\032krasna\032vec
-DEFVAR TF@%2
-MOVE TF@%2 int@50
-DEFVAR TF@%3
-MOVE TF@%3 int@3
-CALL $substr
-MOVE GF@a TF@%retval
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@autobus\032je\032krasna\032vec
-DEFVAR TF@%2
-MOVE TF@%2 int@50
-DEFVAR TF@%3
-MOVE TF@%3 int@0
-CALL $substr
-MOVE GF@a TF@%retval
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@autobus\032je\032krasna\032vec
-DEFVAR TF@%2
-MOVE TF@%2 int@0
-DEFVAR TF@%3
-MOVE TF@%3 int@50
-CALL $substr
-MOVE GF@a TF@%retval
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
-CREATEFRAME
-DEFVAR TF@%1
-MOVE TF@%1 string@autobus\032je\032krasna\032vec
-DEFVAR TF@%2
-MOVE TF@%2 int@50
-DEFVAR TF@%3
-MOVE TF@%3 int@0
-CALL $substr
-MOVE GF@a TF@%retval
-MOVE GF@$op1 GF@a
-CALL $print
-WRITE string@\010
-CREATEFRAME
-DEFVAR TF@%retval
-MOVE TF@%retval nil@nil
+JUMP $while0Begin
+LABEL $while0End

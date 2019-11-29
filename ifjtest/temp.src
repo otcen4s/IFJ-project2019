@@ -80,6 +80,6 @@ def print(*args):
 
 
 # Zde bude nasledovat program jazyka IFJ19
-##9
+# 9
 a = 0
-b= a//0
+b = a//0
