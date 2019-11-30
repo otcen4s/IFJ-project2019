@@ -1,2 +1,2 @@
-main : main.c parser.c string_lib.c scanner.c symtable.c stack.c function_str.c expr_parser.c generator.c
-	$(CC) -Wall  -W -std=c99 $^ -o $@
+all : main.c parser.c string_lib.c scanner.c symtable.c stack.c function_str.c expr_parser.c generator.c
+	gcc -Wall  -W -std=c99 $^ -o main
