@@ -1,6 +1,13 @@
 print('Toto je moj program')
 
 def dlzka(povDlzka):
+    if 3 != 2:
+        print('jo')
+    else:
+        if 5 == 5:
+            print('no')
+        else:
+            pass
     if povDlzka < 50:
         while povDlzka < 100:
             povDlzka = povDlzka + 10
@@ -38,6 +45,13 @@ def start():
 
 x = 10
 while x > 5:
+    if 3 != 2:
+        print('jo')
+    else:
+        if 5 == 5:
+            print('no')
+        else:
+            pass
     if x == 3:
         start()
     else:
@@ -78,3 +92,17 @@ if povDlzka < 50:
                 ban = ban - 1
 else:
     pass
+
+if 2 == 2:
+    a = 10
+else:
+    pass
+
+a = 30
+
+if 2 == 2:
+    a = 10
+else:
+    print(a)
+
+a = 30
