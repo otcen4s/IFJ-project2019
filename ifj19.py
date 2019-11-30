@@ -81,5 +81,18 @@ def print(*args):
 # Zde bude nasledovat program jazyka IFJ19
 
 
-a = substr('auto', 5, 1)
-print(a)
+print('Toto je moj program')
+
+
+def dlzka(povDlzka):
+    if povDlzka < 50:
+        while povDlzka < 100:
+            povDlzka = povDlzka + 10
+            print(povDlzka)
+            if povDlzka > 80:
+                povDlzka = povDlzka - 1
+            else:
+                pass
+
+
+dlzka(30)
