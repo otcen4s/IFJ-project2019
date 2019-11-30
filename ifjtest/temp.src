@@ -66,4 +66,9 @@ def print(*args):
 
 # Zde bude nasledovat program jazyka IFJ19
 ##9
+<<<<<<< HEAD
 a = 5.7 / 0
+=======
+a = 0
+b= a//0
+>>>>>>> nested

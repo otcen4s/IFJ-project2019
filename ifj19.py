@@ -80,6 +80,9 @@ def print(*args):
 
 # Zde bude nasledovat program jazyka IFJ19
 
+if 2 == 2:
+    a = 10
+else:
+    print(a)
 
-a = substr('auto', 5, 1)
-print(a)
+a = 30

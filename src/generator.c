@@ -2,12 +2,12 @@
 
 #define ADDLINE(line) \
 do { \
-str_append((inWhile ? &whileCode : &code), line); \
-str_append((inWhile ? &whileCode : &code), "\n"); \
+str_append(((inDef || inWhile) ? &defCode : &code), line); \
+str_append(((inDef || inWhile) ? &defCode : &code), "\n"); \
  } while (0) \
 
 #define ADDCODE(line) \
-str_append((inWhile ? &whileCode : &code), line); \
+str_append(((inDef || inWhile) ? &defCode : &code), line); \
 
 #define ISGLOBAL(global) \
 global ? "GF@" : "LF@" \
@@ -17,10 +17,12 @@ global ? "GF@" : "LF@" \
 tString code;
 tString line;
 tString helper;
+tString defCode;
 tString whileCode;
 tString currFuncName;
 
 int error;
+bool inDef = false;
 bool inWhile = false;
 int paramCounter = 0;
 int defParamCounter = 0;
@@ -40,6 +42,10 @@ int generator_begin() {
     }
 
     if ((error = str_init(&helper))) {
+        return error;
+    }
+
+    if ((error = str_init(&defCode))) {
         return error;
     }
 
@@ -639,6 +645,8 @@ void generator_end() {
     str_destroy(&code);
     str_destroy(&line);
     str_destroy(&helper);
+    str_destroy(&defCode);
+    str_destroy(&whileCode);
 
 }
 
@@ -768,8 +776,8 @@ void gen_else_end() {
 
 
 void gen_while_start() {
-    if (stack_empty(whileStack)) {
-        str_copy(&whileCode, "");
+    if (stack_empty(whileStack) && !inDef) {
+        str_copy(&defCode, "");
         inWhile = true;
     }
 
@@ -798,8 +806,8 @@ void gen_while_end() {
 
     ADDCODE("LABEL $while"); ADDCODE(uidStr); ADDLINE("End");
 
-    if (stack_empty(whileStack)) {
-        str_append(&code, whileCode.str);
+    if (stack_empty(whileStack) && !inDef) {
+        str_append(&code, defCode.str);
 
         inWhile = false;
     }
@@ -820,6 +828,9 @@ void gen_func_def_start(char *funcName) {
 
     ADDLINE("DEFVAR LF@%retval");
     ADDLINE("MOVE LF@%retval nil@nil");
+
+    str_copy(&defCode, "");
+    inDef = true;
 }
 
 void gen_func_def_add_param(char *paramName) {
@@ -837,6 +848,9 @@ void gen_func_def_return() {
 }
 
 void gen_func_def_end() {
+    str_append(&code, defCode.str);
+    inDef = false;
+
     ADDLINE("POPFRAME");
     ADDLINE("RETURN");
     ADDCODE("LABEL %"); ADDCODE(currFuncName.str); ADDLINE("End");
