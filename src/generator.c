@@ -12,8 +12,6 @@ str_append(&tempCode, line); \
 #define ISGLOBAL(global) \
 global ? "GF@" : "LF@" \
 
-#define STRLEN 128
-
 tString code;
 tString line;
 tString helper;
@@ -25,7 +23,7 @@ int paramCounter = 0;
 int defParamCounter = 0;
 int ifUID = 0;
 int whileUID = 0;
-char uidStr[STRLEN];
+char uidStr[100];
 t_stack * ifStack;
 t_stack * whileStack;
 
@@ -811,7 +809,7 @@ void gen_func_def_start(char *funcName) {
 }
 
 void gen_func_def_add_param(char *paramName) {
-    char temp[STRLEN];
+    char temp[100];
     sprintf(temp, "%d", ++defParamCounter);
 
     ADDCODE("DEFVAR LF@"); ADDLINE(paramName);

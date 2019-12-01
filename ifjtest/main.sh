@@ -6,8 +6,8 @@ NC='\033[0m'
 
 run_test() {
     echo \# \# \# "$filename" \# \# \#
-    cat ifj19.py "$filename" > temp.src
-    ./../bin/main < "$filename" > temp.code
+    cat ifj19.py "$filename" > source.out
+    ./../bin/main < "$filename" > assembly.out
 
     code=$?
 
@@ -20,10 +20,10 @@ run_test() {
 
         inFile="${filename%.*}.in"
         if [ -f "$inFile" ]; then
-            ./ic19int temp.code < "$inFile" > test.out
+            ./ic19int assembly.out < "$inFile" > test.out
             code=$?
         else
-            ./ic19int temp.code > test.out
+            ./ic19int assembly.out > test.out
             code=$?
         fi
 
@@ -37,10 +37,10 @@ run_test() {
 
         if [ "$code" == "0" ]; then
             if [ -f "$inFile" ]; then
-                python3 temp.src < "$inFile" > vzor.out
+                python3 source.out < "$inFile" > vzor.out
                 code=$?
             else
-                python3 temp.src > vzor.out
+                python3 source.out > vzor.out
                 code=$?
             fi
 
