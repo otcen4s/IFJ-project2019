@@ -2,12 +2,12 @@
 
 #define ADDLINE(line) \
 do { \
-str_append(((inDef || inWhile) ? &defCode : &code), line); \
-str_append(((inDef || inWhile) ? &defCode : &code), "\n"); \
+str_append(&tempCode, line); \
+str_append(&tempCode, "\n"); \
  } while (0) \
 
 #define ADDCODE(line) \
-str_append(((inDef || inWhile) ? &defCode : &code), line); \
+str_append(&tempCode, line); \
 
 #define ISGLOBAL(global) \
 global ? "GF@" : "LF@" \
@@ -17,19 +17,16 @@ global ? "GF@" : "LF@" \
 tString code;
 tString line;
 tString helper;
-tString defCode;
-tString whileCode;
+tString tempCode;
 tString currFuncName;
 
 int error;
-bool inDef = false;
-bool inWhile = false;
 int paramCounter = 0;
 int defParamCounter = 0;
-int uid = 0;
+int ifUID = 0;
 int whileUID = 0;
 char uidStr[STRLEN];
-t_stack * stack;
+t_stack * ifStack;
 t_stack * whileStack;
 
 int generator_begin() {
@@ -45,11 +42,7 @@ int generator_begin() {
         return error;
     }
 
-    if ((error = str_init(&defCode))) {
-        return error;
-    }
-
-    if ((error = str_init(&whileCode))) {
+    if ((error = str_init(&tempCode))) {
         return error;
     }
 
@@ -57,7 +50,7 @@ int generator_begin() {
         return error;
     }
 
-    stack = stack_create(0, INTEGER_TYPE);
+    ifStack = stack_create(0, INTEGER_TYPE);
     whileStack = stack_create(0, INTEGER_TYPE);
 
     // generate header
@@ -631,22 +624,21 @@ int generator_begin() {
 
     ADDLINE("LABEL $$main");
 
+    str_append(&code, tempCode.str);
+    str_copy(&tempCode, "");
+
     return NO_ERROR;
 }
 
 void generator_end() {
 
-    ADDLINE("popframe");
-    ADDLINE("clears");
-
-    stack_free(stack);
+    stack_free(ifStack);
     stack_free(whileStack);
 
     str_destroy(&code);
     str_destroy(&line);
     str_destroy(&helper);
-    str_destroy(&defCode);
-    str_destroy(&whileCode);
+    str_destroy(&tempCode);
 
 }
 
@@ -656,10 +648,6 @@ void gen_defvar(char *varName, bool global) {
     str_append(&code, varName);
     str_append(&code, "\n");
 }
-
-// void gen_var_assign(char *varName, bool global, Token token) {
-//     ADDCODE("MOVE "); ADDCODE(ISGLOBAL(global)); ADDLINE(varName);
-// }
 
 void gen_var(char *varName, bool global) {
     str_concat(&line, ISGLOBAL(global), varName, NULL);
@@ -741,11 +729,11 @@ void gen_instruct(const char *instruct) {
 }
 
 void gen_if_start() {
-    stack_push(stack, uid);
-    stack_push(stack, uid);
-    stack_push(stack, uid);
-    sprintf(uidStr, "%d", uid);
-    uid++;
+    stack_push(ifStack, ifUID);
+    stack_push(ifStack, ifUID);
+    stack_push(ifStack, ifUID);
+    sprintf(uidStr, "%d", ifUID);
+    ifUID++;
 
     ADDLINE("CALL $eval");
 
@@ -753,21 +741,21 @@ void gen_if_start() {
 }
 
 void gen_if_end() {
-    int top = stack_pop(stack, &error).integer;
+    int top = stack_pop(ifStack, &error).integer;
     sprintf(uidStr, "%d", top);
 
     ADDCODE("JUMP $if"); ADDCODE(uidStr); ADDLINE("End");
 }
 
 void gen_else_start() {
-    int top = stack_pop(stack, &error).integer;
+    int top = stack_pop(ifStack, &error).integer;
     sprintf(uidStr, "%d", top);
 
     ADDCODE("LABEL $if"); ADDCODE(uidStr); ADDLINE("Else");
 }
 
 void gen_else_end() {
-    int top = stack_pop(stack, &error).integer;
+    int top = stack_pop(ifStack, &error).integer;
     sprintf(uidStr, "%d", top);
 
     ADDCODE("LABEL $if"); ADDCODE(uidStr); ADDLINE("End");
@@ -776,11 +764,6 @@ void gen_else_end() {
 
 
 void gen_while_start() {
-    if (stack_empty(whileStack) && !inDef) {
-        str_copy(&defCode, "");
-        inWhile = true;
-    }
-
     stack_push(whileStack, whileUID);
     stack_push(whileStack, whileUID);
     sprintf(uidStr, "%d", whileUID);
@@ -805,12 +788,6 @@ void gen_while_end() {
     ADDCODE("JUMP $while"); ADDCODE(uidStr); ADDLINE("Begin");
 
     ADDCODE("LABEL $while"); ADDCODE(uidStr); ADDLINE("End");
-
-    if (stack_empty(whileStack) && !inDef) {
-        str_append(&code, defCode.str);
-
-        inWhile = false;
-    }
 }
 
 void gen_move_retval(char *varName, bool global) {
@@ -829,8 +806,8 @@ void gen_func_def_start(char *funcName) {
     ADDLINE("DEFVAR LF@%retval");
     ADDLINE("MOVE LF@%retval nil@nil");
 
-    str_copy(&defCode, "");
-    inDef = true;
+    str_append(&code, tempCode.str);
+    str_copy(&tempCode, "");
 }
 
 void gen_func_def_add_param(char *paramName) {
@@ -848,12 +825,12 @@ void gen_func_def_return() {
 }
 
 void gen_func_def_end() {
-    str_append(&code, defCode.str);
-    inDef = false;
-
     ADDLINE("POPFRAME");
     ADDLINE("RETURN");
     ADDCODE("LABEL %"); ADDCODE(currFuncName.str); ADDLINE("End");
+
+    str_append(&code, tempCode.str);
+    str_copy(&tempCode, "");
 
     paramCounter = 0;
 }
@@ -963,6 +940,8 @@ const char *replace_space (char *string) {
 }
 
 void generate_code(FILE *destFile) {
+    str_append(&code, tempCode.str);
+
     fputs(code.str, destFile);
     generator_end();
 }
