@@ -1,7 +1,0 @@
-##3
-
-#na diskorde pisu err 2? podla mna sa najskor vyhodnocuje c vramci expression a vyhodnoti sa ako undef
-#pred tym ako narazime na syntax error
-def a():
-    b = 9
-    c fun()

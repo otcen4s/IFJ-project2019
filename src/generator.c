@@ -212,33 +212,10 @@ int generator_begin() {
     // defining function idivs
     ADDLINE("LABEL $idivs");
 
-    ADDLINE("JUMPIFEQ $idivsSameType GF@$op1Type GF@$op2Type");
-    ADDLINE("JUMPIFEQ $idivsOp1Int GF@$op1Type string@int");
-    ADDLINE("JUMPIFEQ $idivsOp1Float GF@$op1Type string@float");
-    ADDLINE("JUMP $error");
-
-    ADDLINE("LABEL $idivsOp1Int");
-    ADDLINE("JUMPIFNEQ $error GF@$op2Type string@float");
-    ADDLINE("FLOAT2INT GF@$op2 GF@$op2");
-    ADDLINE("JUMP $idivsFinish");
-
-    ADDLINE("LABEL $idivsOp1Float");
+    ADDLINE("JUMPIFNEQ $error GF@$op1Type string@int");
     ADDLINE("JUMPIFNEQ $error GF@$op2Type string@int");
-    ADDLINE("FLOAT2INT GF@$op1 GF@$op1");
-    ADDLINE("JUMP $idivsFinish");
-
-    ADDLINE("LABEL $idivsSameType");
-    ADDLINE("JUMPIFEQ $idivsFinish GF@$op1Type string@int");
-    ADDLINE("JUMPIFEQ $idivsSameTypeFloat GF@$op1Type string@float");
-    ADDLINE("JUMP $error");
-
-    ADDLINE("LABEL $idivsSameTypeFloat");
-    ADDLINE("FLOAT2INT GF@$op1 GF@$op1");
-    ADDLINE("FLOAT2INT GF@$op2 GF@$op2");
-    ADDLINE("JUMP $idivsFinish");
-
-    ADDLINE("LABEL $idivsFinish");
     ADDLINE("JUMPIFEQ $divisionByZero GF@$op2 int@0");
+
     ADDLINE("PUSHS GF@$op1");
     ADDLINE("PUSHS GF@$op2");
     ADDLINE("IDIVS");
