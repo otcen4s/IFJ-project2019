@@ -3,6 +3,7 @@
     "editor.fontSize": 18,
     "python.pythonPath": "/bin/python3",
     "files.associations": {
-        "stack.h": "c"
+        "stack.h": "c",
+        "generator.h": "c"
     }
 }
