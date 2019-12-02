@@ -4,10 +4,12 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m'
 
+compilerPath=./../bin/main
+
 run_test() {
     echo \# \# \# "$filename" \# \# \#
     cat ifj19.py "$filename" > source.out
-    ./../bin/main < "$filename" > assembly.out
+    $compilerPath < "$filename" > assembly.out
 
     code=$?
 
