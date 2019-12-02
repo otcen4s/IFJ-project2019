@@ -532,6 +532,15 @@ Token read_token(Scanner *scanner, int *err)
                     }
                     scanner->state= STATE_STRING_START;
                 }
+                    else if (scanner->curr_char == '\"')
+                {
+                    if(str_insert_char(scanner->atr_string,'\"'))
+                    {
+                        *err= INTERNAL_ERROR;
+                        return empty_token;
+                    }
+                    scanner->state= STATE_STRING_START;
+                }
                 // check for hexa decimal escape sequence
                 else if (scanner->curr_char == 'x') scanner->state = STATE_STR_ESCAPE_HEXA_1;    
                 else 
