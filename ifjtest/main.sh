@@ -5,6 +5,7 @@ GREEN='\033[0;32m'
 NC='\033[0m'
 
 compilerPath=./../bin/main
+makefileFolder=../
 
 run_test() {
     echo \# \# \# "$filename" \# \# \#
@@ -46,9 +47,10 @@ run_test() {
                 code=$?
             fi
 
-            diff=$(diff -s vzor.out test.out)
+            diff -s vzor.out test.out > /dev/null
+            diff=$?
 
-            if [ "$diff" == "Files vzor.out and test.out are identical" ]; then
+            if [ "$diff" == "0" ]; then
                 printf "${GREEN}DIFF OK${NC}\n"
             else
                 printf "${RED}DIFF BAD${NC}\n"
@@ -70,7 +72,7 @@ run_test() {
     echo
 }
 
-make main -C ../
+make main -C $makefileFolder
 
 if [ "$1" != "" ]; then
     if [ "${1: -1}" == "/" ]; then

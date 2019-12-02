@@ -4,6 +4,9 @@ print(a)
 a = chr(0)
 print(a)
 
+#a = chr(255)
+#print(a)
+
 # testy nad 127 neprechadzaju diffom, nieco kvoli encodingu?
 a = chr(127)
 print(a)

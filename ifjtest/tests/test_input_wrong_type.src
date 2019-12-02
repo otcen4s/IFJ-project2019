@@ -1,0 +1,23 @@
+a = inputi()
+print(a)
+
+a = inputf()
+print(a)
+
+a = inputs()
+print(a)
+
+a = inputs()
+print(a)
+
+a = inputi()
+print(a)
+
+a = inputs()
+print(a)
+
+a = inputf()
+print(a)
+
+a = inputi()
+print(a)
