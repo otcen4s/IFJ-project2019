@@ -56,7 +56,8 @@ typedef struct
 	Symbol op1;
 	Symbol op2;
 	Symbol op3;
-	int valid_sym_cnt;
+	Token stored_operand;
+	bool boll_asoc;
 } Expr_parser;
 
 
