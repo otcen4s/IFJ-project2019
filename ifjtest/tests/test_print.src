@@ -23,3 +23,6 @@ if zet == None:
     print('rovna sa None')
 else:
     print('nerovna sa None')
+
+a = print()
+print(a)

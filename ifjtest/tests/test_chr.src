@@ -1,12 +1,5 @@
-a = chr(123)
-print(a)
-
-a = chr(0)
-print(a)
-
-#a = chr(255)
-#print(a)
-
-# testy nad 127 neprechadzaju diffom, nieco kvoli encodingu?
-a = chr(127)
-print(a)
+i = 127
+while i >= 0:
+    a = chr(i)
+    print(a)
+    i = i - 1

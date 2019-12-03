@@ -1,0 +1,22 @@
+def pokus():
+    print('test')
+    return
+    print('ahoj')
+    return
+    print('neviem')
+
+a = pokus()
+print(a)
+
+def test(a):
+    print(a)
+    return a
+
+x = test(10)
+print(x)
+
+def test2():
+    a = 20
+
+a = test2()
+print(a)

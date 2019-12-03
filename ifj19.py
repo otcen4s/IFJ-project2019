@@ -80,9 +80,8 @@ def print(*args):
 
 # Zde bude nasledovat program jazyka IFJ19
 
-if 2 == 2:
-    a = 10
-else:
-    print(a)
 
-a = 30
+if 50 > 10 < 12 != 13:
+    print('sedi')
+else:
+    print('nesedi')
