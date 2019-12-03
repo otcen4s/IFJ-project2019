@@ -911,6 +911,15 @@ const char *replace_space (char *string) {
     return helper.str;
 }
 
+void store_top() {
+    ADDLINE("POPS GF@$temp");
+    ADDLINE("PUSHS GF@$temp");
+}
+
+void push_top() {
+    ADDLINE("PUSHS GF@$temp");
+}
+
 void generate_code(FILE *destFile) {
     str_append(&code, tempCode.str);
 

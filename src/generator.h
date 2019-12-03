@@ -57,6 +57,9 @@ void gen_gtes();
 void gen_eqs();
 void gen_neqs();
 
+void store_top();
+void push_top();
+
 void gen_func_start(char *funcName);
 
 const char *replace_space(char *string);
