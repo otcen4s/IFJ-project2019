@@ -1105,7 +1105,6 @@ int arg(Parser *parser)
     CHECK_TOKEN(TOKEN_COMMA);  /* STATE: ID ( <arg> , */
     CHECK_ERROR();
 
-    // TODO SAMO - mozno to je zle, funckia iba prida riadok, dalo by sa riesit iba gen_instruct, ale kvoli prehladnosti kodu som vytvoril dalsiu funckiu
     if (parser->is_in_print) {
         gen_print_space();
     }
