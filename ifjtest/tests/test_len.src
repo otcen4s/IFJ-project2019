@@ -1,6 +1,0 @@
-slovo = 'auto'
-dlzka = len(slovo)
-print(dlzka)
-
-a = len('x\nz')
-print(a)

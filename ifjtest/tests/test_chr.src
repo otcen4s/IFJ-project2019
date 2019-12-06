@@ -1,5 +1,0 @@
-i = 127
-while i >= 0:
-    a = chr(i)
-    print(a)
-    i = i - 1

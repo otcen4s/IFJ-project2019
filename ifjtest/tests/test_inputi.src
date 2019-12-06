@@ -1,4 +1,0 @@
-a = inputi()
-print(a)
-
-inputi()

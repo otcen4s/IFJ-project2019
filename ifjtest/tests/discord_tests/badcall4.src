@@ -1,5 +1,0 @@
-##2 ? podla diskordu 2 podla mna nastane 3 skor ako sa zisti zla syntax
-def a():
-    pass
-
-b = a(param)
