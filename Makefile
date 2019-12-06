@@ -63,3 +63,9 @@ odovzdanie:
 	cd ./xzitna02 && zip -r ../xzitna02.zip ./ && cd ..
 	rm -r ./xzitna02
 	./is_it_ok.sh ./xzitna02.zip ./temp_folder
+
+	#unpack it for testing
+	unzip ./xzitna02.zip -d ./xzitna02
+
+	#copy interpret to the project folder (zbinek said it will be there)
+	cp ./tests/ic19int ./xzitna02

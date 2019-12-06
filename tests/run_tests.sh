@@ -24,10 +24,10 @@ run_test() {
 
         inFile="${filename%.*}.in"
         if [ -f "$inFile" ]; then
-            ./ic19int assembly.out < "$inFile" > test.out
+            ./../ic19int assembly.out < "$inFile" > test.out
             code=$?
         else
-            ./ic19int assembly.out > test.out
+            ./../ic19int assembly.out > test.out
             code=$?
         fi
 
