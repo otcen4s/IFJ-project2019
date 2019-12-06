@@ -74,12 +74,13 @@ typedef enum {
 	LTH,	
 	LBRACKET,
 	RBRACKET,
-	
+
 	// fromhere is the diference  compared to token enum !
 	VALUE,
 	ID,
 	DOLLAR,
 	NON_TERM,
+	AND
 } Symbol_enum; 
 
 typedef enum {

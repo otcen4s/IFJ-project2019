@@ -253,13 +253,21 @@ int get_reduction_rule(Expr_parser* expr_parser)
     {
         return E_LEQ_E;
     }
-
+    
     /********* E -> E != E ***************/
     if( expr_parser->op1.symbol == NON_TERM &&
         expr_parser->op2.symbol == NEQ &&
         expr_parser->op3.symbol == NON_TERM)
     {
         return E_NEQ_E;
+    }
+
+     /********* E -> E and E ***************/
+    if( expr_parser->op1.symbol == NON_TERM &&
+        expr_parser->op2.symbol == AND &&
+        expr_parser->op3.symbol == NON_TERM)
+    {
+        return E_AND_E;
     }
 
     /********* E-> (E) ***************/
@@ -354,6 +362,8 @@ int reduce(Expr_parser * expr_parser)
        break;
     
     case E_EQ_E:
+       expr_parser->boll_asoc=true;
+       store_top();
        gen_eqs();
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
@@ -361,13 +371,28 @@ int reduce(Expr_parser * expr_parser)
        break;
     
     case E_GTH_E:
+        store_top();
+        if(expr_parser->boll_asoc)
+        {
+            push_top();
+
+        }
         gen_gts();
+        if(expr_parser->boll_asoc)
+        {
+           gen_instruct("ANDS");
+            
+        }
+        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
        if(err) return INTERNAL_ERROR;
+       expr_parser->boll_asoc=true;
        break;
     
     case E_LTH_E:
+       expr_parser->boll_asoc=true;
+       store_top();
        gen_lts();
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
@@ -375,6 +400,8 @@ int reduce(Expr_parser * expr_parser)
        break;
     
     case E_LEQ_E:
+       expr_parser->boll_asoc=true;
+       store_top();
        gen_ltes();
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
@@ -382,6 +409,8 @@ int reduce(Expr_parser * expr_parser)
        break;
     
     case E_GEQ_E:
+       expr_parser->boll_asoc=true;
+       store_top();
        gen_gtes();
        //add new not terminal which represents result to the sym stack
        err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
@@ -389,11 +418,19 @@ int reduce(Expr_parser * expr_parser)
        break;
     
     case E_NEQ_E:
+        expr_parser->boll_asoc=true;
+        store_top();
         gen_neqs();
         //add new not terminal which represents result to the sym stack
         err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
         if(err) return INTERNAL_ERROR;
         break;
+    
+    case E_AND_E:
+       gen_instruct("ANDS");
+       err=stack_push(expr_parser->stack, create_symbol(NON_TERM, SYM_UNDEF));
+       if(err) return INTERNAL_ERROR;
+       break;
 
     case PAR_E_PAR:
        //add new not terminal which represents result to the sym stack
