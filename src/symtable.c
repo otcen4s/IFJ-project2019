@@ -1,7 +1,7 @@
-/* IFJ project
-**@brief Table of symbols (Symtable)  
-**
-**@author: 
+/*
+* Project           : IFJ19 Compiler
+* File              : symtable.c
+* Author            : Matej Otčenáš
 */
 
 #include "symtable.h"

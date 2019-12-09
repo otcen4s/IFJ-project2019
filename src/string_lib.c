@@ -1,3 +1,9 @@
+/*
+* Project           : IFJ19 Compiler
+* File              : string_lib.c
+* Author            : Matej Otčenáš
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -1,3 +1,9 @@
+/*
+* Project           : IFJ19 Compiler
+* File              : parser.h
+* Author            : Matej Otčenáš
+*/
+
 #ifndef _PARSER_H_
 #define _PARSER_H_
 
@@ -6,7 +12,6 @@
 #include "symtable.h"
 #include "string_lib.h"
 #include "error.h"
-#include "function_str.h"
 #include <stdlib.h>
 #include <stdbool.h>
 #include "expr_parser.h"

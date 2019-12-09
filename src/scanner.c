@@ -1,3 +1,9 @@
+/*
+* Project           : IFJ19 Compiler
+* File              : scanner.c
+* Author            : Adam Žitňanský
+*/
+
 #include "scanner.h"
 
 int init_scanner(Scanner *s, const char* file_name)
@@ -71,8 +77,6 @@ Token create_integer_token(tString string, int *error) {
     token.type = 0;
     char *endptr;
 
-    //TODO IMPLEMENT IN AUTOMATA
-    //HOTFIX
     if(string.len > 2)
     {
         if((string.str[0] == '0') && (string.str[1] == '0'))

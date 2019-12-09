@@ -1,3 +1,9 @@
+/*
+* Project           : IFJ19 Compiler
+* File              : string_lib.h
+* Author            : Matej Otčenáš
+*/
+
 #ifndef _STRING_LIB_H
 #define _STRING_LIB_H
 

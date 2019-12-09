@@ -1,3 +1,9 @@
+/*
+* Project           : IFJ19 Compiler
+* File              : generator.h
+* Author            : Samuel Dudík
+*/
+
 #ifndef _GENERATOR_H
 #define _GENERATOR_H
 

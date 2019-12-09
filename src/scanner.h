@@ -1,3 +1,8 @@
+/*
+* Project           : IFJ19 Compiler
+* File              : scanner.h
+* Author            : Adam Žitňanský
+*/
 #ifndef _SCANNER_H
 #define _SCANNER_H
 

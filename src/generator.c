@@ -1,3 +1,9 @@
+/*
+* Project           : IFJ19 Compiler
+* File              : generator.c
+* Author            : Samuel Dudík
+*/
+
 #include "generator.h"
 
 #define ADDLINE(line) \

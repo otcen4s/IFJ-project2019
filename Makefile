@@ -38,7 +38,7 @@ $(PATHB)stack_test : $(PATHT)stack_test.c $(PATHS)stack.c
 $(PATHB)generator_test : $(PATHT)generator_test.c $(PATHS)generator.c $(PATHS)string_lib.c $(PATHS)stack.c
 	$(CC) $(CFLAGS) $^ -o $@
 
-$(PATHB)parser_test : $(PATHT)parser_test.c $(PATHS)parser.c $(PATHS)string_lib.c $(PATHS)scanner.c $(PATHS)symtable.c $(PATHS)stack.c $(PATHS)function_str.c $(PATHS)expr_parser.c $(PATHS)generator.c
+$(PATHB)parser_test : $(PATHT)parser_test.c $(PATHS)parser.c $(PATHS)string_lib.c $(PATHS)scanner.c $(PATHS)symtable.c $(PATHS)stack.c $(PATHS)expr_parser.c $(PATHS)generator.c
 	$(CC) $(CFLAGS) $^ -o $@
 
 $(PATHB)symtable_test : $(PATHT)symtable_test.c $(PATHS)symtable.c $(PATHS)string_lib.c
@@ -47,7 +47,7 @@ $(PATHB)symtable_test : $(PATHT)symtable_test.c $(PATHS)symtable.c $(PATHS)strin
 $(PATHB)expr_test : $(PATHT)expr_test.c $(PATHS)parser.c $(PATHS)string_lib.c $(PATHS)scanner.c $(PATHS)symtable.c $(PATHS)stack.c $(PATHS)expr_parser.c  $(PATHS)scanner.c $(PATHS)generator.c
 	$(CC) $(CFLAGS) $^ -o $@
 
-main : $(PATHS)main.c $(PATHS)parser.c $(PATHS)string_lib.c $(PATHS)scanner.c $(PATHS)symtable.c $(PATHS)stack.c $(PATHS)function_str.c $(PATHS)expr_parser.c $(PATHS)generator.c
+main : $(PATHS)main.c $(PATHS)parser.c $(PATHS)string_lib.c $(PATHS)scanner.c $(PATHS)symtable.c $(PATHS)stack.c $(PATHS)expr_parser.c $(PATHS)generator.c
 	$(CC) -Wall -g -W -std=c99 $^ -o $(PATHB)$@
 
 clean :

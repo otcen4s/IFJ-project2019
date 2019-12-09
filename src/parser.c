@@ -1,3 +1,9 @@
+/*
+* Project           : IFJ19 Compiler
+* File              : parser.c
+* Author            : Matej Otčenáš
+*/
+
 #include "parser.h"
 
 /************** MACROS **********/

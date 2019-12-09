@@ -1,3 +1,9 @@
+/*
+* Project           : IFJ19 Compiler
+* File              : expr_parser.h
+* Author            : Adam Žitňanský
+*/
+
 #ifndef EXPR_PARSER 
 #define EXPR_PARSER
 

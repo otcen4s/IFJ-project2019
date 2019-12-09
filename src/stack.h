@@ -1,3 +1,8 @@
+/*
+* Project           : IFJ19 Compiler
+* File              : stack.h
+* Author            : Adam Žitňanský
+*/
 
 #ifndef _STACK_H_
 #define _STACK_H_

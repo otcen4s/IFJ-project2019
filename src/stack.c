@@ -1,3 +1,9 @@
+/*
+* Project           : IFJ19 Compiler
+* File              : stack.c
+* Author            : Adam Žitňanský
+*/
+
 #include "stack.h"
 
 t_stack* stack_create  (const unsigned cap, const enum stack_type type) 

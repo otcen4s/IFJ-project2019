@@ -1,4 +1,9 @@
 
+/*
+* Project           : IFJ19 Compiler
+* File              : symtable.h
+* Author            : Matej Otčenáš
+*/
 #ifndef _SYMTAB_H
 #define _SYMTAB_H
 
@@ -7,7 +12,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "string_lib.h"
-#include "function_str.h"
 #include "error.h"
 
 #define SYMTAB_SIZE 20047
