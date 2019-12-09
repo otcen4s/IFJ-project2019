@@ -1,39 +1,40 @@
 1. <statement> -> EOF
 2. <statement> -> EOL <statement>
 3. <statement> -> DEF ID ( <params> ): EOL INDENT <statement_inside> <end> DEDENT <statement>
-4. <statement> -> IF <expression_start>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> DEDENT <statement>
-5. <statement> -> WHILE <expression_start>: EOL INDENT <statement_inside> <end> DEDENT <statement> // TODO po statement_inside nemusi nasledovat EOL a DEDENT co riesi statement_inside pre while a if ale nie id, ret, pass, print
-6. <statement> -> ID = <expression_start> <end> <statement>
-7. <statement> -> PASS <end> <statement>
-8. <statement> -> PRINT ( <arg> ) <end> <statement>
-9. <statement> -> <value> <end> <statement> // TODO nezahrna to ID
-9. <statement_inside> -> IF <expression>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> EOL DEDENT <statement> // tazko sa robia tieto statement_inside z dovodu ze mozu byt zanorene a v tom pripade by nefungovli korektne... bude potrebne v kode pocitat zanorenia 
-10. <statement_inside> -> WHILE <expression_start>: EOL INDENT <statement_inside> EOL DEDENT <statement>
-11. <statement_inside> -> ID = <expression_start> EOL <statement_inside>
-12. <statement_inside> -> RETURN <expression_start> EOL <statement_inside>
-13. <statement_inside> -> PASS EOL <statement_inside>
-14. <statement_inside> -> PRINT ( <arg> ) EOL 
-15. <end> -> EOF
-16. <end> -> EOL
-17. <params> -> ID <next_params>
-18. <params> -> eps
-19. <next_params> -> , ID <next_params>
-20. <next_params> -> eps
-21. <expression_start> -> <value> <expression_next>
-22. <expression_next> eps
-23. <expression_next> OPERATOR <expression_start>
-24. <value> ID
-25. <value> INT
-26. <value> DOUBLE
-27. <value> STRING
-28. <value> NONE
-29. <value> -> ID ( <arg> )
-30. <value> -> INPUTS()
-31. <value> -> INPTUF()
-32. <value> -> INPUTI()
-33. <value> -> LEN ( <value> )
-34. <value> -> SUBSTR ( <value>, <value>, <value> )
-35. <value> -> ORD ( <value>, <value> )
-36. <value> -> CHR ( <value> )
-37. <arg> -> eps
-38. <arg> -> <value> <arg>
+4. <statement> -> IF <expression>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> DEDENT <statement>
+5. <statement> -> WHILE <expression>: EOL INDENT <statement_inside> <end> DEDENT <statement> 
+6. <statement> -> ID = <expression_start> <statement>
+7. <statement> -> PASS <statement>
+8. <statement> -> PRINT ( <arg> ) <statement>
+9. <statement> -> <expression_start> <statement> 
+10. <statement_inside> -> IF <expression>: EOL INDENT <statement_inside> EOL DEDENT ELSE: EOL INDENT <statement_inside> <end> DEDENT <statement>  
+11. <statement_inside> -> WHILE <expression>: EOL INDENT <statement_inside> <end> DEDENT <statement>
+12. <statement_inside> -> ID = <expression_start> <end> <statement_inside>
+13. <statement_inside> -> RETURN <expression> <end> <statement_inside>
+14. <statement_inside> -> PASS <end> <statement_inside>
+15. <statement_inside> -> PRINT ( <arg> ) <end> <statement_inside>
+16. <statement_inside> -> <expression_start> <end> <statement_inside>
+17. <end> -> EOF
+18. <end> -> EOL
+19. <end> -> eps
+20. <params> -> ID <next_params>
+21. <params> -> eps
+22. <next_params> -> , ID <next_params>
+23. <next_params> -> eps
+24. <expression_start> -> <value>
+25. <expression_start> -> <function_call>
+26. <value> -> ID <expression> 
+27. <value> -> INT <expression>
+28. <value> -> DOUBLE <expression>
+29. <value> -> STRING <expression>
+30. <value> -> NONE <expression>
+31. <function_call> -> ID ( <arg> )
+32. <function_call> -> INPUTS()
+33. <function_call> -> INPTUF()
+34. <function_call> -> INPUTI()
+35. <function_call> -> LEN ( <arg> )
+36. <function_call> -> SUBSTR ( <arg> )
+37. <function_call> -> ORD ( <arg> )
+38. <function_call> -> CHR ( <arg> )
+39. <arg> -> eps
+40. <arg> -> <value> <arg>

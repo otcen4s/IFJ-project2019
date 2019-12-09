@@ -7,9 +7,10 @@ def f():
   print(a)  # pracuji pouze s globalni promennou, OK
 
 def g():
+  
   print(a)  # pracuji s globalni promennou, ale chyba 3 kvuli zbytku tela funkce
   a = 3
-  return a
+ # return a
 
 print(a)
 f()
